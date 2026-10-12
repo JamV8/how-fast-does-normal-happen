@@ -28,7 +28,7 @@ real <- do.call(rbind, lapply(seq_along(real_keys), function(i) {
 
 ::: {.callout-tip appearance="simple"}
 ## In plain words
-Polls, drug trials and A/B tests report results as "average ± margin". That margin is only right once the average
+Polls, drug trials and website experiments report results as "average ± margin". That margin is only right once the average
 behaves like a bell curve, and statistics classes say 30 data points are enough for that. I simulated 100,000 studies
 for every sample size, on textbook data and real data, to see how many points an average really needs. **The answer
 depends on the data:** balanced data need fewer than 10, lopsided data like prices or delays need 50 to 2,450, and

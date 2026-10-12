@@ -7,7 +7,10 @@
   const hud = document.getElementById("hud");
   const steps = [...document.querySelectorAll(".step")];
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const COL = { white: "#e9edf5", cyan: "#67e8f9", coral: "#ff7a7a", gold: "#ffd166", violet: "#a78bfa", star: "#7d8bb0" };
+  const COL = { white: "#3d7bfd", cyan: "#6d4aff", coral: "#ff5d73", gold: "#e5a000", violet: "#00b8a0", star: "#d3c7b6",
+                green: "#16a34a", orange: "#f59e0b", red: "#e11d48" };
+  const INK = "#1f1a33";
+  const TINT = { 0: "#faf7f2", 8: "#fff6df", 1: "#e9f7f4", 2: "#e9f7f4", 3: "#f2eeff", 4: "#f2eeff", 5: "#ebf2ff", 6: "#fff0f2", 7: "#faf7f2" };
   const fmt = (x) => Math.round(x).toLocaleString("en-US");
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -20,7 +23,7 @@
   for (const k in COL) {
     const s = document.createElement("canvas"); s.width = s.height = 64;
     const g = s.getContext("2d"), grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    grd.addColorStop(0, COL[k]); grd.addColorStop(0.22, COL[k]); grd.addColorStop(0.45, rgba(COL[k], 0.28)); grd.addColorStop(1, rgba(COL[k], 0));
+    grd.addColorStop(0, COL[k]); grd.addColorStop(0.55, COL[k]); grd.addColorStop(0.8, rgba(COL[k], 0.35)); grd.addColorStop(1, rgba(COL[k], 0));
     g.fillStyle = grd; g.fillRect(0, 0, 64, 64); SPR[k] = s;
   }
 
@@ -93,7 +96,7 @@
     const oc = document.createElement("canvas"), w = Math.round(B.w), h = Math.round(B.h);
     oc.width = w; oc.height = h;
     const g = oc.getContext("2d"), fs = Math.min(h * 0.95, w * 0.62);
-    g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = `800 ${fs}px "Inter Tight", Inter, sans-serif`;
+    g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = `800 ${fs}px "Plus Jakarta Sans", sans-serif`;
     g.fillText("30", w / 2, h / 2 + fs * 0.04);
     const img = g.getImageData(0, 0, w, h).data, pts = [], step = Math.max(2, Math.round(Math.sqrt((w * h * 0.25) / ALL)));
     for (let y = 0; y < h; y += step) for (let x = 0; x < w; x += step) if (img[(y * w + x) * 4 + 3] > 140) pts.push([B.x + x, B.y + y]);
@@ -160,7 +163,7 @@
                         w: lerp(region.w, tReg.w, 1 - Math.exp(-dt * 5)), h: lerp(region.h, tReg.h, 1 - Math.exp(-dt * 5)) } : tReg;
 
     if (scene === 0) {
-      const hr = { x: W * 0.08, y: H * (narrow ? 0.71 : 0.66), w: W * 0.84, h: H * (narrow ? 0.26 : 0.31) };
+      const hr = { x: W * 0.08, y: H * (narrow ? 0.71 : 0.7), w: W * 0.84, h: H * (narrow ? 0.26 : 0.27) };
       stack(P.map((_, i) => i), (i) => bellZ[i], hr, -3.4, 3.4, narrow ? 60 : 110, 5);
       for (const p of P) { p.ta = 0.55 + 0.3 * p.jit; p.ts = narrow ? 1.3 : 1.7; p.c = p.star[0] < Math.exp(-(((p.tx - W / 2) / (W * 0.16)) ** 2)) ? "cyan" : "violet"; p.ty += Math.sin(sceneT * 1.3 + p.tx * 0.012) * 3; }
       return;
@@ -210,12 +213,12 @@
       region.dy = st.dy; region.binW = st.binW; region.count = ids.length;
     }
     if (scene === 5) {
-      for (const p of P) { p.tx = p.star[0] * W; p.ty = p.star[1] * H; p.ta = 0.18; p.ts = 1; p.c = "star"; }
+      for (const p of P) { p.tx = p.star[0] * W; p.ty = p.star[1] * H; p.ta = 0.35; p.ts = 1; p.c = "star"; }
     }
     if (scene === 6) {
       const reg = Rg.full;
       stack(meanIds, (id) => cauchyVals[P[id].k], reg, -8, 8, narrow ? 56 : 90, 6);
-      meanIds.forEach((id) => { const p = P[id]; p.ta = Math.abs(cauchyVals[p.k]) > 8 ? 0 : 0.9; p.ts = narrow ? 1.3 : 1.6; p.c = "violet"; });
+      meanIds.forEach((id) => { const p = P[id]; p.ta = Math.abs(cauchyVals[p.k]) > 8 ? 0 : 0.9; p.ts = narrow ? 1.3 : 1.6; p.c = "coral"; });
       kicks += dt;
       while (kicks > 0.08) {   // the extremes keep knocking averages around
         kicks -= 0.08;
@@ -235,10 +238,10 @@
   // ---------- drawing ----------
   function axis(reg, lo, hi, label, ticks) {
     const y = reg.y + reg.h + 6;
-    ctx.strokeStyle = "rgba(255,255,255,.16)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(reg.x, y); ctx.lineTo(reg.x + reg.w, y); ctx.stroke();
-    ctx.fillStyle = "rgba(255,255,255,.45)"; ctx.font = '500 11px "JetBrains Mono", monospace'; ctx.textAlign = "center";
+    ctx.strokeStyle = "rgba(31,26,51,.22)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(reg.x, y); ctx.lineTo(reg.x + reg.w, y); ctx.stroke();
+    ctx.fillStyle = "rgba(31,26,51,.55)"; ctx.font = '500 11px "JetBrains Mono", monospace'; ctx.textAlign = "center";
     ticks.forEach((v) => { if (v < lo || v > hi) return; const x = reg.x + (v - lo) / (hi - lo) * reg.w; ctx.fillRect(x, y, 1, 4); ctx.fillText(nice(v), x, y + 17); });
-    if (label) { ctx.textAlign = "left"; ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.fillText(label, reg.x, y + 34); }
+    if (label) { ctx.textAlign = "left"; ctx.fillStyle = "rgba(31,26,51,.5)"; ctx.fillText(label, reg.x, y + 34); }
   }
   const nice = (v) => Math.abs(v) >= 100 ? fmt(v) : Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(Math.abs(v) < 1 ? 2 : 1);
   function niceTicks(lo, hi, k = 5) {
@@ -252,7 +255,7 @@
     if (!region || !region.dy) return;
     const se = 1 / Math.sqrt(n), [lo, hi] = range;
     ctx.save(); ctx.globalAlpha = curveAlpha;
-    ctx.shadowColor = "rgba(255,255,255,.7)"; ctx.shadowBlur = 14; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(255,93,115,.35)"; ctx.shadowBlur = 6; ctx.strokeStyle = COL.coral; ctx.lineWidth = 3;
     ctx.beginPath();
     for (let i = 0; i <= 260; i++) {
       const x = lo + (hi - lo) * i / 260, cnt = MEAN_N * region.binW * dnorm(x, 1, se);
@@ -266,23 +269,23 @@
     const rows = ORDER.map((k) => SITE[k]).filter(Boolean), lab = narrow ? 118 : 210, x0 = B.x + lab, x1 = B.x + B.w - (narrow ? 40 : 70);
     const top = B.y + 30, rh = (B.h - 70) / rows.length, xs = (n) => x0 + Math.log10(n) / 4 * (x1 - x0);
     ctx.save(); ctx.globalAlpha = chartAlpha;
-    ctx.font = '500 11px "JetBrains Mono", monospace'; ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.4)";
-    [1, 10, 100, 1000, 10000].forEach((v) => { ctx.fillText(fmt(v), xs(v), top + rh * rows.length + 22); ctx.fillStyle = "rgba(255,255,255,.06)"; ctx.fillRect(xs(v), top - 10, 1, rh * rows.length + 6); ctx.fillStyle = "rgba(255,255,255,.4)"; });
-    ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.setLineDash([4, 5]); ctx.beginPath(); ctx.moveTo(xs(30), top - 18); ctx.lineTo(xs(30), top + rh * rows.length); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = "#fff"; ctx.font = '600 12px "JetBrains Mono", monospace'; ctx.fillText("n = 30", xs(30), top - 24);
-    ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.45)"; ctx.font = '500 11px "JetBrains Mono", monospace';
+    ctx.font = '500 11px "JetBrains Mono", monospace'; ctx.textAlign = "center"; ctx.fillStyle = "rgba(31,26,51,.5)";
+    [1, 10, 100, 1000, 10000].forEach((v) => { ctx.fillText(fmt(v), xs(v), top + rh * rows.length + 22); ctx.fillStyle = "rgba(31,26,51,.07)"; ctx.fillRect(xs(v), top - 10, 1, rh * rows.length + 6); ctx.fillStyle = "rgba(31,26,51,.5)"; });
+    ctx.strokeStyle = "rgba(31,26,51,.55)"; ctx.setLineDash([4, 5]); ctx.beginPath(); ctx.moveTo(xs(30), top - 18); ctx.lineTo(xs(30), top + rh * rows.length); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = INK; ctx.font = '600 12px "JetBrains Mono", monospace'; ctx.fillText("n = 30", xs(30), top - 24);
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(31,26,51,.5)"; ctx.font = '500 11px "JetBrains Mono", monospace';
     ctx.fillText("values per study needed before the averages form a bell curve", (x0 + x1) / 2, top + rh * rows.length + 42);
     rows.forEach((p, i) => {
       const y = top + rh * (i + 0.5), tt = clamp((t - 0.25 - i * 0.09) / 1.4, 0, 1), e = easeOut(tt);
-      ctx.fillStyle = "rgba(255,255,255,.05)"; ctx.fillRect(x0, y, x1 - x0, 1);
-      ctx.textAlign = "right"; ctx.fillStyle = "#c9cfdb"; ctx.font = `500 ${narrow ? 11 : 13}px Inter, sans-serif`;
+      ctx.fillStyle = "rgba(31,26,51,.07)"; ctx.fillRect(x0, y, x1 - x0, 1);
+      ctx.textAlign = "right"; ctx.fillStyle = "#3b3450"; ctx.font = `600 ${narrow ? 11 : 13}px "Plus Jakarta Sans", sans-serif`;
       const nm = PLAIN[p.key] || p.name;
       ctx.fillText(narrow ? nm.replace(/ \(.*\)/, "") : nm, x0 - 14, y + 4);
-      const never = p.n_main == null, col = never || p.n_main > 30 ? "coral" : "cyan", hex = COL[col];
+      const never = p.n_main == null, col = never ? "red" : p.n_main > 30 ? "orange" : "green", hex = COL[col];
       const target = never ? 10000 : p.n_main, nNow = Math.pow(10, Math.log10(target) * e), x = xs(nNow);
       ctx.strokeStyle = rgba(hex, 0.55); ctx.lineWidth = 2; if (never) ctx.setLineDash([3, 5]);
       ctx.beginPath(); ctx.moveTo(xs(1), y); ctx.lineTo(x, y); ctx.stroke(); ctx.setLineDash([]);
-      ctx.globalCompositeOperation = "lighter"; ctx.drawImage(SPR[col], x - 11, y - 11, 22, 22); ctx.globalCompositeOperation = "source-over";
+      ctx.drawImage(SPR[col], x - 9, y - 9, 18, 18);
       if (tt >= 1) {
         ctx.textAlign = "left"; ctx.fillStyle = hex; ctx.font = '600 12px "JetBrains Mono", monospace';
         ctx.fillText(never ? "never" : "n = " + fmt(p.n_main), never ? x - 46 : x + 12, never ? y - 9 : y + 4);
@@ -294,14 +297,14 @@
   function drawWhy() {
     if (!whyReg) return;
     const xs = (z) => whyReg.x + (z + 3.4) / 6.8 * whyReg.w, top = whyReg.y - 26, bot = whyReg.y + whyReg.h + 6;
-    ctx.save(); ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.setLineDash([4, 5]); ctx.lineWidth = 1;
+    ctx.save(); ctx.strokeStyle = "rgba(31,26,51,.45)"; ctx.setLineDash([4, 5]); ctx.lineWidth = 1;
     [-1.96, 1.96].forEach((z) => { ctx.beginPath(); ctx.moveTo(xs(z), top + 10); ctx.lineTo(xs(z), bot); ctx.stroke(); });
     ctx.setLineDash([]); ctx.textAlign = "center";
     ctx.fillStyle = COL.cyan; ctx.font = `600 ${narrow ? 12 : 14}px "JetBrains Mono", monospace`;
     ctx.fillText("95% of repeated polls land here", xs(0), top);
     ctx.fillStyle = COL.coral; ctx.font = `600 ${narrow ? 11 : 12}px "JetBrains Mono", monospace`;
     ctx.fillText("2.5%", xs(-2.75), whyReg.y + whyReg.h - 30); ctx.fillText("2.5%", xs(2.75), whyReg.y + whyReg.h - 30);
-    ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = `600 ${narrow ? 12 : 13}px "JetBrains Mono", monospace`;
+    ctx.fillStyle = "rgba(31,26,51,.75)"; ctx.font = `600 ${narrow ? 12 : 13}px "JetBrains Mono", monospace`;
     ctx.fillText("← the “± 3%” →", xs(0), bot + 20);
     ctx.restore();
   }
@@ -313,14 +316,14 @@
     const a = ph < 0.15 ? ph / 0.15 : ph < 1.25 ? 1 : Math.max(0, 1 - (ph - 1.25) / 0.4);
     ctx.save(); ctx.globalAlpha = a * 0.55; ctx.strokeStyle = COL.coral; ctx.lineWidth = 1;
     sample.forEach((i) => { const p = P[i]; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mx, my); ctx.stroke(); });
-    ctx.globalAlpha = a; ctx.fillStyle = COL.gold; ctx.font = '600 12px "JetBrains Mono", monospace'; ctx.textAlign = "left";
+    ctx.globalAlpha = a; ctx.fillStyle = INK; ctx.font = '600 12px "JetBrains Mono", monospace'; ctx.textAlign = "left";
     ctx.fillText("average = " + m.toFixed(2), mx + 12, my + 4);
     ctx.restore();
   }
   function drawStrike(pr) {
     const t = clamp((pr - 0.3) / 0.25, 0, 1); if (t <= 0) return;
     const xa = B.x + B.w * 0.14, ya = B.y + B.h * 0.72, xb = B.x + B.w * 0.86, yb = B.y + B.h * 0.28;
-    ctx.save(); ctx.strokeStyle = COL.coral; ctx.lineWidth = narrow ? 5 : 8; ctx.lineCap = "round"; ctx.shadowColor = COL.coral; ctx.shadowBlur = 18;
+    ctx.save(); ctx.strokeStyle = COL.coral; ctx.lineWidth = narrow ? 5 : 8; ctx.lineCap = "round"; ctx.shadowColor = "rgba(255,93,115,.4)"; ctx.shadowBlur = 8;
     ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(lerp(xa, xb, easeOut(t)), lerp(ya, yb, easeOut(t))); ctx.stroke(); ctx.restore();
   }
 
@@ -363,6 +366,7 @@
   function frame(dt) {
     if (scene !== lastScene) {
       sceneT = 0; lastScene = scene;
+      document.querySelector(".stage").style.backgroundColor = TINT[scene] || TINT[0];
       if (scene !== 2) { cycle = -1; }
       if (scene === 2) { live = []; cycle = -1; }
     } else sceneT += dt;
@@ -377,11 +381,10 @@
     if ((scene === 2 || scene === 3 || scene === 4) && region) axis(region, range[0], range[1], scene === 4 ? `average of n = ${fmt(nAt(prog).n)} waiting times` : "average of 5 waiting times", scene === 4 ? niceTicks(range[0], range[1]) : [0, 1, 2, 3, 4, 5, 6]);
     if (scene === 6) axis(Rg.full, -8, 8, "average of n extreme-outlier values", [-8, -4, 0, 4, 8]);
 
-    ctx.globalCompositeOperation = "lighter";
     for (const p of P) {
       p.x += (p.tx - p.x) * kp; p.y += (p.ty - p.y) * kp; p.a += (p.ta - p.a) * ka; p.s += (p.ts - p.s) * ka;
       if (p.a < 0.01) continue;
-      const r = p.s * 2.6;
+      const r = p.s * 2.0;
       ctx.globalAlpha = p.a; ctx.drawImage(SPR[p.c], p.x - r, p.y - r, r * 2, r * 2);
     }
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";

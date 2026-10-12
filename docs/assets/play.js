@@ -44,7 +44,7 @@
     ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h); ctx.closePath(); ctx.fill();
   }
   function text(ctx, s, x, y, opt = {}) {
-    ctx.font = `${opt.weight || 700} ${opt.size || 13}px Fredoka, Nunito, sans-serif`;
+    ctx.font = `${opt.weight || 700} ${opt.size || 13}px "Plus Jakarta Sans", sans-serif`;
     ctx.fillStyle = opt.color || INK2; ctx.textAlign = opt.align || "center"; ctx.textBaseline = opt.base || "alphabetic";
     ctx.fillText(s, x, y);
   }
@@ -338,8 +338,8 @@
       <path d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="#f3dfe3" stroke-width="22" stroke-linecap="round"/>
       <path d="M20 110 A90 90 0 0 1 110 20" fill="none" stroke="#ffd2d9" stroke-width="22" stroke-linecap="round"/>
       <path d="M110 20 A90 90 0 0 1 200 110" fill="none" stroke="#bdf0cf" stroke-width="22" stroke-linecap="round"/>
-      <text x="200" y="128" text-anchor="end" font-family="Fredoka" font-size="13" fill="#2b9a55">bell!</text>
-      <text x="20" y="128" text-anchor="start" font-family="Fredoka" font-size="13" fill="#c0475b">nope</text>
+      <text x="200" y="128" text-anchor="end" font-family="Plus Jakarta Sans" font-size="13" fill="#2b9a55">bell!</text>
+      <text x="20" y="128" text-anchor="start" font-family="Plus Jakarta Sans" font-size="13" fill="#c0475b">nope</text>
       <g id="needle" style="transform-origin:110px 110px; transition: transform .9s cubic-bezier(.3,1.5,.5,1); transform: rotate(-90deg)">
         <line x1="110" y1="110" x2="110" y2="32" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>
       </g>
@@ -431,7 +431,7 @@
           : "Can you make <b>Chaos</b> ring the bell? Try a <i>huge</i> n.";
         return;
       }
-      if (!best[cur]) { el.innerHTML = `🎯 Find the <b>smallest n</b> that rings the bell for <b>${POP[cur].nm.toLowerCase()}</b>.`; return; }
+      if (!best[cur]) { el.innerHTML = `Find the <b>smallest n</b> that rings the bell for <b>${POP[cur].nm.toLowerCase()}</b>.`; return; }
       const study = s && s.n_main;
       const stars = study ? (best[cur] <= study * 1.25 ? "⭐⭐⭐" : best[cur] <= study * 2 ? "⭐⭐" : "⭐") : "";
       el.innerHTML = `Your best: <b>n = ${fmt(best[cur])}</b> ${stars} &nbsp;·&nbsp; the study’s answer: <span class="gold">n = ${study ? fmt(study) : "?"}</span>` +

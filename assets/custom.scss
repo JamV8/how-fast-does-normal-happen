@@ -1,15 +1,16 @@
 /*-- scss:defaults --*/
-$font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$font-family-sans-serif: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 $font-size-root: 17px;
-$primary: #2f5d8a;
-$link-color: #2f5d8a;
+$primary: #6d4aff;
+$link-color: #5233d9;
 $headings-font-weight: 700;
 $navbar-bg: #ffffff;
 
 /*-- scss:rules --*/
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-body { color: #222; line-height: 1.65; }
+body { color: #1f1a33; line-height: 1.65; background: #faf7f2; }
+.navbar { background: rgba(250, 247, 242, .95) !important; }
 h1.title { font-weight: 800; letter-spacing: -0.02em; }
 h2 { margin-top: 2.2rem; padding-bottom: .3rem; border-bottom: 1px solid #ececec; }
 .navbar { border-bottom: 1px solid #ececec; }
@@ -17,7 +18,7 @@ h2 { margin-top: 2.2rem; padding-bottom: .3rem; border-bottom: 1px solid #ececec
 
 /* answer box at the top of each analysis */
 .answer-box {
-  border-left: 5px solid #2E7D32; background: #f3f8f3; padding: 1rem 1.25rem;
+  border-left: 5px solid #6d4aff; background: #f2eeff; padding: 1rem 1.25rem;
   border-radius: 6px; margin: 1.2rem 0 1.6rem;
 }
 .answer-box.fail { border-left-color: #C62828; background: #fbf3f3; }

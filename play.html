@@ -7,13 +7,13 @@
 <meta name="description" content="A playful, interactive tour of the Central Limit Theorem: roll dice, feed the Average Machine, and race ten populations to the bell curve.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/play.css">
 </head>
 <body>
 
 <header class="topbar">
-  <a class="brand" href="index.html">🔔 How fast does normal happen?</a>
+  <a class="brand" href="index.html"><span class="logo-mark"></span>How fast does normal happen?</a>
   <nav class="dots" id="dots" aria-label="Levels"></nav>
   <a class="toplink" href="index.html">← Story mode</a>
 </header>
@@ -32,7 +32,7 @@
 <section class="level tint-yellow" id="level1" data-level="1">
   <div class="level-head">
     <span class="pill yellow">Level 1</span>
-    <h2>Roll a die 🎲</h2>
+    <h2>Roll a die</h2>
     <p>Every number is equally likely. What shape do you get?</p>
   </div>
   <div class="game two-col">
@@ -46,7 +46,7 @@
     </div>
     <div class="chart-wrap"><canvas id="l1-hist" class="hist"></canvas><div class="count" id="l1-count">0 rolls</div></div>
   </div>
-  <p class="aha" id="l1-aha">Flat. No bell here. 🤷</p>
+  <p class="aha" id="l1-aha">Flat. No bell here.</p>
 </section>
 
 <!-- ============ LEVEL 2 ============ -->
@@ -67,7 +67,7 @@
     </div>
     <div class="chart-wrap"><canvas id="l2-hist" class="hist"></canvas><div class="count" id="l2-count">0 rolls</div></div>
   </div>
-  <p class="aha" id="l2-aha">The middle gets crowded. ⛰️ Extremes need <em>both</em> dice to agree.</p>
+  <p class="aha" id="l2-aha">The middle gets crowded. Extremes need <em>both</em> dice to agree.</p>
 </section>
 
 <!-- ============ LEVEL 3 ============ -->
@@ -94,7 +94,7 @@
 <section class="level tint-coral" id="level4" data-level="4">
   <div class="level-head">
     <span class="pill coral">Level 4</span>
-    <h2>The Average Machine ⚙️</h2>
+    <h2>The Average Machine</h2>
     <p>Does it work for <em>anything</em>? Pick something weird, then find the smallest sample that rings the bell.</p>
   </div>
   <div class="cards" id="l4-cards"></div>
@@ -120,7 +120,7 @@
 <section class="level tint-blue" id="level5" data-level="5">
   <div class="level-head">
     <span class="pill blue">Level 5</span>
-    <h2>So… is 30 the magic number? 🏁</h2>
+    <h2>So… is 30 the magic number?</h2>
     <p>Textbooks say 30 is enough. Ten racers, one finish line: the bell curve.</p>
   </div>
   <div class="race" id="race"></div>
@@ -132,7 +132,7 @@
 <section class="level tint-yellow" id="level6" data-level="6">
   <div class="level-head">
     <span class="pill yellow">Level 6</span>
-    <h2>Why should you care? 📰</h2>
+    <h2>Why should you care?</h2>
     <p>Every poll in the news says something like <b>“52% ± 3%”</b>. That ± comes from the bell curve.</p>
   </div>
   <div class="game">
@@ -145,15 +145,15 @@
 
 <!-- ============ OUTRO ============ -->
 <section class="outro" id="outro">
-  <h2>You just learned the Central Limit Theorem. 🎉</h2>
+  <h2>You just learned the Central Limit Theorem.</h2>
   <p>Want the real math? Everything here comes from millions of simulations in R.</p>
   <div class="outro-grid">
-    <a class="ocard" href="report.html"><span>📊</span>Findings</a>
-    <a class="ocard" href="analysis/03_exponential.html"><span>🔬</span>Population analyses</a>
-    <a class="ocard" href="analysis/06_real_world_data.html"><span>✈️</span>Real data</a>
-    <a class="ocard" href="methods.html"><span>📐</span>Method</a>
-    <a class="ocard" href="simulator.html"><span>🧪</span>Lab mode</a>
-    <a class="ocard" href="https://github.com/JamV8/how-fast-does-normal-happen"><span>💻</span>Code</a>
+    <a class="ocard" href="report.html">Findings</a>
+    <a class="ocard" href="analysis/03_exponential.html">Population analyses</a>
+    <a class="ocard" href="analysis/06_real_world_data.html">Real data</a>
+    <a class="ocard" href="methods.html">Method</a>
+    <a class="ocard" href="simulator.html">Lab mode</a>
+    <a class="ocard" href="https://github.com/JamV8/how-fast-does-normal-happen">Code</a>
   </div>
   <p class="foot">MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem</p>
 </section>
