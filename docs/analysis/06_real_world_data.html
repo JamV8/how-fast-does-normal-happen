@@ -966,7 +966,7 @@ Figure&nbsp;5: 100 of the simulated studies of 30 flights. Each line is one stud
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/jamv8\.github\.io\/how-fast-does-normal-happen\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
@@ -1608,7 +1608,7 @@ Figure&nbsp;5: 100 of the simulated studies of 30 flights. Each line is one stud
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem · R + Quarto</p>
+<p>Dzhamal Chapanov · MATH 167R, Project 1 · Monte Carlo study of the Central Limit Theorem · R + Quarto</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;

@@ -14,6 +14,7 @@ project:
 
 website:
   title: "How Fast Does Normal Happen?"
+  site-url: "https://jamv8.github.io/how-fast-does-normal-happen/"
   description: "A Monte Carlo stress test of the Central Limit Theorem, with real data and an interactive simulator."
   page-navigation: true
   back-to-top-navigation: true
@@ -47,7 +48,7 @@ website:
       - href: AI_prompts.md
         text: AI log
   page-footer:
-    center: "MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem · R + Quarto"
+    center: "Dzhamal Chapanov · MATH 167R, Project 1 · Monte Carlo study of the Central Limit Theorem · R + Quarto"
 
 format:
   html:

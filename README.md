@@ -1,5 +1,7 @@
 # How Fast Does Normal Happen?
 
+*Dzhamal Chapanov · MATH 167R, Project 1 · Fall 2026*
+
 **Statistics classes say 30 data points are enough for an average to behave like a bell curve. I tested that rule. Depending on the data it took anywhere from 8 to 2,450 values, and for one kind of data no sample size worked.**
 
 **[Visual story](https://jamv8.github.io/how-fast-does-normal-happen/)** (start here, no statistics background needed)
@@ -180,4 +182,4 @@ prompts, what I questioned, and how I validated the code are documented in [AI_p
 
 ---
 
-*MATH 167R · Project 1.*
+*Dzhamal Chapanov · MATH 167R, Project 1 · Fall 2026.*

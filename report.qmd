@@ -1,6 +1,7 @@
 ---
 title: "Findings"
 subtitle: "Is the number 30? A cross-population summary of the study"
+author: "Dzhamal Chapanov"
 ---
 
 ```{r}
