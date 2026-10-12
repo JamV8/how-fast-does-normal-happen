@@ -1,0 +1,6 @@
+"population","prediction","chosen_n","n_strict","n_lenient","n_reported","skewness","ex_kurtosis","qq_cor","lower_tail","upper_tail","se_ratio","key_note"
+"Normal(0,1)","1","1","1","1",1,-0.008,-0.014,1,0.0255,0.0249,1.001,"Control case: normal at every n"
+"Six-sided die","15","8","38","3",8,-0.014,-0.167,0.998,0.0244,0.023,0.999,"Symmetric: flat shape and discreteness are the only obstacles"
+"Binomial(5, 0.1)","100","83","900","20",83,0.14,0.047,0.9983,0.0213,0.0287,1.004,"Skewness passes early; discreteness (Q-Q steps, jumping tails) sets n"
+"Cauchy(0, 1)","never","none","none","none",5000,91.853,36948.676,0.1148,0.0011,0.0011,NA,"No finite variance: the mean of n values has the same distribution as one value"
+"Exponential(1)","45","71","600","20",71,0.243,0.104,0.9984,0.0183,0.0313,1.006,"Skewness is the bottleneck; theory predicts (2/0.25)^2 = 64"

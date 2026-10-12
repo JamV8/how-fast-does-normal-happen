@@ -1,0 +1,67 @@
+project:
+  type: website
+  output-dir: docs
+  render:
+    - analysis/*.qmd
+    - report.qmd
+    - methods.qmd
+    - index.qmd
+    - simulator.qmd
+    - AI_prompts.md
+  resources:
+    - assets/
+
+website:
+  title: "How Fast Does Normal Happen?"
+  description: "A Monte Carlo stress test of the Central Limit Theorem, with real data and an interactive simulator."
+  page-navigation: true
+  back-to-top-navigation: true
+  navbar:
+    background: light
+    left:
+      - href: index.qmd
+        text: Home
+      - href: simulator.qmd
+        text: Try it yourself
+      - href: report.qmd
+        text: Findings
+      - text: Populations
+        menu:
+          - href: analysis/01_normal.qmd
+            text: "1 · Normal"
+          - href: analysis/02_die.qmd
+            text: "2 · Six-sided die"
+          - href: analysis/03_exponential.qmd
+            text: "3 · Exponential"
+          - href: analysis/04_binomial.qmd
+            text: "4 · Binomial (5, 0.1)"
+          - href: analysis/05_cauchy.qmd
+            text: "5 · Cauchy"
+      - href: analysis/06_real_world_data.qmd
+        text: Real data
+      - href: methods.qmd
+        text: Method
+      - href: AI_prompts.md
+        text: AI log
+  page-footer:
+    center: "MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem · R + Quarto"
+
+format:
+  html:
+    theme: [cosmo, assets/custom.scss]
+    toc: true
+    toc-depth: 2
+    code-fold: true
+    code-tools: true
+    code-summary: "Show code"
+    fig-width: 9
+    fig-height: 5.5
+    fig-dpi: 110
+    smooth-scroll: true
+    link-external-newwindow: true
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false

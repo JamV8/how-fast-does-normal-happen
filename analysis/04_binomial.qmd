@@ -1,0 +1,193 @@
+---
+title: "Binomial (n = 5, p = 0.1)"
+subtitle: "Discrete counts of a rare event: highly skewed and lumpy"
+---
+
+```{r}
+#| label: simulate
+#| code-summary: "Show the simulation code"
+source("../R/clt_functions.R")
+
+rgen  <- function(n) rbinom(n, size = 5, prob = 0.1)  # n counts, each 0..5
+mu    <- 5 * 0.1                                     # 0.5
+sigma <- sqrt(5 * 0.1 * 0.9)                         # 0.671
+pop_skew <- (1 - 2 * 0.1) / sigma                    # 1.19
+pop_kurt <- (1 - 6 * 0.1 * 0.9) / (5 * 0.1 * 0.9)    # 1.02
+
+coarse <- c(1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 200,
+            300, 400, 500, 600, 700, 800, 900, 1000, 1250, 1500, 2000)
+exper  <- run_with_refinement(rgen, coarse, mu, sigma)
+
+res    <- exper$results
+n_main <- smallest_normal_n(res)
+n_std  <- n_by_standard(res)
+at     <- function(k) res[res$n == k, ]
+
+save_results(res, "binomial")
+save_summary(res, "Binomial(5, 0.1)", n_main, prediction = "100",
+             key_note = "Skewness passes early; discreteness (Q-Q steps, jumping tails) sets n")
+
+# the exponential results, for comparison in section 7
+exp_row <- subset(read.csv("../results/summary.csv"), population == "Exponential(1)")
+```
+
+::: {.answer-box}
+<span class="big">n = `r n_main`</span> under my main standard
+(strict standard: ≈ `r n_std[["strict"]]` · lenient standard: ≈ `r n_std[["lenient"]]` · my prediction: 100)
+:::
+
+## 1. What population am I sampling from?
+
+Each observation counts the successes in 5 tries when each try succeeds with probability 0.1. Think of
+the number of defective items in a box of five, or the number of goals a player scores in five shots.
+Most of the time the answer is **0**, sometimes 1, and rarely more.
+
+| Property | Value |
+|---|---|
+| Possible values | 0, 1, 2, 3, 4, 5 |
+| Mean μ | np = 0.5 |
+| Standard deviation σ | √(np(1−p)) ≈ 0.671 |
+| Skewness | (1−2p)/σ ≈ 1.19 (right skew) |
+| Excess kurtosis | ≈ 1.02 |
+| Theoretical SE of the mean | 0.671/√n |
+
+```{r}
+#| label: fig-population
+#| fig-cap: "The population: P(0) = 59%, P(1) = 33%, P(2) = 7%, and 3 or more is under 1%."
+#| fig-height: 3.6
+style_par(mar = c(4, 4, 1, 1))
+pmf <- dbinom(0:5, size = 5, prob = 0.1)
+b <- barplot(pmf, names.arg = 0:5, col = adjustcolor(pal$bars, 0.75), border = NA,
+             ylim = c(0, 0.7), xlab = "Number of successes in 5 tries", ylab = "Probability")
+text(b, pmf + 0.04, pct(pmf), cex = 0.85, col = pal$ink)
+```
+
+## 2. What did I expect before running the simulation?
+
+> **n = 100.** The binomial is less skewed than the exponential, but its values are discrete: the sample
+> mean can only move in steps of 1/n. In my pilot run the histogram still looked lumpy at n = 20, so I
+> expected it to need more observations than the exponential before its graph looks smooth and normal.
+
+## 3. Which sample sizes did I investigate?
+
+1. **Coarse grid:** n = `r paste(coarse, collapse = ", ")`. It reaches 2,000 to check whether the strict
+   standard stays satisfied beyond 1,000.
+2. **Refinement:** `r if (length(exper$refined)) paste0("every n from ", min(exper$refined), " to ", max(exper$refined)) else "not needed"`.
+
+B = 100,000 sample means per n, seed `r student_id`.
+
+## 4. Results
+
+```{r}
+#| label: fig-convergence
+#| fig-cap: "The four checks. Skewness (with theory 1.19/√n in orange) passes early; the Q-Q correlation and the tails take much longer."
+#| fig-height: 6.5
+plot_convergence(res, chosen_n = n_main, theory_skew = pop_skew, theory_kurt = pop_kurt)
+```
+
+The order in which the checks pass is the key result for this population:
+
+| Check | Passes (and stays passed) from |
+|---|---|
+| Excess kurtosis | n = `r first_stable_n(res$n, res$kurt_ok)` |
+| Skewness | n = `r first_stable_n(res$n, res$skew_ok)` (theory: (1.19/0.25)² ≈ 23) |
+| Q-Q correlation | n = `r first_stable_n(res$n, res$qq_ok)` |
+| Tails | n = `r first_stable_n(res$n, res$tail_ok)` |
+
+```{r}
+#| label: fig-hist
+#| fig-cap: "Sampling distribution of the mean (one bar per possible value, spaced 1/n apart) and the CLT normal curve."
+#| fig-height: 6
+n_show <- c(1, 5, 20, 30, n_main, 300)
+plot_hist_grid(exper, n_show, mu, sigma, step = 1)
+```
+
+```{r}
+#| label: fig-qq
+#| fig-cap: "Q-Q plots. The points form a staircase because the mean can only take values 1/n apart."
+#| fig-height: 6
+plot_qq_grid(exper, n_show)
+```
+
+### Why the tail check jumps around
+
+```{r}
+#| label: fig-tails-zoom
+#| fig-cap: "Tail rates for every n near the threshold. They do not move smoothly: each time a possible value of the mean crosses the ±1.96 SE boundary, the rate jumps."
+#| fig-height: 4.2
+near <- res[res$n >= 40 & res$n <= 150, ]
+style_par(mar = c(4, 4.4, 1, 1))
+plot(near$n, 100 * near$upper_tail, type = "b", pch = 24, col = pal$curve, bg = pal$curve,
+     ylim = range(c(100 * near$lower_tail, 100 * near$upper_tail, 1.75, 3.25)),
+     xlab = "n", ylab = "% of means beyond 1.96 SE")
+lines(near$n, 100 * near$lower_tail, type = "b", pch = 25, col = pal$bars, bg = pal$bars)
+rect(0, 1.75, 1e4, 3.25, col = adjustcolor(pal$zone, 0.10), border = NA)
+abline(h = c(1.75, 3.25), lty = 2, col = pal$zone)
+legend("topright", c("upper tail", "lower tail"), pch = c(24, 25),
+       col = c(pal$curve, pal$bars), pt.bg = c(pal$curve, pal$bars), bty = "n")
+```
+
+For a continuous population the share of means beyond μ ± 1.96 SE changes smoothly with n. Here the
+sample mean takes values `r f3(1 / 75)` apart at n = 75, which is `r f2((1 / 75) / (sigma / sqrt(75)))`
+standard errors. So one more or one fewer possible value inside the boundary changes the tail rate
+noticeably. That is why the pass/fail result flips between neighbouring sample sizes.
+
+```{r}
+#| label: fig-se
+#| fig-cap: "Simulated SE (dots) against σ/√n (line)."
+#| fig-height: 4.2
+plot_se_check(res)
+```
+
+The simulated mean stayed within `r f4(max(abs(res$sim_mean - mu)))` of 0.5 and the simulated SE within
+`r pct(max(abs(res$se_ratio - 1)))` of σ/√n at every n.
+
+::: {.callout-note collapse="true"}
+## Full results table
+```{r}
+#| label: tbl-results
+#| echo: false
+results_table(res)
+```
+:::
+
+## 5. When did the sampling distribution become approximately normal?
+
+$$\boxed{n = `r n_main`}$$
+
+```{r}
+#| label: tbl-standards
+#| echo: false
+standards_table(res)
+```
+
+## 6. Why did I choose that value?
+
+- **Skewness was not the problem.** It dropped below 0.25 at n = `r first_stable_n(res$n, res$skew_ok)`,
+  close to the theoretical (1.19/0.25)² ≈ 23.
+- **Discreteness was.** The Q-Q correlation and the tail check passed only at
+  n = `r first_stable_n(res$n, res$qq_ok)` and n = `r first_stable_n(res$n, res$tail_ok)`. Near the
+  threshold the tail rates jump as possible values of the mean cross the ±1.96 SE boundary.
+  `r flip_text(res, n_main)`
+- At **n = `r n_main`** all four checks pass (skewness `r f3(at(n_main)$skewness)`, Q-Q r
+  `r f4(at(n_main)$qq_cor)`, tails `r pct(at(n_main)$lower_tail, 2)` / `r pct(at(n_main)$upper_tail, 2)`),
+  and so does every larger n I tested, up to 2,000.
+- **n = 30 is not enough:** the skewness passes there, but the Q-Q correlation is `r f4(at(30)$qq_cor)`
+  and the tails are `r pct(at(30)$lower_tail, 2)` / `r pct(at(30)$upper_tail, 2)`.
+
+## 7. What surprised me?
+
+> I expected the exponential and the binomial to end up far apart, since the exponential is much more
+> skewed (2.0 vs 1.19). Under my main standard they were actually close: `r exp_row$chosen_n` for the
+> exponential and `r n_main` for the binomial. The results table shows that they fail for different
+> reasons. The exponential is held back by its skewness, which decreases as 2/√n. The binomial already
+> passed the skewness check at n = `r first_stable_n(res$n, res$skew_ok)`. What held it back was the Q-Q
+> correlation and the tail check, because its sample mean can only take values in steps of 1/n. Its Q-Q
+> plot looks like a staircase, and the tail check passes and fails again at neighbouring n.
+>
+> The bigger surprise for me was the strict standard. There the binomial needed about
+> `r num(as.numeric(n_std[["strict"]]))`, compared with about `r num(as.numeric(exp_row$n_strict))` for the
+> exponential, even though it is less skewed. My explanation is that with a narrow tail tolerance, the
+> steps in the binomial mean matter more than its skewness. Compared to the die, each step is about
+> 2.5 times bigger relative to the standard error (σ = 1.71 for the die vs 0.67 here), so it takes much
+> longer to smooth out.

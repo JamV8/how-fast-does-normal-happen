@@ -1,0 +1,185 @@
+---
+title: "Findings"
+subtitle: "Is the number 30? A cross-population summary of the study"
+---
+
+```{r}
+#| label: setup
+#| include: false
+source("R/clt_functions.R")
+s <- read.csv("results/summary.csv", stringsAsFactors = FALSE)
+s <- s[match(c("Normal(0,1)", "Six-sided die", "Exponential(1)", "Binomial(5, 0.1)", "Cauchy(0, 1)"), s$population), ]
+get <- function(p, col) s[s$population == p, col]
+repro <- read.csv("results/reproducibility.csv", check.names = FALSE)
+
+real_keys  <- c("faithful", "discoveries", "diamonds", "flights", "counties")
+real_names <- c("Old Faithful waiting times", "Great inventions per year", "Diamond prices",
+                "NYC flight arrival delays", "Midwest county populations")
+real_skew  <- c(skew(faithful$waiting), skew(as.numeric(discoveries)), skew(ggplot2::diamonds$price),
+                skew(na.omit(nycflights13::flights$arr_delay)), skew(ggplot2::midwest$poptotal))
+real <- do.call(rbind, lapply(seq_along(real_keys), function(i) {
+  r <- read.csv(file.path("results", paste0("real_", real_keys[i], "_results.csv")))
+  data.frame(name = real_names[i], skew = real_skew[i],
+             n_pred = ceiling((real_skew[i] / 0.25)^2),
+             n_main = smallest_normal_n(r),
+             pass30 = r$normal_enough[r$n == 30])
+}))
+```
+
+## Executive summary
+
+I used Monte Carlo simulation in R (100,000 simulated samples for every sample size, seed 9426) to find
+the smallest sample size n at which the sample mean is "normal enough" for five assigned populations,
+and then for five real datasets. "Normal enough" means passing four calibrated checks (skewness, excess
+kurtosis, Q-Q straightness, and the two tails of a 95% interval) and continuing to pass at every larger n.
+
+1. **There is no universal n.** The answer ranged from **n = 1** (normal population) to
+   **n = `r get("Binomial(5, 0.1)", "chosen_n")`** (rare-event binomial), and **no n at all** for the Cauchy.
+2. **n = 30 is not a safe rule.** It is more than enough for symmetric populations, but too small for the
+   skewed exponential (n = `r get("Exponential(1)", "chosen_n")`) and binomial, and for 4 of 5 real datasets.
+3. **Skewness predicts the answer.** Because the skewness of the mean shrinks as skewness/√n, the threshold is
+   about n ≈ (skewness / 0.25)². This predicted 64 for the exponential (simulated: `r get("Exponential(1)", "chosen_n")`) and
+   came close for the continuous real datasets.
+4. **Discreteness adds a separate delay.** The binomial passed the skewness check by n = 30 but needed
+   n = `r get("Binomial(5, 0.1)", "chosen_n")` before its stair-step Q-Q plot and jumping tail rates settled.
+5. **Infinite variance breaks the theorem.** For the Cauchy, the mean of 5,000 values has exactly the same
+   spread as a single value. Large n does not help at all.
+6. **The standard error formula σ/√n held at every n** for every population with finite variance, even
+   where the shape was still far from normal. The shape is the slow part, not the spread.
+
+## My standard for "normal enough"
+
+| Check | Pass zone | Why |
+|---|---|---|
+| Skewness | \|skew\| ≤ 0.25 | keeps each tail of a 95% interval within about 0.7 points of 2.5% |
+| Excess kurtosis | \|kurt\| ≤ 0.5 | about 10× the Monte Carlo noise; catches heavy tails |
+| Q-Q correlation | r ≥ 0.998 | the Q-Q equivalent of skewness 0.25 |
+| Tails | 1.75%–3.25% on **each** side | the practical goal itself, checked one side at a time |
+
+The thresholds were calibrated by simulation (details in [Method](methods.qmd)). Every result is also
+reported under a strict standard (skewness ≤ 0.1) and a lenient one (skewness ≤ 0.5).
+
+## Final table: assigned populations
+
+```{r}
+#| label: tbl-final
+#| echo: false
+tab <- data.frame(
+  Population = c("[Standard normal](analysis/01_normal.qmd)", "[Six-sided die](analysis/02_die.qmd)",
+                 "[Exponential (λ = 1)](analysis/03_exponential.qmd)", "[Binomial (5, 0.1)](analysis/04_binomial.qmd)",
+                 "[Cauchy (0, 1)](analysis/05_cauchy.qmd)"),
+  `My prediction` = s$prediction,
+  `Smallest n judged normal` = paste0("**", s$chosen_n, "**"),
+  `Strict / lenient n` = paste0(s$n_strict, " / ", s$n_lenient),
+  `Skewness at chosen n` = ifelse(s$chosen_n == "none", "undefined", f3(s$skewness)),
+  `Ex. kurtosis at chosen n` = ifelse(s$chosen_n == "none", "undefined", f3(s$ex_kurtosis)),
+  `SE: simulated / theory` = ifelse(is.na(s$se_ratio), "no σ", f3(s$se_ratio)),
+  `Key observation` = c("Control case: normal at every n",
+                        "Symmetric; only the flat, discrete shape had to fade",
+                        "Skewness is the bottleneck; theory predicts 64",
+                        "Skewness passes at 30; discreteness sets the answer",
+                        "Mean of n values has the same spread as one value"),
+  check.names = FALSE)
+knitr::kable(tab, align = "lcrcrrrl")
+```
+
+```{r}
+#| label: fig-summary
+#| fig-cap: "Smallest n judged normal enough (main standard), with the strict–lenient range as a bar. The dashed line is the n = 30 rule of thumb."
+#| fig-height: 4.6
+#| echo: false
+pops <- c("Normal", "Die", "Exponential", "Binomial", "Cauchy")
+nm <- suppressWarnings(as.numeric(s$chosen_n)); ns <- suppressWarnings(as.numeric(s$n_strict)); nl <- suppressWarnings(as.numeric(s$n_lenient))
+style_par(mar = c(4.2, 7.5, 1, 1))
+plot(NA, xlim = c(1, 5000), ylim = c(0.5, 5.5), log = "x", yaxt = "n", xlab = "Sample size n (log scale)", ylab = "")
+axis(2, at = 5:1, labels = pops, las = 1, tick = FALSE)
+abline(v = c(1, 10, 100, 1000), col = pal$grid)
+abline(v = 30, lty = 2, lwd = 2, col = pal$ink)
+for (i in 1:5) {
+  y <- 6 - i
+  if (is.na(nm[i])) {
+    arrows(1, y, 5000, y, col = pal$fail, lwd = 3, length = 0.12)
+    text(2000, y + 0.25, "never", col = pal$fail, font = 2)
+  } else {
+    segments(nl[i], y, ns[i], y, lwd = 8, col = adjustcolor(pal$bars, 0.3))
+    points(nm[i], y, pch = 19, cex = 2, col = ifelse(nm[i] <= 30, pal$pass, pal$accent))
+    text(nm[i], y + 0.3, nm[i], font = 2)
+  }
+}
+text(30, 5.45, "n = 30", pos = 4, font = 2, cex = 0.9)
+```
+
+## Extension: real data
+
+```{r}
+#| label: tbl-real
+#| echo: false
+knitr::kable(data.frame(
+  Dataset = real$name, Skewness = f2(real$skew),
+  `Predicted n, (skew/0.25)²` = num(real$n_pred),
+  `Simulated n` = paste0("**", num(real$n_main), "**"),
+  `Is n = 30 enough?` = ifelse(real$pass30, "yes", "no"), check.names = FALSE), align = "lrrrc")
+```
+
+See [Real data](analysis/06_real_world_data.qmd) for the full analysis.
+
+## Answers to the research questions
+
+### Sample size: is there evidence for a universal rule such as n = 30?
+
+**No.** The required n depends on the population and spans more than three orders of magnitude, and for one
+population it does not exist. n = 30 happens to correspond roughly to my *lenient* standard: under that
+standard every finite-variance population I tested passes by about n = 20 or less, except the heavy-tailed
+real datasets. Under my main standard, which keeps each tail of a 95% interval within 0.75 points of 2.5%,
+30 is too small for every strongly skewed population. So the rule of thumb is only safe if you accept one-sided
+error rates that can be off by a factor of 1.5 to 2.5.
+
+### Population shape: which converged fastest, which slowest, and why?
+
+- **Fastest:** the normal (n = 1, already normal), then the die (n = `r get("Six-sided die", "chosen_n")`) and the Old
+  Faithful waiting times (n = `r real$n_main[1]`). All are symmetric or nearly so, so their skewness is zero or small from the
+  start, and mainly kurtosis and discreteness have to fade.
+- **Slowest (finite variance):** the binomial (n = `r get("Binomial(5, 0.1)", "chosen_n")`) and exponential
+  (n = `r get("Exponential(1)", "chosen_n")`) among the assigned populations; county populations (n = `r num(real$n_main[5])`)
+  among the real data. The exponential is held back by skewness, the binomial by discreteness, and the county
+  data by a few extreme values (skewness 12).
+- **Never:** the Cauchy.
+
+The main driver is the population's skewness, because the skewness of the mean decreases only as 1/√n:
+halving the remaining skewness requires four times as much data. Kurtosis decreases as 1/n and was never the
+limiting factor for finite-variance populations.
+
+### Assumptions: what happened when they were violated?
+
+- **Infinite variance (Cauchy):** the CLT does not apply at all. The interquartile range of the sample mean
+  stayed at 2.0 from n = 1 to n = 5,000, and skewness and kurtosis estimates jumped randomly because the true
+  values do not exist. The sample *median* does converge, so the right response to such data is a robust statistic.
+- **Dependent observations** and **non-identically distributed observations** were offered as extra-credit
+  extensions and are not part of this submission. The real-data page notes where independence is likely to
+  fail in practice (flight delays on the same day are correlated).
+
+## Reproducibility
+
+Every simulation uses seed 9426, set immediately before each sample size, and B = 100,000. As required, I reran
+the exponential analysis with a different seed:
+
+```{r}
+#| label: tbl-repro
+#| echo: false
+knitr::kable(repro, align = "r")
+```
+
+The exact numbers changed, but the conclusion did not: the threshold stayed in the same narrow range around
+the theoretical 64, and n = 30 failed under both seeds. The seed makes the results **reproducible**; the large
+B makes them **reliable**.
+
+To reproduce everything: open `clt-monte-carlo.Rproj` in RStudio and run `quarto render`, then
+`Rscript R/export_site_data.R` for the website data. Packages: knitr, rmarkdown, ggplot2, nycflights13, jsonlite.
+
+## Limitations
+
+- "Normal enough" is a judgment call. I report three standards so readers can apply their own.
+- Near a threshold, Monte Carlo noise can flip a single n. The "keeps passing for every larger n" rule and
+  B = 100,000 reduce but cannot remove this; answers should be read as ±5%.
+- The strict and lenient answers use a coarser grid than the main answer, so they are approximate.
+- The real datasets are treated as complete populations and sampled with replacement.

@@ -1,0 +1,146 @@
+---
+title: "Six-Sided Die"
+subtitle: "Discrete and flat, but perfectly symmetric"
+---
+
+```{r}
+#| label: simulate
+#| code-summary: "Show the simulation code"
+source("../R/clt_functions.R")
+
+rgen  <- function(n) sample(1:6, size = n, replace = TRUE)   # n fair rolls
+mu    <- 3.5
+sigma <- sqrt(35 / 12)       # = 1.708
+pop_kurt <- -1.2686          # excess kurtosis of a fair die
+
+coarse <- c(1, 2, 3, 5, 10, 15, 20, 25, 30, 32, 34, 36, 38, 40, 45, 50,
+            60, 75, 100, 200)
+exper  <- run_with_refinement(rgen, coarse, mu, sigma)
+
+res    <- exper$results
+n_main <- smallest_normal_n(res)
+n_std  <- n_by_standard(res)
+at     <- function(k) res[res$n == k, ]
+
+save_results(res, "die")
+save_summary(res, "Six-sided die", n_main, prediction = "15",
+             key_note = "Symmetric: flat shape and discreteness are the only obstacles")
+```
+
+::: {.answer-box}
+<span class="big">n = `r n_main`</span> under my main standard
+(strict standard: ≈ `r n_std[["strict"]]` · lenient standard: `r n_std[["lenient"]]` · my prediction: 15)
+:::
+
+## 1. What population am I sampling from?
+
+A fair six-sided die: the values 1 to 6, each with probability 1/6. It is the opposite of a bell curve.
+It is **flat** (no peak), **bounded** (no extreme values at all), and **discrete** (only six possible
+values). It is, however, perfectly **symmetric**.
+
+| Property | Value |
+|---|---|
+| Mean μ | 3.5 |
+| Standard deviation σ | √(35/12) ≈ 1.708 |
+| Skewness | 0 (symmetric) |
+| Excess kurtosis | −1.27 (light tails: flat, no extremes) |
+| Theoretical SE of the mean | 1.708/√n |
+
+```{r}
+#| label: fig-population
+#| fig-cap: "The population: six equally likely values."
+#| fig-height: 3.6
+style_par(mar = c(4, 4, 1, 1))
+barplot(rep(1/6, 6), names.arg = 1:6, col = adjustcolor(pal$bars, 0.75),
+        border = NA, ylim = c(0, 0.2), xlab = "Face", ylab = "Probability")
+```
+
+## 2. What did I expect before running the simulation?
+
+> **n = 15.** The die is symmetric (skewness 0) but flat and discrete. In my pilot run it clearly failed
+> at n = 1 and passed every check at n = 15, so I predicted 15.
+
+## 3. Which sample sizes did I investigate?
+
+1. **Coarse grid:** n = `r paste(coarse, collapse = ", ")`. It is denser between 30 and 50 to locate
+   the strict standard.
+2. **Refinement:** `r if (length(exper$refined)) paste0("every n from ", min(exper$refined), " to ", max(exper$refined)) else "not needed"`.
+
+B = 100,000 sample means per n, seed `r student_id`. For plotting, each histogram bar is one possible
+value of the mean. The average of n rolls can only be a multiple of 1/n, so there are 5n + 1 possible values.
+
+## 4. Results
+
+```{r}
+#| label: fig-convergence
+#| fig-cap: "The four checks. Skewness is zero from the start; the Q-Q correlation is the last check to pass. Orange: theoretical kurtosis −1.27/n."
+#| fig-height: 6.5
+plot_convergence(res, chosen_n = n_main, theory_skew = 0, theory_kurt = pop_kurt)
+```
+
+```{r}
+#| label: fig-hist
+#| fig-cap: "Sampling distribution of the mean of n rolls (one bar per possible value) and the CLT normal curve."
+#| fig-height: 6
+n_show <- c(1, 2, 3, 5, n_main, 30)
+plot_hist_grid(exper, n_show, mu, sigma, step = 1)
+```
+
+```{r}
+#| label: fig-qq
+#| fig-cap: "Q-Q plots. At small n the points form visible steps (discreteness) and an S-shape (light tails)."
+#| fig-height: 6
+plot_qq_grid(exper, n_show)
+```
+
+```{r}
+#| label: fig-se
+#| fig-cap: "Simulated SE (dots) against σ/√n (line)."
+#| fig-height: 4.2
+plot_se_check(res)
+```
+
+The simulated mean stayed within `r f4(max(abs(res$sim_mean - mu)))` of 3.5, and the simulated SE was
+within `r pct(max(abs(res$se_ratio - 1)))` of σ/√n at every n.
+
+::: {.callout-note collapse="true"}
+## Full results table
+```{r}
+#| label: tbl-results
+#| echo: false
+results_table(res)
+```
+:::
+
+## 5. When did the sampling distribution become approximately normal?
+
+$$\boxed{n = `r n_main`}$$
+
+```{r}
+#| label: tbl-standards
+#| echo: false
+standards_table(res)
+```
+
+## 6. Why did I choose that value?
+
+- **Skewness never mattered.** It was `r f3(at(1)$skewness)` at n = 1 and stayed near zero, because the
+  die is symmetric.
+- **The flat shape faded quickly.** Excess kurtosis follows −1.27/n and passed my ±0.5 limit at
+  n = `r first_stable_n(res$n, res$kurt_ok)`.
+- **The Q-Q correlation was the last check to pass**, at n = `r first_stable_n(res$n, res$qq_ok)`.
+  At small n the Q-Q plot is a staircase with an S-shape: the steps come from discreteness, and the S
+  comes from the missing tails (a sum of a few dice can never be very far from 3.5).
+- At **n = `r n_main`** all four checks pass: skewness `r f3(at(n_main)$skewness)`, kurtosis
+  `r f3(at(n_main)$ex_kurtosis)`, Q-Q r `r f4(at(n_main)$qq_cor)`, tails
+  `r pct(at(n_main)$lower_tail, 2)` / `r pct(at(n_main)$upper_tail, 2)`. Every larger n also passes.
+  `r flip_text(res, n_main)`
+
+## 7. What surprised me?
+
+> I expected the die to stay visibly discrete for a long time, since it only has six values. It passed
+> my main standard at n = `r n_main`. What surprised me more is that it also passed the strict standard
+> at around n = `r n_std[["strict"]]`. Its skewness was zero from the start, so the only problems were the
+> flat shape and the gaps between possible values. With n rolls the mean can take 5n + 1 different values,
+> and by n = 40 the gaps are less than a tenth of a standard error. So even for a discrete distribution
+> like a die, a larger n improves the approximation quite well.

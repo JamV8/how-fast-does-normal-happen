@@ -1,0 +1,112 @@
+---
+title: "Try it yourself"
+subtitle: "Pick a population and a sample size, then watch thousands of averages pile up"
+page-layout: full
+toc: false
+code-tools: false
+---
+
+```{=html}
+<link rel="stylesheet" href="assets/site.css">
+<div class="lp">
+<p class="lead" style="margin:0 0 22px">
+  Each <b>study</b> picks <b>n</b> values at random from the population and averages them.
+  The simulator repeats the study thousands of times and stacks up the averages.
+  If the Central Limit Theorem has kicked in, they form the red bell curve.
+</p>
+<div class="sim">
+  <!-- ============ CONTROLS ============ -->
+  <div class="panel controls">
+    <label class="ctl" for="pop">1 · Population</label>
+    <select id="pop">
+      <optgroup label="Textbook distributions">
+        <option value="normal">Normal (bell curve)</option>
+        <option value="die">Six-sided die</option>
+        <option value="exponential" selected>Exponential (waiting times)</option>
+        <option value="binomial">Binomial (5, 0.1): rare-event counts</option>
+        <option value="cauchy">Cauchy (extreme tails)</option>
+      </optgroup>
+      <optgroup label="Real data">
+        <option value="faithful">Old Faithful geyser: minutes between eruptions</option>
+        <option value="discoveries">Great inventions per year</option>
+        <option value="diamonds">Diamond prices (USD)</option>
+        <option value="flights">NYC flight arrival delays (minutes)</option>
+        <option value="counties">Midwest county populations</option>
+        <option value="rivers">North American river lengths (miles)</option>
+      </optgroup>
+    </select>
+    <div class="hint" id="pop-desc"></div>
+
+    <label class="ctl" for="n-slider">2 · Sample size n <span class="note">(values per study)</span></label>
+    <div class="n-row"><div class="n-display" id="n-display">5</div>
+      <input id="n-input" type="number" min="1" max="5000" value="5" style="width:110px"></div>
+    <input id="n-slider" type="range" min="0" max="1000" value="190">
+    <div class="quick" id="quick"></div>
+
+    <label class="ctl">3 · Number of studies (B)</label>
+    <div class="seg" id="b-seg">
+      <button data-b="1000">1,000</button><button data-b="10000">10,000</button><button data-b="100000" class="on">100,000</button>
+    </div>
+    <div class="hint" id="b-note">The full study used 100,000.</div>
+
+    <label class="ctl">4 · Standard for “normal enough”</label>
+    <div class="seg" id="std-seg">
+      <button data-s="strict">Strict</button><button data-s="main" class="on">Main</button><button data-s="lenient">Lenient</button>
+    </div>
+
+    <label class="ctl" for="seed">Random seed</label>
+    <input id="seed" type="number" value="9426">
+
+    <div class="actions">
+      <button class="go" id="run">▶ Run all studies</button>
+      <button class="one" id="one">+1 study (watch it)</button>
+      <button class="reset" id="reset">Reset</button>
+    </div>
+  </div>
+
+  <!-- ============ STAGE ============ -->
+  <div class="stage">
+    <div class="row2">
+      <div class="panel">
+        <h3 class="ph">The population</h3>
+        <p class="sub" id="pop-sub">Where each value comes from.</p>
+        <svg id="pop-chart" viewBox="0 0 460 200"></svg>
+      </div>
+      <div class="panel">
+        <h3 class="ph">One study</h3>
+        <p class="sub" id="one-sub">Click “+1 study” to see the n values of a single study and their average.</p>
+        <svg id="one-chart" viewBox="0 0 460 200"></svg>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="n-row"><h3 class="ph">The averages of all studies</h3><span class="counter" id="counter">0 studies</span></div>
+      <p class="sub">Bars: how many studies got each average. <span style="color:var(--bell);font-weight:700">Red curve</span>: the bell curve the Central Limit Theorem predicts.</p>
+      <svg id="hist-chart" viewBox="0 0 960 330"></svg>
+      <div class="note" id="hist-note"></div>
+    </div>
+
+    <div class="verdict-box idle" id="verdict" aria-live="polite">
+      <div class="icon">…</div><div><div class="t">Run the studies to get a verdict</div><div class="d"></div></div>
+    </div>
+
+    <div class="score" id="score"></div>
+
+    <div class="row2">
+      <div class="panel">
+        <h3 class="ph">Q-Q plot</h3>
+        <p class="sub">If the averages are normal, the dots follow the straight line.</p>
+        <svg id="qq-chart" viewBox="0 0 460 300"></svg>
+      </div>
+      <div class="panel">
+        <h3 class="ph">What the full study found</h3>
+        <div class="found" id="found"></div>
+        <p class="sub" style="margin-top:12px">The browser uses a different random number generator than R, so results right at
+          the threshold can differ slightly. Try n just below and just above the study's answer.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script src="assets/simulator.js" defer></script>
+```

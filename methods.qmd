@@ -1,0 +1,163 @@
+---
+title: "Method"
+subtitle: "How I simulated, and what “normal enough” means in this study"
+---
+
+```{r}
+#| label: setup
+#| include: false
+source("R/clt_functions.R")
+```
+
+## The question behind the standard
+
+The CLT is used to justify normal-based tools: 95% confidence intervals, margins of error, z- and t-tests.
+All of them rest on one property of the normal curve: **2.5% of the probability lies beyond 1.96 standard
+errors on each side**. So in this study, "approximately normal" means **normal enough that these tools
+give nearly the right answer.** That purpose drives every threshold below.
+
+## Monte Carlo design
+
+| Element | Choice | Why |
+|---|---|---|
+| Sample size **n** | the quantity I am searching for | the size of one sample whose mean we study |
+| Repetitions **B** | 100,000 sample means for every n | B sets how *precisely* each n is measured, not the answer; it costs seconds of computing |
+| Seed | `r student_id` (last four digits of my student ID), set immediately before each n | each n is a self-contained, reproducible experiment, independent of which other n are tested |
+| Search | coarse grid, then every n between the last failing and the first passing coarse n | the approach suggested in the assignment: start wide, then refine near the threshold |
+| Code | one shared file, [`R/clt_functions.R`](https://github.com/JamV8/how-fast-does-normal-happen/blob/main/R/clt_functions.R), used by every analysis | every population is simulated and judged by exactly the same code |
+
+## The four checks
+
+| Check | What it measures | Ideal | Pass zone (main standard) |
+|---|---|---|---|
+| Skewness | asymmetry: is one tail longer? | 0 | between −0.25 and 0.25 |
+| Excess kurtosis | are extreme values too common (+) or too rare (−)? | 0 | between −0.5 and 0.5 |
+| Q-Q correlation r | how straight the normal Q-Q plot is | 1 | at least 0.998 |
+| Tail check | share of sample means beyond μ ± 1.96·σ/√n, **each side separately** | 2.5% | between 1.75% and 3.25% on each side |
+
+A sample size is **normal enough** when all four checks pass *and* the histogram and Q-Q plot show no
+systematic departure from the normal curve. The chosen n is the smallest n that passes **and after which
+every larger n I tested also passes**, so one lucky simulation cannot decide the answer.
+
+Shapiro-Wilk p-values are reported but not used for decisions (see the last section).
+
+## Why these thresholds
+
+There is no universal cutoff, so I set each threshold between two limits:
+
+1. **Not stricter than the simulation can measure.** Even perfectly normal data produce some nonzero
+   skewness, kurtosis and tail error just by chance. A threshold must sit well above this noise.
+2. **Not looser than practice can tolerate.** The threshold must keep the one-sided error rates of a 95%
+   interval close to 2.5%.
+
+### Limit 1: Monte Carlo noise
+
+```{r}
+#| label: noise
+#| code-summary: "Show code: measuring the noise on truly normal data"
+set.seed(student_id)
+noise <- replicate(200, {
+  m <- rnorm(B)                       # B = 100,000 values that ARE normal
+  c(skew(m), kurt(m), qq_cor(m), mean(m < -1.96), mean(m > 1.96))
+})
+knitr::kable(data.frame(
+  Statistic = c("Skewness", "Excess kurtosis", "Q-Q correlation", "Each tail rate"),
+  `Typical noise (SD over 200 runs)` = c(f3(sd(noise[1, ])), f3(sd(noise[2, ])),
+                                        paste0("lowest of 200 runs: ", sprintf("%.5f", min(noise[3, ]))),
+                                        pct(sd(c(noise[4, ], noise[5, ])), 2)),
+  `Main threshold` = c("0.25", "0.5", "0.998", "2.5% ± 0.75%"),
+  check.names = FALSE), align = "lrr")
+```
+
+Each threshold is roughly ten times the noise or more, so a truly normal sampling distribution never fails
+by chance. The kurtosis threshold is twice the skewness threshold because kurtosis is about twice as noisy.
+
+### Limit 2: what skewness does to a 95% interval
+
+If the sampling distribution has skewness γ, how often does the true mean fall beyond each end of the
+usual ±1.96 SE interval? This can be computed exactly for gamma-shaped distributions, which have every
+possible skewness:
+
+```{r}
+#| label: tail-errors
+#| code-summary: "Show code: exact tail errors for a given skewness"
+tail_err <- function(g) {
+  k <- (2 / g)^2                      # gamma shape with skewness g
+  c(upper = pgamma(k + 1.96 * sqrt(k), k, lower.tail = FALSE),
+    lower = pgamma(k - 1.96 * sqrt(k), k))
+}
+gs <- c(0.10, 0.25, 0.50, 1.00)
+te <- sapply(gs, tail_err)
+knitr::kable(data.frame(
+  Skewness = f2(gs),
+  `Upper tail (should be 2.5%)` = pct(te["upper", ], 2),
+  `Lower tail (should be 2.5%)` = pct(te["lower", ], 2),
+  `Both tails (should be 5%)` = pct(colSums(te), 2),
+  Verdict = c("nearly perfect", "**noticeable but acceptable (my main standard)**",
+              "one side wrong by 2.5x", "unusable for one-sided tests"),
+  check.names = FALSE), align = "rrrrl")
+```
+
+Two things follow:
+
+- **0.25 is the compromise.** At 0.1 the intervals are almost perfect, but reaching it takes about
+  (0.25/0.1)² ≈ 6 times more data. At 0.5 one side of the interval is wrong by a factor of 2.5. Halving the
+  threshold multiplies the required n by four, because skewness shrinks as 1/√n.
+- **The tails must be checked separately.** The *total* error barely moves (4.98% → 4.47%) even at
+  skewness 1, because the two sides cancel. A two-sided tail check would pass a clearly skewed distribution.
+  Checking each side against 1.75%–3.25% gives the same tolerance as skewness 0.25.
+
+Kurtosis matters much less for 95% intervals: a symmetric distribution with excess kurtosis 0.5 puts about
+5.2% instead of 5% outside ±1.96 SE. Kurtosis also fades quickly (as 1/n rather than 1/√n), so in practice
+it acts as a safety net for heavy tails.
+
+### Matching the Q-Q threshold to the skewness threshold
+
+```{r}
+#| label: qq-calibration
+#| code-summary: "Show code: Q-Q correlation for a given skewness"
+set.seed(student_id)
+gs2 <- c(0.10, 0.15, 0.20, 0.25, 0.30, 0.50)
+r_at <- sapply(gs2, function(g) mean(replicate(5, qq_cor(rgamma(B, shape = (2 / g)^2)))))
+knitr::kable(data.frame(Skewness = f2(gs2), `Average Q-Q r (B = 100,000)` = sprintf("%.5f", r_at),
+                        check.names = FALSE), align = "rr")
+```
+
+A skewness of 0.25 corresponds to a Q-Q correlation of about 0.998, so I use **0.998**. My first draft
+used 0.999. This check showed that 0.999 was secretly stricter than the skewness rule (it matches a
+skewness of about 0.17), so the two rules contradicted each other. I corrected it.
+
+## Three standards: a sensitivity analysis
+
+Because the cutoff is a judgment call, I report every result under three standards that are calibrated the
+same way. Only the main standard decides the chosen n.
+
+```{r}
+#| label: standards
+#| echo: false
+knitr::kable(data.frame(
+  Standard = c("Strict", "**Main**", "Lenient"),
+  `Max |skewness|` = sapply(standards[c("strict", "main", "lenient")], `[[`, "max_abs_skew"),
+  `Max |excess kurtosis|` = sapply(standards[c("strict", "main", "lenient")], `[[`, "max_abs_kurt"),
+  `Min Q-Q r` = sapply(standards[c("strict", "main", "lenient")], `[[`, "min_qq_cor"),
+  `Each tail` = sapply(standards[c("strict", "main", "lenient")], function(s)
+    paste0(pct(s$tail_min, 2), " – ", pct(s$tail_max, 2))),
+  check.names = FALSE), align = "lrrrr")
+```
+
+## Why I do not decide with Shapiro-Wilk
+
+The Shapiro-Wilk test asks whether the data are *exactly* normal. With 5,000 points (its maximum in R) it
+detects departures far too small to matter for a 95% interval:
+
+```{r}
+#| label: shapiro
+#| echo: false
+ex <- read.csv("results/exponential_results.csv")
+ex_pass <- ex[ex$normal_enough, ]
+```
+
+For the exponential population, `r nrow(ex_pass)` sample sizes passed all four of my checks, yet Shapiro-Wilk
+still rejected normality (p < 0.05) at `r sum(ex_pass$shapiro_p < 0.05)` of them, including n = 1,000
+(p = `r signif(ex$shapiro_p[ex$n == 1000], 2)`). A test that answers "is it *perfectly* normal?" is the wrong tool
+for "is it normal *enough*?", which is also the assignment's own warning.

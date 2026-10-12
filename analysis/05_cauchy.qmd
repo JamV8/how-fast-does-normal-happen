@@ -1,0 +1,206 @@
+---
+title: "Cauchy (location 0, scale 1)"
+subtitle: "Extremely heavy tails: the case where the CLT does not apply"
+---
+
+```{r}
+#| label: simulate
+#| code-summary: "Show the simulation code"
+source("../R/clt_functions.R")
+
+rgen <- function(n) rcauchy(n, location = 0, scale = 1)
+# The Cauchy distribution has no mean and no variance, so mu and sigma are NA.
+# The tail check then uses the simulated mean and SD of the sample means.
+
+coarse <- c(1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000)
+exper  <- run_with_refinement(rgen, coarse)
+
+res    <- exper$results
+n_main <- smallest_normal_n(res)          # NA = never normal enough
+n_std  <- n_by_standard(res)
+at     <- function(k) res[res$n == k, ]
+
+save_results(res, "cauchy")
+save_summary(res, "Cauchy(0, 1)", n_main, prediction = "never",
+             key_note = "No finite variance: the mean of n values has the same distribution as one value")
+
+# Quartiles and other quantiles of the sample means at each n
+qs <- t(sapply(exper$means, quantile, probs = c(0.10, 0.25, 0.50, 0.75, 0.90)))
+```
+
+::: {.answer-box .fail}
+<span class="big">No n is large enough.</span>
+The sampling distribution of the mean never becomes normal, under any of my three standards
+(tested up to n = `r num(max(res$n))`; my prediction: never).
+:::
+
+## 1. What population am I sampling from?
+
+The Cauchy distribution looks like a bell curve near the middle, but its tails are so heavy that
+extreme values keep appearing no matter how much data you collect. For example, about 6% of draws are
+farther than 10 from the center; for a normal distribution with the same peak the chance is essentially zero.
+
+| Property | Value |
+|---|---|
+| Center (median) | 0 |
+| Quartiles | −1 and +1 |
+| Mean μ | **does not exist** |
+| Standard deviation σ | **does not exist** (infinite variance) |
+| Skewness, kurtosis | **do not exist** |
+| Theoretical SE of the mean | **not defined** |
+
+The CLT requires a finite variance, so its conditions fail here.
+
+```{r}
+#| label: fig-population
+#| fig-cap: "Cauchy density (red) vs a normal curve with the same peak height (gray). The Cauchy tails stay far above the normal tails."
+#| fig-height: 4
+style_par(mar = c(4, 4, 1, 1))
+curve(dcauchy(x), -8, 8, n = 600, col = pal$curve, lwd = 2.5, xlab = "Value", ylab = "Density")
+curve(dnorm(x, 0, sqrt(pi / 2)), add = TRUE, col = "gray45", lwd = 2, lty = 2)
+legend("topright", c("Cauchy(0, 1)", "Normal, same peak height"), col = c(pal$curve, "gray45"),
+       lwd = 2, lty = c(1, 2), bty = "n")
+```
+
+## 2. What did I expect before running the simulation?
+
+> **Never.** The Cauchy has no finite mean or variance, so the CLT conditions fail. In my pilot run the
+> quantiles of the sample means at n = 100 were the same as at n = 1, so averaging did not seem to help.
+
+## 3. Which sample sizes did I investigate?
+
+n = `r paste(num(coarse), collapse = ", ")`, which is a much wider range than for the other populations, to
+check whether anything changes at very large n. B = 100,000 sample means per n, seed `r student_id`.
+No refinement was possible because no n passed.
+
+## 4. Results
+
+### The usual statistics are meaningless here
+
+```{r}
+#| label: tbl-diagnostics
+#| echo: false
+knitr::kable(data.frame(
+  n = num(res$n),
+  `Mean of the means` = f2(res$sim_mean),
+  `SD of the means` = num(round(res$sim_se, 1)),
+  Skewness = num(round(res$skewness, 1)),
+  `Ex. kurtosis` = num(round(res$ex_kurtosis)),
+  `Q-Q r` = f3(res$qq_cor),
+  `Tails` = paste0(pct(res$lower_tail, 2), " / ", pct(res$upper_tail, 2)),
+  check.names = FALSE), align = "r",
+  caption = "Diagnostics for the Cauchy sample means. Every check fails at every n.")
+```
+
+The skewness and kurtosis take enormous values that **change sign at random** from one n to the next,
+and the SD of the means does **not** shrink like 1/√n. Each of these numbers is decided by the single
+most extreme value among the 100,000 means. Because the true moments do not exist, these statistics
+estimate nothing, so for this population I rely on quantiles and pictures instead.
+
+### The middle of the distribution never shrinks
+
+```{r}
+#| label: tbl-quantiles
+#| echo: false
+knitr::kable(data.frame(n = num(as.numeric(rownames(qs))), `10%` = f2(qs[, 1]), `25%` = f2(qs[, 2]),
+                        `50%` = f2(qs[, 3]), `75%` = f2(qs[, 4]), `90%` = f2(qs[, 5]),
+                        IQR = f2(qs[, 4] - qs[, 2]), check.names = FALSE), align = "r",
+             caption = "Quantiles of the sample means. If the CLT worked, the IQR would shrink like 1/√n (for example 100 times smaller at n = 10,000).")
+```
+
+The interquartile range stays at about **`r f2(median(qs[, 4] - qs[, 2]))`** at every n, the same as for a
+single observation. For any population with a finite variance the IQR of the mean would shrink by a factor
+of √n: about 10 times smaller at n = 100 and 70 times smaller at n = 5,000.
+
+```{r}
+#| label: fig-hist
+#| fig-cap: "Sample means for n = 1 to 5,000, shown between −10 and 10 (about 6% of the means fall outside). The red curve is the Cauchy(0, 1) density itself: the mean of n Cauchy values has exactly the same distribution as a single value."
+#| fig-height: 6
+n_show <- c(1, 10, 100, 500, 1000, 5000)
+old <- style_par(mfrow = c(2, 3), mar = c(3.6, 3.6, 2.6, 0.8))
+for (k in n_show) {
+  m <- exper$means[[as.character(k)]]
+  hist(m[abs(m) <= 10], breaks = 80, freq = FALSE, col = adjustcolor(pal$bars, 0.75),
+       border = "white", xlim = c(-10, 10), ylim = c(0, 0.36),
+       main = sprintf("n = %s  (%s outside)", num(k), pct(mean(abs(m) > 10))),
+       xlab = "Sample mean", ylab = "Density")
+  # density of the means restricted to [-10, 10]
+  curve(dcauchy(x) / (pcauchy(10) - pcauchy(-10)), add = TRUE, col = pal$curve, lwd = 2, n = 400)
+}
+par(old)
+```
+
+```{r}
+#| label: fig-qq
+#| fig-cap: "Q-Q plots: almost flat in the middle with points flying off at both ends, the extreme form of the S-shape that signals heavy tails."
+#| fig-height: 6
+plot_qq_grid(exper, n_show)
+```
+
+### One long sequence: the running mean never settles
+
+```{r}
+#| label: fig-running
+#| fig-cap: "Running mean of a single sequence of 10,000 observations. The exponential's running mean settles at its true mean 1; the Cauchy's keeps jumping whenever a huge value arrives."
+#| fig-height: 4.2
+set.seed(student_id)
+N <- 10000
+run_c <- cumsum(rcauchy(N)) / seq_len(N)
+run_e <- cumsum(rexp(N)) / seq_len(N)
+old <- style_par(mfrow = c(1, 2), mar = c(4, 4, 2.6, 0.8))
+plot(run_e, type = "l", log = "x", col = pal$bars, lwd = 1.5, ylim = c(0, 2),
+     xlab = "Number of observations (log scale)", ylab = "Running mean", main = "Exponential(1)")
+abline(h = 1, lty = 2, col = pal$curve)
+plot(run_c, type = "l", log = "x", col = pal$curve, lwd = 1.5,
+     xlab = "Number of observations (log scale)", ylab = "Running mean", main = "Cauchy(0, 1)")
+abline(h = 0, lty = 2, col = pal$muted)
+par(old)
+```
+
+### A useful contrast: the median does converge
+
+```{r}
+#| label: fig-median
+#| fig-cap: "IQR of the sample mean vs the sample median (B = 20,000 per n). The median's spread shrinks like 1/√n; the mean's does not move."
+#| fig-height: 4.2
+n_med <- c(1, 5, 10, 50, 100, 500, 1000)
+set.seed(student_id)
+iqr_mean   <- sapply(n_med, function(k) IQR(replicate(20000, mean(rcauchy(k)))))
+iqr_median <- sapply(n_med, function(k) IQR(replicate(20000, median(rcauchy(k)))))
+style_par(mar = c(4, 4.4, 1, 1))
+plot(n_med, iqr_mean, log = "xy", type = "b", pch = 19, col = pal$curve, ylim = range(c(iqr_mean, iqr_median)),
+     xlab = "n (log scale)", ylab = "IQR of the statistic (log scale)")
+lines(n_med, iqr_median, type = "b", pch = 17, col = pal$bars)
+legend("bottomleft", c("sample mean", "sample median"), pch = c(19, 17), col = c(pal$curve, pal$bars), bty = "n")
+```
+
+The problem is not the data but the **statistic**. The sample median ignores how far away the extreme
+values are, so it settles down even for the Cauchy. The sample mean gives every extreme value full weight.
+
+## 5. When did the sampling distribution become approximately normal?
+
+$$\boxed{\text{No value of } n}$$
+
+Every check failed at every sample size from 1 to `r num(max(res$n))`, under the strict, main and lenient
+standards alike.
+
+## 6. Why did I choose that answer?
+
+- **Theory:** the average of n independent Cauchy(0, 1) values is again exactly Cauchy(0, 1). Adding more
+  data does not change the distribution of the mean at all, so there is no n at which it becomes normal.
+- **Simulation:** the quartiles of the sample means stayed at about −1 and +1 from n = 1 to
+  n = `r num(max(res$n))` (IQR ≈ `r f2(median(qs[, 4] - qs[, 2]))` throughout), the histograms overlap the
+  Cauchy density at every n, and the running mean of a single long sequence never settles.
+- **Why the CLT fails:** the CLT needs a finite variance. One extreme value in a sample can outweigh all
+  the others, so averaging does not cancel out the extremes as it does for the other populations.
+- **Practical lesson:** "the sample is large" is not enough to justify a normal approximation. For data
+  with extremely heavy tails, a robust statistic such as the median is the better tool.
+
+## 7. What surprised me?
+
+> I predicted it would never become normal, and it did not. What I did not expect was how little changed.
+> I asked for an extra pilot at n = 100 to see if a bigger sample would help at least slightly, but the
+> middle half of the sample means still went from about −1 to 1, the same as for single values. At
+> n = 5,000 it was still the same, and the skewness kept jumping between large positive and negative values.
+> This matches the theory: the mean of n standard Cauchy values has exactly the same distribution as one
+> value, so averaging does not help. A single extreme value can outweigh the rest of the sample.

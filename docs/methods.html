@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Method – How Fast Does Normal Happen?</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-0d97d4800fce7e8be498074810d7b290.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">How Fast Does Normal Happen?</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./simulator.html"> 
+<span class="menu-text">Try it yourself</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./report.html"> 
+<span class="menu-text">Findings</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-populations" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Populations</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-populations">    
+        <li>
+    <a class="dropdown-item" href="./analysis/01_normal.html">
+ <span class="dropdown-text">1 · Normal</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./analysis/02_die.html">
+ <span class="dropdown-text">2 · Six-sided die</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./analysis/03_exponential.html">
+ <span class="dropdown-text">3 · Exponential</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./analysis/04_binomial.html">
+ <span class="dropdown-text">4 · Binomial (5, 0.1)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./analysis/05_cauchy.html">
+ <span class="dropdown-text">5 · Cauchy</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="./analysis/06_real_world_data.html"> 
+<span class="menu-text">Real data</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./methods.html" aria-current="page"> 
+<span class="menu-text">Method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./AI_prompts.html"> 
+<span class="menu-text">AI log</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#the-question-behind-the-standard" id="toc-the-question-behind-the-standard" class="nav-link active" data-scroll-target="#the-question-behind-the-standard">The question behind the standard</a></li>
+  <li><a href="#monte-carlo-design" id="toc-monte-carlo-design" class="nav-link" data-scroll-target="#monte-carlo-design">Monte Carlo design</a></li>
+  <li><a href="#the-four-checks" id="toc-the-four-checks" class="nav-link" data-scroll-target="#the-four-checks">The four checks</a></li>
+  <li><a href="#why-these-thresholds" id="toc-why-these-thresholds" class="nav-link" data-scroll-target="#why-these-thresholds">Why these thresholds</a></li>
+  <li><a href="#three-standards-a-sensitivity-analysis" id="toc-three-standards-a-sensitivity-analysis" class="nav-link" data-scroll-target="#three-standards-a-sensitivity-analysis">Three standards: a sensitivity analysis</a></li>
+  <li><a href="#why-i-do-not-decide-with-shapiro-wilk" id="toc-why-i-do-not-decide-with-shapiro-wilk" class="nav-link" data-scroll-target="#why-i-do-not-decide-with-shapiro-wilk">Why I do not decide with Shapiro-Wilk</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Method</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+<p class="subtitle lead">How I simulated, and what “normal enough” means in this study</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="the-question-behind-the-standard" class="level2">
+<h2 class="anchored" data-anchor-id="the-question-behind-the-standard">The question behind the standard</h2>
+<p>The CLT is used to justify normal-based tools: 95% confidence intervals, margins of error, z- and t-tests. All of them rest on one property of the normal curve: <strong>2.5% of the probability lies beyond 1.96 standard errors on each side</strong>. So in this study, “approximately normal” means <strong>normal enough that these tools give nearly the right answer.</strong> That purpose drives every threshold below.</p>
+</section>
+<section id="monte-carlo-design" class="level2">
+<h2 class="anchored" data-anchor-id="monte-carlo-design">Monte Carlo design</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Element</th>
+<th>Choice</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sample size <strong>n</strong></td>
+<td>the quantity I am searching for</td>
+<td>the size of one sample whose mean we study</td>
+</tr>
+<tr class="even">
+<td>Repetitions <strong>B</strong></td>
+<td>100,000 sample means for every n</td>
+<td>B sets how <em>precisely</em> each n is measured, not the answer; it costs seconds of computing</td>
+</tr>
+<tr class="odd">
+<td>Seed</td>
+<td>9426 (last four digits of my student ID), set immediately before each n</td>
+<td>each n is a self-contained, reproducible experiment, independent of which other n are tested</td>
+</tr>
+<tr class="even">
+<td>Search</td>
+<td>coarse grid, then every n between the last failing and the first passing coarse n</td>
+<td>the approach suggested in the assignment: start wide, then refine near the threshold</td>
+</tr>
+<tr class="odd">
+<td>Code</td>
+<td>one shared file, <a href="https://github.com/JamV8/how-fast-does-normal-happen/blob/main/R/clt_functions.R"><code>R/clt_functions.R</code></a>, used by every analysis</td>
+<td>every population is simulated and judged by exactly the same code</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="the-four-checks" class="level2">
+<h2 class="anchored" data-anchor-id="the-four-checks">The four checks</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Check</th>
+<th>What it measures</th>
+<th>Ideal</th>
+<th>Pass zone (main standard)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Skewness</td>
+<td>asymmetry: is one tail longer?</td>
+<td>0</td>
+<td>between −0.25 and 0.25</td>
+</tr>
+<tr class="even">
+<td>Excess kurtosis</td>
+<td>are extreme values too common (+) or too rare (−)?</td>
+<td>0</td>
+<td>between −0.5 and 0.5</td>
+</tr>
+<tr class="odd">
+<td>Q-Q correlation r</td>
+<td>how straight the normal Q-Q plot is</td>
+<td>1</td>
+<td>at least 0.998</td>
+</tr>
+<tr class="even">
+<td>Tail check</td>
+<td>share of sample means beyond μ ± 1.96·σ/√n, <strong>each side separately</strong></td>
+<td>2.5%</td>
+<td>between 1.75% and 3.25% on each side</td>
+</tr>
+</tbody>
+</table>
+<p>A sample size is <strong>normal enough</strong> when all four checks pass <em>and</em> the histogram and Q-Q plot show no systematic departure from the normal curve. The chosen n is the smallest n that passes <strong>and after which every larger n I tested also passes</strong>, so one lucky simulation cannot decide the answer.</p>
+<p>Shapiro-Wilk p-values are reported but not used for decisions (see the last section).</p>
+</section>
+<section id="why-these-thresholds" class="level2">
+<h2 class="anchored" data-anchor-id="why-these-thresholds">Why these thresholds</h2>
+<p>There is no universal cutoff, so I set each threshold between two limits:</p>
+<ol type="1">
+<li><strong>Not stricter than the simulation can measure.</strong> Even perfectly normal data produce some nonzero skewness, kurtosis and tail error just by chance. A threshold must sit well above this noise.</li>
+<li><strong>Not looser than practice can tolerate.</strong> The threshold must keep the one-sided error rates of a 95% interval close to 2.5%.</li>
+</ol>
+<section id="limit-1-monte-carlo-noise" class="level3">
+<h3 class="anchored" data-anchor-id="limit-1-monte-carlo-noise">Limit 1: Monte Carlo noise</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code: measuring the noise on truly normal data</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>noise <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">200</span>, {</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(B)                       <span class="co"># B = 100,000 values that ARE normal</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">skew</span>(m), <span class="fu">kurt</span>(m), <span class="fu">qq_cor</span>(m), <span class="fu">mean</span>(m <span class="sc">&lt;</span> <span class="sc">-</span><span class="fl">1.96</span>), <span class="fu">mean</span>(m <span class="sc">&gt;</span> <span class="fl">1.96</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Statistic =</span> <span class="fu">c</span>(<span class="st">"Skewness"</span>, <span class="st">"Excess kurtosis"</span>, <span class="st">"Q-Q correlation"</span>, <span class="st">"Each tail rate"</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Typical noise (SD over 200 runs)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">f3</span>(<span class="fu">sd</span>(noise[<span class="dv">1</span>, ])), <span class="fu">f3</span>(<span class="fu">sd</span>(noise[<span class="dv">2</span>, ])),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                                        <span class="fu">paste0</span>(<span class="st">"lowest of 200 runs: "</span>, <span class="fu">sprintf</span>(<span class="st">"%.5f"</span>, <span class="fu">min</span>(noise[<span class="dv">3</span>, ]))),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                                        <span class="fu">pct</span>(<span class="fu">sd</span>(<span class="fu">c</span>(noise[<span class="dv">4</span>, ], noise[<span class="dv">5</span>, ])), <span class="dv">2</span>)),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Main threshold</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"0.25"</span>, <span class="st">"0.5"</span>, <span class="st">"0.998"</span>, <span class="st">"2.5% ± 0.75%"</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">align =</span> <span class="st">"lrr"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Statistic</th>
+<th style="text-align: right;">Typical noise (SD over 200 runs)</th>
+<th style="text-align: right;">Main threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Skewness</td>
+<td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Excess kurtosis</td>
+<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">0.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Q-Q correlation</td>
+<td style="text-align: right;">lowest of 200 runs: 0.99997</td>
+<td style="text-align: right;">0.998</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Each tail rate</td>
+<td style="text-align: right;">0.05%</td>
+<td style="text-align: right;">2.5% ± 0.75%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Each threshold is roughly ten times the noise or more, so a truly normal sampling distribution never fails by chance. The kurtosis threshold is twice the skewness threshold because kurtosis is about twice as noisy.</p>
+</section>
+<section id="limit-2-what-skewness-does-to-a-95-interval" class="level3">
+<h3 class="anchored" data-anchor-id="limit-2-what-skewness-does-to-a-95-interval">Limit 2: what skewness does to a 95% interval</h3>
+<p>If the sampling distribution has skewness γ, how often does the true mean fall beyond each end of the usual ±1.96 SE interval? This can be computed exactly for gamma-shaped distributions, which have every possible skewness:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code: exact tail errors for a given skewness</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tail_err <span class="ot">&lt;-</span> <span class="cf">function</span>(g) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> (<span class="dv">2</span> <span class="sc">/</span> g)<span class="sc">^</span><span class="dv">2</span>                      <span class="co"># gamma shape with skewness g</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">upper =</span> <span class="fu">pgamma</span>(k <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> <span class="fu">sqrt</span>(k), k, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> <span class="fu">pgamma</span>(k <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> <span class="fu">sqrt</span>(k), k))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>gs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="fl">0.25</span>, <span class="fl">0.50</span>, <span class="fl">1.00</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>te <span class="ot">&lt;-</span> <span class="fu">sapply</span>(gs, tail_err)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">Skewness =</span> <span class="fu">f2</span>(gs),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Upper tail (should be 2.5%)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(te[<span class="st">"upper"</span>, ], <span class="dv">2</span>),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Lower tail (should be 2.5%)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(te[<span class="st">"lower"</span>, ], <span class="dv">2</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Both tails (should be 5%)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(<span class="fu">colSums</span>(te), <span class="dv">2</span>),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Verdict =</span> <span class="fu">c</span>(<span class="st">"nearly perfect"</span>, <span class="st">"**noticeable but acceptable (my main standard)**"</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>              <span class="st">"one side wrong by 2.5x"</span>, <span class="st">"unusable for one-sided tests"</span>),</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">align =</span> <span class="st">"rrrrl"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 18%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">Skewness</th>
+<th style="text-align: right;">Upper tail (should be 2.5%)</th>
+<th style="text-align: right;">Lower tail (should be 2.5%)</th>
+<th style="text-align: right;">Both tails (should be 5%)</th>
+<th style="text-align: left;">Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">2.77%</td>
+<td style="text-align: right;">2.22%</td>
+<td style="text-align: right;">4.98%</td>
+<td style="text-align: left;">nearly perfect</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">3.14%</td>
+<td style="text-align: right;">1.76%</td>
+<td style="text-align: right;">4.91%</td>
+<td style="text-align: left;"><strong>noticeable but acceptable (my main standard)</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">3.68%</td>
+<td style="text-align: right;">0.98%</td>
+<td style="text-align: right;">4.66%</td>
+<td style="text-align: left;">one side wrong by 2.5x</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">4.47%</td>
+<td style="text-align: right;">0.00%</td>
+<td style="text-align: right;">4.47%</td>
+<td style="text-align: left;">unusable for one-sided tests</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Two things follow:</p>
+<ul>
+<li><strong>0.25 is the compromise.</strong> At 0.1 the intervals are almost perfect, but reaching it takes about (0.25/0.1)² ≈ 6 times more data. At 0.5 one side of the interval is wrong by a factor of 2.5. Halving the threshold multiplies the required n by four, because skewness shrinks as 1/√n.</li>
+<li><strong>The tails must be checked separately.</strong> The <em>total</em> error barely moves (4.98% → 4.47%) even at skewness 1, because the two sides cancel. A two-sided tail check would pass a clearly skewed distribution. Checking each side against 1.75%–3.25% gives the same tolerance as skewness 0.25.</li>
+</ul>
+<p>Kurtosis matters much less for 95% intervals: a symmetric distribution with excess kurtosis 0.5 puts about 5.2% instead of 5% outside ±1.96 SE. Kurtosis also fades quickly (as 1/n rather than 1/√n), so in practice it acts as a safety net for heavy tails.</p>
+</section>
+<section id="matching-the-q-q-threshold-to-the-skewness-threshold" class="level3">
+<h3 class="anchored" data-anchor-id="matching-the-q-q-threshold-to-the-skewness-threshold">Matching the Q-Q threshold to the skewness threshold</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code: Q-Q correlation for a given skewness</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>gs2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span>, <span class="fl">0.25</span>, <span class="fl">0.30</span>, <span class="fl">0.50</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>r_at <span class="ot">&lt;-</span> <span class="fu">sapply</span>(gs2, <span class="cf">function</span>(g) <span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">5</span>, <span class="fu">qq_cor</span>(<span class="fu">rgamma</span>(B, <span class="at">shape =</span> (<span class="dv">2</span> <span class="sc">/</span> g)<span class="sc">^</span><span class="dv">2</span>)))))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Skewness =</span> <span class="fu">f2</span>(gs2), <span class="st">`</span><span class="at">Average Q-Q r (B = 100,000)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%.5f"</span>, r_at),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">align =</span> <span class="st">"rr"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Skewness</th>
+<th style="text-align: right;">Average Q-Q r (B = 100,000)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.99968</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.99935</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.99887</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.99822</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">0.99749</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0.99317</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>A skewness of 0.25 corresponds to a Q-Q correlation of about 0.998, so I use <strong>0.998</strong>. My first draft used 0.999. This check showed that 0.999 was secretly stricter than the skewness rule (it matches a skewness of about 0.17), so the two rules contradicted each other. I corrected it.</p>
+</section>
+</section>
+<section id="three-standards-a-sensitivity-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="three-standards-a-sensitivity-analysis">Three standards: a sensitivity analysis</h2>
+<p>Because the cutoff is a judgment call, I report every result under three standards that are calibrated the same way. Only the main standard decides the chosen n.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 25%">
+<col style="width: 32%">
+<col style="width: 10%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Standard</th>
+<th style="text-align: right;">Max |skewness|</th>
+<th style="text-align: right;">Max |excess kurtosis|</th>
+<th style="text-align: right;">Min Q-Q r</th>
+<th style="text-align: right;">Each tail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">strict</td>
+<td style="text-align: left;">Strict</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">0.9996</td>
+<td style="text-align: right;">2.20% – 2.80%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">main</td>
+<td style="text-align: left;"><strong>Main</strong></td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.9980</td>
+<td style="text-align: right;">1.75% – 3.25%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lenient</td>
+<td style="text-align: left;">Lenient</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.9930</td>
+<td style="text-align: right;">0.90% – 4.10%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="why-i-do-not-decide-with-shapiro-wilk" class="level2">
+<h2 class="anchored" data-anchor-id="why-i-do-not-decide-with-shapiro-wilk">Why I do not decide with Shapiro-Wilk</h2>
+<p>The Shapiro-Wilk test asks whether the data are <em>exactly</em> normal. With 5,000 points (its maximum in R) it detects departures far too small to matter for a 95% interval:</p>
+<p>For the exponential population, 21 sample sizes passed all four of my checks, yet Shapiro-Wilk still rejected normality (p &lt; 0.05) at 20 of them, including n = 1,000 (p = 0.31). A test that answers “is it <em>perfectly</em> normal?” is the wrong tool for “is it normal <em>enough</em>?”, which is also the assignment’s own warning.</p>
+
+
+<!-- -->
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const cellDetails = window.document.querySelectorAll(".cell details.code-fold");
+        for (let i=0; i<cellDetails.length; i++) {
+          const details = cellDetails[i];
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell div.sourceCode.cell-code");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Method"</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "How I simulated, and what “normal enough” means in this study"</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"R/clt_functions.R"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## The question behind the standard</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>The CLT is used to justify normal-based tools: 95% confidence intervals, margins of error, z- and t-tests.</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>All of them rest on one property of the normal curve: **2.5% of the probability lies beyond 1.96 standard</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>errors on each side**. So in this study, "approximately normal" means **normal enough that these tools</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>give nearly the right answer.** That purpose drives every threshold below.</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="fu">## Monte Carlo design</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Element <span class="pp">|</span> Choice <span class="pp">|</span> Why <span class="pp">|</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Sample size **n** <span class="pp">|</span> the quantity I am searching for <span class="pp">|</span> the size of one sample whose mean we study <span class="pp">|</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Repetitions **B** <span class="pp">|</span> 100,000 sample means for every n <span class="pp">|</span> B sets how *precisely* each n is measured, not the answer; it costs seconds of computing <span class="pp">|</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Seed <span class="pp">|</span> <span class="in">`r student_id`</span> (last four digits of my student ID), set immediately before each n <span class="pp">|</span> each n is a self-contained, reproducible experiment, independent of which other n are tested <span class="pp">|</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Search <span class="pp">|</span> coarse grid, then every n between the last failing and the first passing coarse n <span class="pp">|</span> the approach suggested in the assignment: start wide, then refine near the threshold <span class="pp">|</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Code <span class="pp">|</span> one shared file, <span class="co">[</span><span class="ot">`R/clt_functions.R`</span><span class="co">](https://github.com/JamV8/how-fast-does-normal-happen/blob/main/R/clt_functions.R)</span>, used by every analysis <span class="pp">|</span> every population is simulated and judged by exactly the same code <span class="pp">|</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## The four checks</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Check <span class="pp">|</span> What it measures <span class="pp">|</span> Ideal <span class="pp">|</span> Pass zone (main standard) <span class="pp">|</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Skewness <span class="pp">|</span> asymmetry: is one tail longer? <span class="pp">|</span> 0 <span class="pp">|</span> between −0.25 and 0.25 <span class="pp">|</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Excess kurtosis <span class="pp">|</span> are extreme values too common (+) or too rare (−)? <span class="pp">|</span> 0 <span class="pp">|</span> between −0.5 and 0.5 <span class="pp">|</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Q-Q correlation r <span class="pp">|</span> how straight the normal Q-Q plot is <span class="pp">|</span> 1 <span class="pp">|</span> at least 0.998 <span class="pp">|</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Tail check <span class="pp">|</span> share of sample means beyond μ ± 1.96·σ/√n, **each side separately** <span class="pp">|</span> 2.5% <span class="pp">|</span> between 1.75% and 3.25% on each side <span class="pp">|</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>A sample size is **normal enough** when all four checks pass *and* the histogram and Q-Q plot show no</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>systematic departure from the normal curve. The chosen n is the smallest n that passes **and after which</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>every larger n I tested also passes**, so one lucky simulation cannot decide the answer.</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>Shapiro-Wilk p-values are reported but not used for decisions (see the last section).</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why these thresholds</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>There is no universal cutoff, so I set each threshold between two limits:</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Not stricter than the simulation can measure.** Even perfectly normal data produce some nonzero</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>   skewness, kurtosis and tail error just by chance. A threshold must sit well above this noise.</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Not looser than practice can tolerate.** The threshold must keep the one-sided error rates of a 95%</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>   interval close to 2.5%.</span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limit 1: Monte Carlo noise</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: noise</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show code: measuring the noise on truly normal data"</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>noise <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">200</span>, {</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(B)                       <span class="co"># B = 100,000 values that ARE normal</span></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">skew</span>(m), <span class="fu">kurt</span>(m), <span class="fu">qq_cor</span>(m), <span class="fu">mean</span>(m <span class="sc">&lt;</span> <span class="sc">-</span><span class="fl">1.96</span>), <span class="fu">mean</span>(m <span class="sc">&gt;</span> <span class="fl">1.96</span>))</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>  <span class="at">Statistic =</span> <span class="fu">c</span>(<span class="st">"Skewness"</span>, <span class="st">"Excess kurtosis"</span>, <span class="st">"Q-Q correlation"</span>, <span class="st">"Each tail rate"</span>),</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Typical noise (SD over 200 runs)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">f3</span>(<span class="fu">sd</span>(noise[<span class="dv">1</span>, ])), <span class="fu">f3</span>(<span class="fu">sd</span>(noise[<span class="dv">2</span>, ])),</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>                                        <span class="fu">paste0</span>(<span class="st">"lowest of 200 runs: "</span>, <span class="fu">sprintf</span>(<span class="st">"%.5f"</span>, <span class="fu">min</span>(noise[<span class="dv">3</span>, ]))),</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>                                        <span class="fu">pct</span>(<span class="fu">sd</span>(<span class="fu">c</span>(noise[<span class="dv">4</span>, ], noise[<span class="dv">5</span>, ])), <span class="dv">2</span>)),</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Main threshold</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"0.25"</span>, <span class="st">"0.5"</span>, <span class="st">"0.998"</span>, <span class="st">"2.5% ± 0.75%"</span>),</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">align =</span> <span class="st">"lrr"</span>)</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>Each threshold is roughly ten times the noise or more, so a truly normal sampling distribution never fails</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>by chance. The kurtosis threshold is twice the skewness threshold because kurtosis is about twice as noisy.</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limit 2: what skewness does to a 95% interval</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>If the sampling distribution has skewness γ, how often does the true mean fall beyond each end of the</span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a>usual ±1.96 SE interval? This can be computed exactly for gamma-shaped distributions, which have every</span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>possible skewness:</span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tail-errors</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show code: exact tail errors for a given skewness"</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a>tail_err <span class="ot">&lt;-</span> <span class="cf">function</span>(g) {</span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> (<span class="dv">2</span> <span class="sc">/</span> g)<span class="sc">^</span><span class="dv">2</span>                      <span class="co"># gamma shape with skewness g</span></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">upper =</span> <span class="fu">pgamma</span>(k <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> <span class="fu">sqrt</span>(k), k, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> <span class="fu">pgamma</span>(k <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> <span class="fu">sqrt</span>(k), k))</span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>gs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="fl">0.25</span>, <span class="fl">0.50</span>, <span class="fl">1.00</span>)</span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>te <span class="ot">&lt;-</span> <span class="fu">sapply</span>(gs, tail_err)</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a>  <span class="at">Skewness =</span> <span class="fu">f2</span>(gs),</span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Upper tail (should be 2.5%)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(te[<span class="st">"upper"</span>, ], <span class="dv">2</span>),</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Lower tail (should be 2.5%)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(te[<span class="st">"lower"</span>, ], <span class="dv">2</span>),</span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Both tails (should be 5%)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(<span class="fu">colSums</span>(te), <span class="dv">2</span>),</span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>  <span class="at">Verdict =</span> <span class="fu">c</span>(<span class="st">"nearly perfect"</span>, <span class="st">"**noticeable but acceptable (my main standard)**"</span>,</span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>              <span class="st">"one side wrong by 2.5x"</span>, <span class="st">"unusable for one-sided tests"</span>),</span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">align =</span> <span class="st">"rrrrl"</span>)</span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>Two things follow:</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**0.25 is the compromise.** At 0.1 the intervals are almost perfect, but reaching it takes about</span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a>  (0.25/0.1)² ≈ 6 times more data. At 0.5 one side of the interval is wrong by a factor of 2.5. Halving the</span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a>  threshold multiplies the required n by four, because skewness shrinks as 1/√n.</span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The tails must be checked separately.** The *total* error barely moves (4.98% → 4.47%) even at</span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>  skewness 1, because the two sides cancel. A two-sided tail check would pass a clearly skewed distribution.</span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a>  Checking each side against 1.75%–3.25% gives the same tolerance as skewness 0.25.</span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>Kurtosis matters much less for 95% intervals: a symmetric distribution with excess kurtosis 0.5 puts about</span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>5.2% instead of 5% outside ±1.96 SE. Kurtosis also fades quickly (as 1/n rather than 1/√n), so in practice</span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>it acts as a safety net for heavy tails.</span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a><span class="fu">### Matching the Q-Q threshold to the skewness threshold</span></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: qq-calibration</span></span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show code: Q-Q correlation for a given skewness"</span></span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>gs2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span>, <span class="fl">0.25</span>, <span class="fl">0.30</span>, <span class="fl">0.50</span>)</span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>r_at <span class="ot">&lt;-</span> <span class="fu">sapply</span>(gs2, <span class="cf">function</span>(g) <span class="fu">mean</span>(<span class="fu">replicate</span>(<span class="dv">5</span>, <span class="fu">qq_cor</span>(<span class="fu">rgamma</span>(B, <span class="at">shape =</span> (<span class="dv">2</span> <span class="sc">/</span> g)<span class="sc">^</span><span class="dv">2</span>)))))</span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Skewness =</span> <span class="fu">f2</span>(gs2), <span class="st">`</span><span class="at">Average Q-Q r (B = 100,000)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%.5f"</span>, r_at),</span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>                        <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">align =</span> <span class="st">"rr"</span>)</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>A skewness of 0.25 corresponds to a Q-Q correlation of about 0.998, so I use **0.998**. My first draft</span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>used 0.999. This check showed that 0.999 was secretly stricter than the skewness rule (it matches a</span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>skewness of about 0.17), so the two rules contradicted each other. I corrected it.</span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a><span class="fu">## Three standards: a sensitivity analysis</span></span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>Because the cutoff is a judgment call, I report every result under three standards that are calibrated the</span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a>same way. Only the main standard decides the chosen n.</span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: standards</span></span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>  <span class="at">Standard =</span> <span class="fu">c</span>(<span class="st">"Strict"</span>, <span class="st">"**Main**"</span>, <span class="st">"Lenient"</span>),</span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Max |skewness|</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sapply</span>(standards[<span class="fu">c</span>(<span class="st">"strict"</span>, <span class="st">"main"</span>, <span class="st">"lenient"</span>)], <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">"max_abs_skew"</span>),</span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Max |excess kurtosis|</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sapply</span>(standards[<span class="fu">c</span>(<span class="st">"strict"</span>, <span class="st">"main"</span>, <span class="st">"lenient"</span>)], <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">"max_abs_kurt"</span>),</span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Min Q-Q r</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sapply</span>(standards[<span class="fu">c</span>(<span class="st">"strict"</span>, <span class="st">"main"</span>, <span class="st">"lenient"</span>)], <span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="st">"min_qq_cor"</span>),</span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Each tail</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sapply</span>(standards[<span class="fu">c</span>(<span class="st">"strict"</span>, <span class="st">"main"</span>, <span class="st">"lenient"</span>)], <span class="cf">function</span>(s)</span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="fu">pct</span>(s<span class="sc">$</span>tail_min, <span class="dv">2</span>), <span class="st">" – "</span>, <span class="fu">pct</span>(s<span class="sc">$</span>tail_max, <span class="dv">2</span>))),</span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">align =</span> <span class="st">"lrrrr"</span>)</span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why I do not decide with Shapiro-Wilk</span></span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>The Shapiro-Wilk test asks whether the data are *exactly* normal. With 5,000 points (its maximum in R) it</span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>detects departures far too small to matter for a 95% interval:</span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: shapiro</span></span>
+<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>ex <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"results/exponential_results.csv"</span>)</span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>ex_pass <span class="ot">&lt;-</span> ex[ex<span class="sc">$</span>normal_enough, ]</span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a>For the exponential population, <span class="in">`r nrow(ex_pass)`</span> sample sizes passed all four of my checks, yet Shapiro-Wilk</span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>still rejected normality (p &lt; 0.05) at <span class="in">`r sum(ex_pass$shapiro_p &lt; 0.05)`</span> of them, including n = 1,000</span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>(p = <span class="in">`r signif(ex$shapiro_p[ex$n == 1000], 2)`</span>). A test that answers "is it *perfectly* normal?" is the wrong tool</span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>for "is it normal *enough*?", which is also the assignment's own warning.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem · R + Quarto</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

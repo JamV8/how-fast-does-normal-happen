@@ -1,0 +1,202 @@
+---
+title: "Exponential (λ = 1)"
+subtitle: "A strongly right-skewed population: think waiting times"
+---
+
+```{r}
+#| label: simulate
+#| code-summary: "Show the simulation code"
+source("../R/clt_functions.R")
+
+rgen  <- function(n) rexp(n, rate = 1)   # one sample of size n
+mu    <- 1                               # population mean
+sigma <- 1                               # population SD
+pop_skew <- 2                            # population skewness
+pop_kurt <- 6                            # population excess kurtosis
+
+# Stage 1: a coarse grid of sample sizes. Stage 2 (automatic): every n
+# between the last coarse n that failed and the first one that passed.
+coarse <- c(1, 2, 5, 10, 15, 20, 30, 45, 60, 80, 100, 150, 200,
+            300, 400, 450, 500, 600, 750, 1000)
+exper <- run_with_refinement(rgen, coarse, mu, sigma)
+
+res    <- exper$results
+n_main <- smallest_normal_n(res)
+n_std  <- n_by_standard(res)
+at     <- function(k) res[res$n == k, ]
+n_first <- min(res$n[res$normal_enough])   # first n that passes at all
+
+save_results(res, "exponential")
+save_summary(res, "Exponential(1)", n_main, prediction = "45",
+             key_note = "Skewness is the bottleneck; theory predicts (2/0.25)^2 = 64")
+```
+
+::: {.answer-box}
+<span class="big">n = `r n_main`</span> under my main standard
+(strict standard: ≈ `r n_std[["strict"]]` · lenient standard: ≈ `r n_std[["lenient"]]` · my prediction: 45)
+:::
+
+## 1. What population am I sampling from?
+
+The exponential distribution describes waiting times: the time until the next customer arrives,
+the next call comes in, or a machine fails. Most waits are short, but occasionally a wait is very long,
+which gives the distribution a long right tail.
+
+| Property | Value |
+|---|---|
+| Mean μ | 1 |
+| Standard deviation σ | 1 |
+| Skewness | 2 (strong right skew) |
+| Excess kurtosis | 6 (heavy right tail) |
+| Theoretical SE of the mean | σ/√n = 1/√n |
+
+```{r}
+#| label: fig-population
+#| fig-cap: "The population itself: 100,000 draws from Exponential(1) with the true density."
+#| fig-height: 4
+set.seed(student_id)
+style_par(mar = c(4, 4, 1, 1))
+x <- rexp(100000, rate = 1)
+hist(x[x < 8], breaks = 60, freq = FALSE, col = adjustcolor(pal$bars, 0.75),
+     border = "white", main = "", xlab = "Waiting time", ylab = "Density")
+curve(dexp(x, 1), add = TRUE, col = pal$curve, lwd = 2.2)
+```
+
+## 2. What did I expect before running the simulation?
+
+> I based my prediction on a pilot run at n = 1, 15 and 20. The skewness of the sample means dropped
+> from 0.52 at n = 15 to 0.45 at n = 20, and I extrapolated that it would reach my 0.25 limit around
+> **n = 45**. From the river-length example (see [Real data](06_real_world_data.qmd)) I already
+> expected that n = 30 would not be enough for a strongly skewed population.
+
+## 3. Which sample sizes did I investigate?
+
+I used the same two-stage search for every population:
+
+1. **Coarse grid:** n = `r paste(coarse, collapse = ", ")`, wide enough to cover both the main
+   and the strict standard.
+2. **Refinement:** every n from `r min(exper$refined)` to `r max(exper$refined)`, the gap
+   between the last coarse n that failed and the first one that passed.
+
+For every n I simulated **B = 100,000** sample means with seed `r student_id`. B only controls how
+precisely each sample size is measured; it is not the sample size.
+
+## 4. Results
+
+### The four checks as n grows
+
+```{r}
+#| label: fig-convergence
+#| fig-cap: "The four numerical checks. Shaded band = pass zone; green = pass, red = fail. Orange curves are the theoretical values 2/√n and 6/n; the dotted line is the chosen n."
+#| fig-height: 6.5
+plot_convergence(res, chosen_n = n_main, theory_skew = pop_skew, theory_kurt = pop_kurt)
+```
+
+Skewness is clearly the bottleneck here. Excess kurtosis passes already at
+n = `r first_stable_n(res$n, res$kurt_ok)`,
+but the skewness falls slowly, following the theoretical curve 2/√n almost exactly.
+The Q-Q correlation and the tail check cross their limits at about the same point as the skewness,
+which is what my calibration in [Method](../methods.qmd) was designed to do.
+
+### Histograms of the sample means
+
+```{r}
+#| label: fig-hist
+#| fig-cap: "Sampling distribution of the mean (bars) and the normal curve predicted by the CLT (red)."
+#| fig-height: 6
+n_show <- c(1, 5, 30, 45, n_main, 300)
+plot_hist_grid(exper, n_show, mu, sigma)
+```
+
+### Normal Q-Q plots
+
+```{r}
+#| label: fig-qq
+#| fig-cap: "Normal Q-Q plots. The upward bend at the right end is the leftover right skew."
+#| fig-height: 6
+plot_qq_grid(exper, n_show)
+```
+
+### Simulation vs. theory
+
+```{r}
+#| label: fig-se
+#| fig-cap: "The SD of the simulated means (dots) follows σ/√n (line) at every n."
+#| fig-height: 4.2
+plot_se_check(res)
+```
+
+Across all `r nrow(res)` sample sizes, the simulated mean stayed within
+`r f4(max(abs(res$sim_mean - mu)))` of μ = 1, and the ratio of simulated SE to σ/√n stayed between
+`r f3(min(res$se_ratio))` and `r f3(max(res$se_ratio))`. The formula for the standard error holds at
+every n, even at n = 1 where the shape is far from normal. **The SE is right long before the shape is.**
+
+::: {.callout-note collapse="true"}
+## Full results table (all `r nrow(res)` sample sizes)
+```{r}
+#| label: tbl-results
+#| echo: false
+results_table(res)
+```
+:::
+
+## 5. When did the sampling distribution become approximately normal?
+
+$$\boxed{n = `r n_main`}$$
+
+```{r}
+#| label: tbl-standards
+#| echo: false
+standards_table(res)
+```
+
+## 6. Why did I choose that value?
+
+- At **n = `r n_main`** all four checks pass: skewness `r f3(at(n_main)$skewness)`,
+  excess kurtosis `r f3(at(n_main)$ex_kurtosis)`, Q-Q correlation `r f4(at(n_main)$qq_cor)`,
+  and tails of `r pct(at(n_main)$lower_tail, 2)` / `r pct(at(n_main)$upper_tail, 2)`.
+  **Every larger n I tested also passes.**
+- `r flip_text(res, n_main)` Near the threshold the skewness is sitting right at 0.25, and at B = 100,000 it is only measured to about ±0.008. My rule of taking the first n after which *every* tested n passes keeps one lucky simulation from deciding the answer.
+- Theory agrees: the skewness of the mean is 2/√n, which equals 0.25 at n = (2/0.25)² = **64**.
+- **n = 30 is not enough.** At n = 30 the skewness is still `r f2(at(30)$skewness)`, and a "95%"
+  interval misses `r pct(at(30)$upper_tail)` of the time on the high side but only
+  `r pct(at(30)$lower_tail)` on the low side.
+
+## 7. What surprised me?
+
+> My prediction of 45 was too low; the final answer was `r n_main`. At n = 45 the histogram already
+> looked normal to me, but the numbers did not agree. The skewness was still `r f2(at(45)$skewness)`,
+> and only `r pct(at(45)$lower_tail)` of the means fell below the lower 1.96 SE limit instead of 2.5%.
+> I saw the same pattern with the river lengths at n = 30: the histogram looked fine, but the Q-Q plot
+> still curved. I learned not to rely on the histogram alone.
+
+## 8. Reproducibility experiment: a different seed
+
+The assignment asks to rerun one analysis with a different seed. I reran the full two-stage search
+with seed **2026** instead of `r student_id`.
+
+```{r}
+#| label: reproducibility
+exper2 <- run_with_refinement(rgen, coarse, mu, sigma, seed = 2026)
+res2   <- exper2$results
+n_main2 <- smallest_normal_n(res2)
+cmp <- data.frame(
+  Seed = c(student_id, 2026),
+  `Chosen n (main)` = c(n_main, n_main2),
+  `Strict n` = c(n_std[["strict"]], n_by_standard(res2)[["strict"]]),
+  `Lenient n` = c(n_std[["lenient"]], n_by_standard(res2)[["lenient"]]),
+  `Skewness at n = 30` = f3(c(at(30)$skewness, res2$skewness[res2$n == 30])),
+  `Skewness at n = 100` = f3(c(at(100)$skewness, res2$skewness[res2$n == 100])),
+  check.names = FALSE)
+write.csv(cmp, "../results/reproducibility.csv", row.names = FALSE)
+knitr::kable(cmp, align = "r")
+```
+
+**Did the exact results change?** Yes. Every number in the table moved slightly, because a different
+seed produces different random samples.
+
+**Did my scientific conclusion change?** No. Both seeds put the threshold in the same narrow range
+around the theoretical value of 64, both show that n = 30 is not enough, and both show skewness as the
+bottleneck. With B = 100,000 the Monte Carlo noise is small compared with the effects I am measuring.
+A seed makes a result **reproducible** (anyone can get exactly my numbers); a large B makes it
+**reliable** (the conclusion does not depend on the seed).

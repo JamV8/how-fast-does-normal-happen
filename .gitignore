@@ -1,0 +1,13 @@
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.quarto/
+*_cache/
+.DS_Store
+
+/.quarto/
+**/*.quarto_ipynb
+*.knit.md
+*_cache/
+/.luarc.json

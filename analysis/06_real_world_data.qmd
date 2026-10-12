@@ -1,0 +1,221 @@
+---
+title: "Real data"
+subtitle: "Does the rule of 30 hold outside the textbook? (extension beyond the assignment)"
+---
+
+```{r}
+#| label: setup
+#| code-summary: "Show the setup code"
+source("../R/clt_functions.R")
+
+# Treat a real dataset as the population: each observation in a sample is
+# drawn at random (with replacement) from the dataset.
+from_data <- function(x) function(n) sample(x, n, replace = TRUE)
+pop_sd    <- function(x) sqrt(mean((x - mean(x))^2))   # SD of the whole population (divide by N)
+```
+
+Textbook distributions are useful because their properties are known exactly. But the reason anyone
+cares about the Central Limit Theorem is **real data**: prices, waiting times, delays, populations. This
+page applies the same method and the same "normal enough" standard to real datasets.
+
+**How it works.** Each dataset is treated as a complete population. A "sample of size n" means picking n
+records at random from it, each pick independent of the others (with replacement). Then everything is the
+same as before: 100,000 samples per n, the four checks, and the smallest n that passes.
+
+## Part A. Warm-up: two examples that shaped my predictions
+
+I worked through these two examples **before** making my predictions for the five assigned populations.
+
+### River lengths: one sample, then thousands
+
+R's `rivers` dataset gives the lengths of the 141 longest rivers in North America. Most rivers are a few
+hundred miles long, but a few giants (up to `r num(max(rivers))` miles) create a long right tail.
+
+```{r}
+#| label: rivers-samples
+riv <- as.numeric(rivers)
+set.seed(student_id)
+five <- t(replicate(4, sample(riv, 5, replace = TRUE)))
+knitr::kable(data.frame(Sample = 1:4,
+                        `Five river lengths (miles)` = apply(five, 1, paste, collapse = ", "),
+                        `Sample mean` = num(round(rowMeans(five))), check.names = FALSE),
+             align = "clr", caption = "Four random samples of n = 5 rivers. Each sample gives a different mean; each mean is one point in the sampling distribution.")
+```
+
+```{r}
+#| label: fig-rivers
+#| fig-cap: "Left: the 141 rivers themselves. Right: 100,000 sample means for n = 5, 30 and 100, with the CLT normal curve."
+#| fig-height: 3.6
+mu_r <- mean(riv); sd_r <- pop_sd(riv)
+riv_exp <- run_clt_experiment(from_data(riv), c(5, 30, 100), mu_r, sd_r)
+old <- style_par(mfrow = c(1, 4), mar = c(3.8, 3.6, 2.6, 0.6))
+hist(riv, breaks = 30, freq = FALSE, col = "gray60", border = "white",
+     main = sprintf("Population (skew %.2f)", skew(riv)), xlab = "Miles", ylab = "Density")
+for (k in c(5, 30, 100)) {
+  m <- riv_exp$means[[as.character(k)]]
+  hist(m, breaks = 50, freq = FALSE, col = adjustcolor(pal$bars, 0.75), border = "white",
+       main = sprintf("n = %d (skew %.2f)", k, skew(m)), xlab = "Mean length", ylab = "")
+  curve(dnorm(x, mu_r, sd_r / sqrt(k)), add = TRUE, col = pal$curve, lwd = 2)
+}
+par(old)
+```
+
+Even at n = 30 the means are still clearly skewed (skewness
+`r f2(riv_exp$results$skewness[riv_exp$results$n == 30])`). The formula skewness/√n predicts
+`r f2(skew(riv) / sqrt(30))`, and the simulation agrees. This was my first sign that n = 30 is not a
+universal answer.
+
+**Caveats I noted.** (1) This dataset contains only the *longest* rivers, so it says nothing about rivers
+in general: a bigger sample cannot fix a biased population. (2) Sampling *without* replacement from only
+141 rivers would behave differently. At n = 141 every sample would be the whole dataset and the mean
+would never vary. That is why the main study samples from theoretical distributions, where every draw is
+independent.
+
+### An election poll: where the CLT is used every day
+
+A poll asks n = 1,000 people a yes/no question. Suppose the true support is 52%. Each answer is a 0 or 1,
+which is about as far from a bell curve as possible, yet the CLT says the poll result is approximately normal.
+
+```{r}
+#| label: fig-poll
+#| fig-cap: "100,000 simulated polls of 1,000 people each. The shaded band is the familiar margin of error, 52% ± 3.1%."
+#| fig-height: 4
+p <- 0.52; n_poll <- 1000
+set.seed(student_id)
+polls <- simulate_means(function(k) rbinom(k, 1, p), n_poll)
+se_p  <- sqrt(p * (1 - p) / n_poll)
+inside <- mean(abs(polls - p) <= 1.96 * se_p)
+style_par(mar = c(4, 4, 1, 1))
+hist(100 * polls, breaks = seq(floor(100 * min(polls)) - 0.05, ceiling(100 * max(polls)) + 0.05, by = 0.1),
+     freq = FALSE, col = adjustcolor(pal$bars, 0.75), border = NA,
+     xlab = "Poll result (% saying yes)", ylab = "Density", main = "")
+rect(100 * (p - 1.96 * se_p), 0, 100 * (p + 1.96 * se_p), 1, col = adjustcolor(pal$zone, 0.12), border = NA)
+curve(dnorm(x, 100 * p, 100 * se_p), add = TRUE, col = pal$curve, lwd = 2.2, n = 400)
+```
+
+A pollster runs **one** poll and reports "52% ± `r f2(100 * 1.96 * se_p)` points". That margin comes from
+the CLT formula, 1.96·√(p(1−p)/n), not from repeating the poll. The simulation checks the promise:
+`r pct(inside)` of the simulated polls landed inside the margin, close to the promised 95%.
+In real life B = 1 (one poll); in a simulation we can afford B = 100,000 and see whether the formula is honest.
+
+## Part B. Five real datasets, from easy to extreme
+
+```{r}
+#| label: datasets
+flights_delay <- nycflights13::flights$arr_delay
+flights_delay <- flights_delay[!is.na(flights_delay)]
+
+datasets <- list(
+  list(key = "faithful", name = "Old Faithful: minutes between eruptions", short = "Geyser wait (min)",
+       x = as.numeric(faithful$waiting), twin = "Six-sided die",
+       coarse = c(1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50, 100), step = 1),
+  list(key = "discoveries", name = "Great inventions per year (1860-1959)", short = "Inventions / year",
+       x = as.numeric(discoveries), twin = "Binomial(5, 0.1)",
+       coarse = c(1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 150, 200, 300), step = 1),
+  list(key = "diamonds", name = "Diamond prices (USD)", short = "Diamond price ($)",
+       x = as.numeric(ggplot2::diamonds$price), twin = "Exponential(1)",
+       coarse = c(1, 2, 5, 10, 20, 30, 40, 50, 60, 75, 100, 150, 200, 300), step = 1),
+  list(key = "flights", name = "NYC flight arrival delays, 2013 (minutes)", short = "Flight delay (min)",
+       x = as.numeric(flights_delay), twin = "Heavier tail than the exponential",
+       coarse = c(1, 5, 10, 30, 50, 100, 150, 200, 250, 300, 400, 500, 750, 1000), step = 5),
+  list(key = "counties", name = "Population of Midwest US counties", short = "County population",
+       x = as.numeric(ggplot2::midwest$poptotal), twin = "Closest real-world cousin of the Cauchy",
+       coarse = c(1, 10, 30, 100, 300, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 7500), step = 50)
+)
+
+info <- do.call(rbind, lapply(datasets, function(d) data.frame(
+  Dataset = d$name, Records = num(length(d$x)), Mean = num(signif(mean(d$x), 4)),
+  Median = num(signif(median(d$x), 4)), Skewness = f2(skew(d$x)),
+  `Ex. kurtosis` = num(round(kurt(d$x), 1)), `Behaves like` = d$twin, check.names = FALSE)))
+knitr::kable(info, align = "lrrrrrl")
+```
+
+```{r}
+#| label: fig-real-populations
+#| fig-cap: "The five populations. The geyser is bimodal; the other four have long right tails, and the county populations most extremely so (Cook County, Illinois, has 5.1 million people; the median county has 35,000). Values above the 99th percentile are not shown."
+#| fig-height: 3.4
+old <- style_par(mfrow = c(1, 5), mar = c(3.6, 2.6, 2.6, 0.6))
+for (d in datasets) {
+  x <- d$x[d$x <= quantile(d$x, 0.99)]
+  if (d$key == "discoveries") {
+    barplot(table(factor(d$x, levels = 0:12)) / length(d$x), col = adjustcolor(pal$bars, 0.75), border = NA,
+            main = d$short, xlab = "", ylab = "", cex.names = 0.7)
+  } else {
+    hist(x, breaks = 40, freq = FALSE, col = adjustcolor(pal$bars, 0.75), border = "white",
+         main = d$short, xlab = "", ylab = "", yaxt = "n")
+  }
+}
+par(old)
+```
+
+### Prediction first, then simulation
+
+For each dataset I first **predicted** the threshold from its skewness, n ≈ (skewness / 0.25)², the same
+formula that predicted 64 for the exponential, and then ran the full two-stage search.
+
+```{r}
+#| label: real-simulate
+real <- lapply(datasets, function(d) {
+  mu_d <- mean(d$x); sd_d <- pop_sd(d$x)
+  e <- run_with_refinement(from_data(d$x), d$coarse, mu_d, sd_d, step = d$step)
+  r <- e$results
+  save_results(r, paste0("real_", d$key))
+  list(d = d, res = r, n_main = smallest_normal_n(r),
+       n_pred = ceiling((skew(d$x) / 0.25)^2), r30 = r[r$n == 30, ])
+})
+
+tab <- do.call(rbind, lapply(real, function(z) data.frame(
+  Dataset = z$d$short,
+  `Skewness` = f2(skew(z$d$x)),
+  `Predicted n` = num(z$n_pred),
+  `Simulated n` = paste0("**", num(z$n_main), "**"),
+  `Skewness at n = 30` = f2(z$r30$skewness),
+  `Tails at n = 30` = paste0(pct(z$r30$lower_tail), " / ", pct(z$r30$upper_tail)),
+  `n = 30 enough?` = ifelse(z$r30$normal_enough, "yes", "**no**"),
+  check.names = FALSE)))
+knitr::kable(tab, align = "lrrrrrc")
+```
+
+```{r}
+#| label: fig-real-skew
+#| fig-cap: "Skewness of the sample means as n grows, one panel per dataset. Dots: simulation. Orange: the prediction skewness/√n. Shaded: my ±0.25 pass zone. Dotted: n = 30."
+#| fig-height: 3.6
+old <- style_par(mfrow = c(1, 5), mar = c(3.8, 3, 2.6, 0.6))
+for (z in real) {
+  r <- z$res
+  plot(r$n, r$skewness, log = "x", pch = 19, cex = 0.7,
+       col = ifelse(r$skew_ok, pal$pass, pal$fail), ylim = range(c(r$skewness, -0.3, 0.3)),
+       main = z$d$short, xlab = "n (log)", ylab = "")
+  rect(1e-3, -0.25, 1e6, 0.25, col = adjustcolor(pal$zone, 0.10), border = NA)
+  curve(skew(z$d$x) / sqrt(x), add = TRUE, col = pal$accent, lwd = 2, n = 300)
+  abline(v = 30, lty = 3)
+}
+par(old)
+```
+
+### What the real data show
+
+- **The rule of 30 fails for most real-world data.** It works for the geyser, whose distribution is
+  bimodal but nearly symmetric. It does not work for prices, delays, or populations, which are the kind of
+  data analysts handle every day. These need roughly
+  `r num(real[[3]]$n_main)`, `r num(real[[4]]$n_main)` and `r num(real[[5]]$n_main)` observations.
+- **The skewness formula predicts the threshold well**, even for messy real data: the simulated n lands
+  near (skewness/0.25)² for the continuous datasets. One number about the population, its skewness, tells
+  you most of what you need to know.
+- **Discrete counts behave like the binomial.** The inventions data pass the skewness check early but need
+  extra observations because of the steps between possible values. This is the same pattern as in the
+  [binomial analysis](04_binomial.qmd).
+- **Heavy tails make the CLT slow.** County populations have finite variance, so the CLT does eventually
+  apply, but only after thousands of observations. In practice that is not far from the
+  [Cauchy](05_cauchy.qmd) case. With a few giants in the data, the mean of a typical sample is dominated by
+  whether a giant was included.
+
+### Limits of this extension
+
+- **The dataset is treated as the whole population.** Real conclusions would also depend on how the data
+  were collected.
+- **Independence is assumed.** Real flight delays on the same day are correlated (one storm delays many
+  flights), which would slow convergence further. The extra-credit dependent-process study is the place
+  to examine this.
+- **Resampling with replacement** keeps the draws independent and identically distributed, matching the
+  CLT's assumptions.

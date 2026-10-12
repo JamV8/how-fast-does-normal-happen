@@ -1,0 +1,136 @@
+---
+title: "Standard Normal (μ = 0, σ = 1)"
+subtitle: "The control case: a population that is already normal"
+---
+
+```{r}
+#| label: simulate
+#| code-summary: "Show the simulation code"
+source("../R/clt_functions.R")
+
+rgen  <- function(n) rnorm(n, mean = 0, sd = 1)
+mu    <- 0
+sigma <- 1
+
+coarse <- c(1, 2, 3, 5, 10, 20, 30, 50, 100)
+exper  <- run_with_refinement(rgen, coarse, mu, sigma)
+
+res    <- exper$results
+n_main <- smallest_normal_n(res)
+n_std  <- n_by_standard(res)
+at     <- function(k) res[res$n == k, ]
+
+save_results(res, "normal")
+save_summary(res, "Normal(0,1)", n_main, prediction = "1",
+             key_note = "Control case: normal at every n")
+```
+
+::: {.answer-box}
+<span class="big">n = `r n_main`</span> under my main standard
+(strict standard: `r n_std[["strict"]]` · lenient standard: `r n_std[["lenient"]]` · my prediction: 1)
+:::
+
+## 1. What population am I sampling from?
+
+The standard normal distribution: the bell curve itself. It is symmetric, has no skewness, and its tails
+are exactly as heavy as the normal benchmark. It is the **control case** of the study: if the simulation
+and the diagnostics work correctly, the sample means should pass every check at every sample size.
+
+| Property | Value |
+|---|---|
+| Mean μ | 0 |
+| Standard deviation σ | 1 |
+| Skewness | 0 |
+| Excess kurtosis | 0 |
+| Theoretical SE of the mean | 1/√n |
+
+```{r}
+#| label: fig-population
+#| fig-cap: "The population: 100,000 draws from N(0, 1) with the true density."
+#| fig-height: 4
+set.seed(student_id)
+style_par(mar = c(4, 4, 1, 1))
+x <- rnorm(100000)
+hist(x, breaks = 60, freq = FALSE, col = adjustcolor(pal$bars, 0.75),
+     border = "white", main = "", xlab = "Value", ylab = "Density")
+curve(dnorm(x), add = TRUE, col = pal$curve, lwd = 2.2)
+```
+
+## 2. What did I expect before running the simulation?
+
+> **n = 1.** The population is already normal, and in my pilot run every check passed at n = 1.
+> A mean of independent normal values is itself exactly normal, so there is nothing to wait for.
+
+## 3. Which sample sizes did I investigate?
+
+n = `r paste(coarse, collapse = ", ")`, with **B = 100,000** sample means per n and seed `r student_id`.
+Since n = 1 already passes, no refinement stage was needed.
+
+## 4. Results
+
+```{r}
+#| label: fig-convergence
+#| fig-cap: "The four checks stay inside the pass zone at every n."
+#| fig-height: 6.5
+plot_convergence(res, chosen_n = n_main, theory_skew = 0, theory_kurt = 0)
+```
+
+```{r}
+#| label: fig-hist
+#| fig-cap: "Sampling distribution of the mean (bars) and the CLT normal curve (red)."
+#| fig-height: 3.4
+plot_hist_grid(exper, c(1, 5, 30), mu, sigma)
+```
+
+```{r}
+#| label: fig-qq
+#| fig-cap: "Normal Q-Q plots: straight lines at every n."
+#| fig-height: 3.4
+plot_qq_grid(exper, c(1, 5, 30))
+```
+
+```{r}
+#| label: fig-se
+#| fig-cap: "Simulated SE (dots) against σ/√n (line)."
+#| fig-height: 4.2
+plot_se_check(res)
+```
+
+The simulated mean stayed within `r f4(max(abs(res$sim_mean - mu)))` of 0, and the simulated SE stayed
+within `r pct(max(abs(res$se_ratio - 1)))` of 1/√n at every sample size.
+
+::: {.callout-note collapse="true"}
+## Full results table
+```{r}
+#| label: tbl-results
+#| echo: false
+results_table(res)
+```
+:::
+
+## 5. When did the sampling distribution become approximately normal?
+
+$$\boxed{n = `r n_main`}$$
+
+```{r}
+#| label: tbl-standards
+#| echo: false
+standards_table(res)
+```
+
+## 6. Why did I choose that value?
+
+- At n = 1 the skewness is `r f3(at(1)$skewness)`, the excess kurtosis `r f3(at(1)$ex_kurtosis)`,
+  the Q-Q correlation `r f4(at(1)$qq_cor)`, and the tails are `r pct(at(1)$lower_tail, 2)` /
+  `r pct(at(1)$upper_tail, 2)`, all essentially perfect. The same holds at every larger n.
+- Even the Shapiro-Wilk test, which I do not use for decisions because it is very sensitive,
+  rejected normality at the 5% level for only `r sum(res$shapiro_p < 0.05)` of the
+  `r nrow(res)` sample sizes. That is about what chance alone would produce for truly normal data.
+- This confirms the tools: on data that really are normal, my simulation and my four checks
+  do not create false alarms. That makes the failures in the other populations meaningful.
+
+## 7. What surprised me?
+
+> This one was not a surprise. The sample means were normal already at n = 1 under all three standards,
+> which makes sense because averaging normal values always gives a normal result. It was also a useful
+> check that my simulation code was not distorting anything.

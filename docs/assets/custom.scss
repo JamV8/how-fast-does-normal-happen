@@ -1,0 +1,33 @@
+/*-- scss:defaults --*/
+$font-family-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$font-size-root: 17px;
+$primary: #2f5d8a;
+$link-color: #2f5d8a;
+$headings-font-weight: 700;
+$navbar-bg: #ffffff;
+
+/*-- scss:rules --*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+body { color: #222; line-height: 1.65; }
+h1.title { font-weight: 800; letter-spacing: -0.02em; }
+h2 { margin-top: 2.2rem; padding-bottom: .3rem; border-bottom: 1px solid #ececec; }
+.navbar { border-bottom: 1px solid #ececec; }
+.navbar-title { font-weight: 700; }
+
+/* answer box at the top of each analysis */
+.answer-box {
+  border-left: 5px solid #2E7D32; background: #f3f8f3; padding: 1rem 1.25rem;
+  border-radius: 6px; margin: 1.2rem 0 1.6rem;
+}
+.answer-box.fail { border-left-color: #C62828; background: #fbf3f3; }
+.answer-box .big { font-size: 1.6rem; font-weight: 800; }
+
+/* tables */
+table { font-size: 0.86rem; }
+thead th { background: #f6f7f9; }
+td, th { white-space: nowrap; }
+.table-wrap { overflow-x: auto; }
+
+/* quotes used for "my prediction" / "what surprised me" */
+blockquote { border-left: 4px solid #c9d6e3; color: #333; font-size: 1rem; }
