@@ -32,68 +32,82 @@
   <div class="steps">
     <section class="step hero" data-scene="0">
       <div class="hero-inner">
-        <p class="kicker">A visual essay on the Central Limit Theorem</p>
+        <p class="kicker">A visual story about averages</p>
         <h1>How fast does<br><em>normal</em> happen?</h1>
-        <p class="sub">Statistics runs on one promise: average enough data and you get a bell curve. Textbooks say thirty observations is enough. I tested it.</p>
+        <p class="sub">Average a group of random numbers. Do it again and again, and the averages pile up into a bell curve. Statisticians call that shape <b>“normal”</b>, and the rule behind it the <b>Central Limit Theorem</b>. Textbooks say groups of 30 are enough. I tested how many numbers it really takes.</p>
         <div class="scroll-cue"><span></span>Scroll</div>
+      </div>
+    </section>
+
+    <section class="step" data-scene="8">
+      <div class="card">
+        <span class="num">01 · WHY IT MATTERS</span>
+        <h2>Most “± 3%” figures rely on this curve.</h2>
+        <p>A news poll asks 1,000 people and reports “52%, plus or minus 3%.” That 52% is an average: every “yes” counts as 1 and every “no” as 0.</p>
+        <p>The poll is never repeated, so the bell curve fills in what would happen if it were: 95% of repeated polls would land within 3 points of the truth.</p>
+        <p class="dim">Drug trials and website experiments work the same way. If the averages are not bell-shaped yet, that ± is wrong, and nobody notices.</p>
       </div>
     </section>
 
     <section class="step" data-scene="1">
       <div class="card">
-        <span class="num">01</span>
-        <h2>Every dataset has a shape.</h2>
-        <p>These are 1,100 waiting times. Most are short. A few are very long, which stretches the shape to the right.</p>
+        <span class="num">02 · THE DATA</span>
+        <h2>Real data are rarely bell-shaped.</h2>
+        <p>Each dot is one waiting time: minutes until the next customer arrives. Most waits are short, a few are very long. The shape is lopsided, nothing like a bell.</p>
       </div>
     </section>
 
     <section class="step" data-scene="2">
       <div class="card">
-        <span class="num">02</span>
-        <h2>Take a sample. Average it.</h2>
-        <p>Pick five at random and collapse them into a single number: their average.</p>
+        <span class="num">03 · ONE STUDY</span>
+        <h2>A study takes a few values and averages them.</h2>
+        <p>Pick five waiting times at random and report their average. That single number is all one study sees.</p>
       </div>
     </section>
 
     <section class="step" data-scene="3">
       <div class="card">
-        <span class="num">03</span>
-        <h2>Now repeat it, thousands of times.</h2>
-        <p>The averages pile up into a shape of their own. With samples of five, it still leans to one side.</p>
+        <span class="num">04 · HOW I TESTED IT</span>
+        <h2>A computer can repeat the study 100,000 times.</h2>
+        <p>Each dot below is one study’s average. Together they show how far a single study can land from the truth. This pile is the kind of curve behind a ±.</p>
+        <p class="dim">With five values per study it is still lopsided. I repeated this for every study size: 5, 10, 20 values and up.</p>
       </div>
     </section>
 
     <section class="step tall" data-scene="4">
       <div class="card">
-        <span class="num">04</span>
-        <h2>Make every sample bigger.</h2>
-        <p>Keep scrolling. As each sample grows, the averages tighten and straighten toward the bell curve.</p>
-        <p class="dim">At <b>n = 30</b> it still leans. At <b>n = 71</b> it passes all four of my normality tests.</p>
+        <span class="num">05 · BIGGER STUDIES</span>
+        <h2>Give every study more values.</h2>
+        <p>Keep scrolling. <b>n</b> is the number of values each study averages. As n grows, the averages squeeze together and settle onto the bell curve (white line).</p>
+        <p class="dim">I counted it as a bell curve once four checks passed (shown at the top). With 30 waiting times, a “95%” range still misses on the high side 3.4% of the time instead of 2.5%, about 40% more often than promised. It took <b>n = 71</b>.</p>
       </div>
     </section>
 
     <section class="step" data-scene="5">
       <div class="card">
-        <span class="num">05</span>
+        <span class="num">06 · WHAT I FOUND</span>
         <h2>The answer depends on the data.</h2>
-        <p>Same test, ten populations. Symmetric data settle in a handful of observations. Real-world prices, delays and populations need hundreds, or thousands.</p>
+        <p>Same test, ten kinds of data, from dice rolls to flight delays. Even, not-lopsided data need only a handful of values. Lopsided real-world data, like prices, delays and populations, need anywhere from about 40 to thousands.</p>
       </div>
     </section>
 
     <section class="step tall" data-scene="6">
       <div class="card">
-        <span class="num">06</span>
+        <span class="num">07 · THE EXCEPTION</span>
         <h2>Some data never settle.</h2>
-        <p>The Cauchy distribution produces extreme values so often that averaging never tames it. Watch the sample size climb to 5,000. The shape does not move.</p>
+        <p>In some data, gigantic outliers show up so often that averaging can’t tame them. Watch n climb to 5,000: the averages stay as scattered as single values.</p>
+        <p class="dim">Real data with a few giant values come close. County populations needed 2,450. (The textbook example is called the Cauchy distribution.)</p>
       </div>
     </section>
 
     <section class="step tall" data-scene="7">
       <div class="card">
-        <span class="num">07</span>
+        <span class="num">08 · THE ANSWER</span>
         <h2>So, is it thirty?</h2>
         <p class="answer">No.</p>
-        <p>It can be <b>8</b>. It can be <b>71</b>. It can be <b>2,450</b>. And for some data, no number works.</p>
+        <p>It is <b>8</b> for dice, <b>71</b> for waiting times, <b>2,450</b> for county populations, and for some data no number works.</p>
+        <p>And the poll? Yes/no answers split close to 50–50 are not lopsided, so 1,000 people is plenty. That ± 3% is honest.</p>
+        <p class="dim">The lesson: before trusting a ± built on an average, check how lopsided the data are. The more lopsided, the more data you need.</p>
       </div>
     </section>
   </div>
@@ -101,17 +115,18 @@
 
 <section class="outro">
   <div class="outro-inner">
-    <p class="kicker">Built on 100,000 simulated studies for every sample size</p>
+    <p class="kicker">How it was made</p>
     <h2>Explore the study</h2>
+    <p class="how">Every number on this page comes from computer simulations written in R, a programming language for statistics: 100,000 simulated studies for every study size, on five computer-generated data types and five real datasets. The full report explains each step.</p>
     <div class="links">
       <a href="play.html"><span>Play mode</span><small>Roll dice, feed the Average Machine, race to the bell curve.</small></a>
-      <a href="simulator.html"><span>Lab</span><small>Any population, any sample size, all four checks.</small></a>
+      <a href="simulator.html"><span>Lab</span><small>Any kind of data, any study size, all four checks.</small></a>
       <a href="report.html"><span>Findings</span><small>Results, the final table, and the research questions.</small></a>
-      <a href="methods.html"><span>Method</span><small>How “normal enough” was defined and calibrated.</small></a>
+      <a href="methods.html"><span>Method</span><small>How the four bell-curve checks were chosen.</small></a>
       <a href="analysis/06_real_world_data.html"><span>Real data</span><small>Flights, diamonds, geysers, counties.</small></a>
-      <a href="https://github.com/JamV8/how-fast-does-normal-happen"><span>Code</span><small>R, Quarto and JavaScript. Seed 9426.</small></a>
+      <a href="https://github.com/JamV8/how-fast-does-normal-happen"><span>Code</span><small>All the code, so anyone can reproduce every number.</small></a>
     </div>
-    <p class="fine">MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem</p>
+    <p class="fine">MATH 167R · Project 1 · A computer-simulation study of the Central Limit Theorem</p>
   </div>
 </section>
 

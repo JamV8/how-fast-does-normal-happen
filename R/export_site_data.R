@@ -56,7 +56,7 @@ summary_rows <- lapply(pops, function(p) {
        pass_at_30 = isTRUE(r30$normal_enough),
        skew_at_30 = round(r30$skewness, 3),
        tails_at_30 = round(100 * c(r30$lower_tail, r30$upper_tail), 2),
-       curve = list(n = r$n, skew = round(r$skewness, 4), qq = round(r$qq_cor, 5),
+       curve = list(n = r$n, skew = round(r$skewness, 4), kurt = round(r$ex_kurtosis, 4), qq = round(r$qq_cor, 5),
                     lower = round(r$lower_tail, 5), upper = round(r$upper_tail, 5),
                     ok = r$normal_enough))
 })
@@ -105,16 +105,20 @@ cat("Wrote assets/data/site.json and assets/data/real_data.json\n")
 
 # ---- static summary figure for the README -----------------------
 pops_fig <- rev(summary_rows)   # top-to-bottom order on the chart
+plain <- c(normal = "Already bell-shaped data", die = "Dice rolls", faithful = "Time between Old Faithful eruptions",
+           discoveries = "Inventions per year", diamonds = "Diamond prices", exponential = "Waiting times (next customer)",
+           binomial = "Count of rare events", flights = "Flight delays (NYC)",
+           counties = "County populations", cauchy = "Extreme-outlier data")
 png("figures/answer_chart.png", width = 2000, height = 1150, res = 220)
-style_par(mar = c(4.2, 13.5, 3.2, 3))
+style_par(mar = c(4.2, 16, 3.2, 3))
 k <- length(pops_fig)
 plot(NA, xlim = c(1, 10000), ylim = c(0.5, k + 0.5), log = "x", yaxt = "n",
-     xlab = "Smallest sample size n that is normal enough (log scale)", ylab = "",
-     main = "How many observations before the average is normal enough?")
+     xlab = "Values per study needed before the averages form a bell curve (each gridline is 10 times the last)", ylab = "",
+     main = "Is 30 enough? It depends on the data")
 abline(v = c(1, 10, 100, 1000, 10000), col = pal$grid)
 for (i in seq_len(k)) {
   p <- pops_fig[[i]]
-  axis(2, at = i, labels = paste0(p$name, if (p$kind == "real") " *" else ""), las = 1, tick = FALSE, cex.axis = 0.95)
+  axis(2, at = i, labels = paste0(plain[[p$key]], if (p$kind == "real") " *" else ""), las = 1, tick = FALSE, cex.axis = 0.95)
   if (is.null(p$n_main) || is.na(p$n_main)) {
     arrows(1, i, 9000, i, col = pal$fail, lwd = 3, length = 0.1)
     text(9000, i + 0.32, "never", col = pal$fail, font = 2, adj = 1)
@@ -127,6 +131,6 @@ for (i in seq_len(k)) {
 }
 abline(v = 30, lty = 2, lwd = 2, col = pal$ink)
 mtext("rule of thumb: n = 30", side = 3, at = 30, line = 0.1, cex = 0.8, font = 2, col = pal$ink)
-mtext("* real data", side = 1, line = 3, adj = 1, cex = 0.75, col = pal$muted)
+mtext("* real-world data      green = 30 is enough   orange = needs more than 30   red = never", side = 1, line = 3, adj = 1, cex = 0.7, col = pal$muted)
 invisible(dev.off())
 cat("Wrote figures/answer_chart.png\n")

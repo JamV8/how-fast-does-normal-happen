@@ -72,6 +72,10 @@
     flights: { name: "Flight delays (NYC)", n_main: 235 }, counties: { name: "County populations", n_main: 2450 },
     cauchy: { name: "Cauchy (extreme tails)", n_main: null } };
   let ORDER = Object.keys(SITE);
+  Object.keys(SITE).forEach((k) => { SITE[k].key = k; });
+  const PLAIN = { normal: "Already bell-shaped data", die: "Dice rolls", faithful: "Time between Old Faithful eruptions",
+    discoveries: "Inventions per year", diamonds: "Diamond prices", exponential: "Waiting times (next customer)",
+    binomial: "Count of rare events", flights: "Flight delays", counties: "County populations", cauchy: "Extreme-outlier data" };
   fetch("assets/data/site.json").then((r) => r.json()).then((d) => {
     SITE = Object.fromEntries(d.populations.map((p) => [p.key, p])); ORDER = d.populations.map((p) => p.key);
   }).catch(() => {});
@@ -134,7 +138,7 @@
   readScroll();
 
   // ---------- per-scene state ----------
-  let range = [0, 6], region = null, live = [], cycle = -1, sample = [], kicks = 0, chartAlpha = 0, curveAlpha = 0;
+  let whyReg = null, range = [0, 6], region = null, live = [], cycle = -1, sample = [], kicks = 0, chartAlpha = 0, curveAlpha = 0;
 
   function nAt(pr) {   // scroll progress -> sample size (log interpolation between the stops)
     const f = clamp(pr, 0, 0.9999) * (N_STOPS.length - 1), k = Math.floor(f), t = ease(f - k);
@@ -156,10 +160,16 @@
                         w: lerp(region.w, tReg.w, 1 - Math.exp(-dt * 5)), h: lerp(region.h, tReg.h, 1 - Math.exp(-dt * 5)) } : tReg;
 
     if (scene === 0) {
-      const hr = { x: W * 0.08, y: H * (narrow ? 0.64 : 0.66), w: W * 0.84, h: H * (narrow ? 0.32 : 0.31) };
+      const hr = { x: W * 0.08, y: H * (narrow ? 0.71 : 0.66), w: W * 0.84, h: H * (narrow ? 0.26 : 0.31) };
       stack(P.map((_, i) => i), (i) => bellZ[i], hr, -3.4, 3.4, narrow ? 60 : 110, 5);
       for (const p of P) { p.ta = 0.55 + 0.3 * p.jit; p.ts = narrow ? 1.3 : 1.7; p.c = p.star[0] < Math.exp(-(((p.tx - W / 2) / (W * 0.16)) ** 2)) ? "cyan" : "violet"; p.ty += Math.sin(sceneT * 1.3 + p.tx * 0.012) * 3; }
       return;
+    }
+    if (scene === 8) {
+      const reg = { x: B.x, y: B.y + B.h * 0.18, w: B.w, h: B.h * 0.74 };
+      stack(P.map((_, i) => i), (i) => bellZ[i], reg, -3.4, 3.4, narrow ? 60 : 96, 6);
+      P.forEach((p, i) => { p.ta = 0.85; p.ts = narrow ? 1.3 : 1.6; p.c = Math.abs(bellZ[i]) <= 1.96 ? "cyan" : "coral"; });
+      whyReg = reg;
     }
     if (scene === 1 || scene === 2 || scene === 3) {
       const pr = scene === 1 ? Rg.popBig : Rg.popTop;
@@ -260,11 +270,14 @@
     [1, 10, 100, 1000, 10000].forEach((v) => { ctx.fillText(fmt(v), xs(v), top + rh * rows.length + 22); ctx.fillStyle = "rgba(255,255,255,.06)"; ctx.fillRect(xs(v), top - 10, 1, rh * rows.length + 6); ctx.fillStyle = "rgba(255,255,255,.4)"; });
     ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.setLineDash([4, 5]); ctx.beginPath(); ctx.moveTo(xs(30), top - 18); ctx.lineTo(xs(30), top + rh * rows.length); ctx.stroke(); ctx.setLineDash([]);
     ctx.fillStyle = "#fff"; ctx.font = '600 12px "JetBrains Mono", monospace'; ctx.fillText("n = 30", xs(30), top - 24);
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.45)"; ctx.font = '500 11px "JetBrains Mono", monospace';
+    ctx.fillText("values per study needed before the averages form a bell curve", (x0 + x1) / 2, top + rh * rows.length + 42);
     rows.forEach((p, i) => {
       const y = top + rh * (i + 0.5), tt = clamp((t - 0.25 - i * 0.09) / 1.4, 0, 1), e = easeOut(tt);
       ctx.fillStyle = "rgba(255,255,255,.05)"; ctx.fillRect(x0, y, x1 - x0, 1);
       ctx.textAlign = "right"; ctx.fillStyle = "#c9cfdb"; ctx.font = `500 ${narrow ? 11 : 13}px Inter, sans-serif`;
-      ctx.fillText(narrow ? p.name.replace(/ \(.*\)/, "") : p.name, x0 - 14, y + 4);
+      const nm = PLAIN[p.key] || p.name;
+      ctx.fillText(narrow ? nm.replace(/ \(.*\)/, "") : nm, x0 - 14, y + 4);
       const never = p.n_main == null, col = never || p.n_main > 30 ? "coral" : "cyan", hex = COL[col];
       const target = never ? 10000 : p.n_main, nNow = Math.pow(10, Math.log10(target) * e), x = xs(nNow);
       ctx.strokeStyle = rgba(hex, 0.55); ctx.lineWidth = 2; if (never) ctx.setLineDash([3, 5]);
@@ -278,6 +291,20 @@
     ctx.restore();
   }
 
+  function drawWhy() {
+    if (!whyReg) return;
+    const xs = (z) => whyReg.x + (z + 3.4) / 6.8 * whyReg.w, top = whyReg.y - 26, bot = whyReg.y + whyReg.h + 6;
+    ctx.save(); ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.setLineDash([4, 5]); ctx.lineWidth = 1;
+    [-1.96, 1.96].forEach((z) => { ctx.beginPath(); ctx.moveTo(xs(z), top + 10); ctx.lineTo(xs(z), bot); ctx.stroke(); });
+    ctx.setLineDash([]); ctx.textAlign = "center";
+    ctx.fillStyle = COL.cyan; ctx.font = `600 ${narrow ? 12 : 14}px "JetBrains Mono", monospace`;
+    ctx.fillText("95% of repeated polls land here", xs(0), top);
+    ctx.fillStyle = COL.coral; ctx.font = `600 ${narrow ? 11 : 12}px "JetBrains Mono", monospace`;
+    ctx.fillText("2.5%", xs(-2.75), whyReg.y + whyReg.h - 30); ctx.fillText("2.5%", xs(2.75), whyReg.y + whyReg.h - 30);
+    ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = `600 ${narrow ? 12 : 13}px "JetBrains Mono", monospace`;
+    ctx.fillText("← the “± 3%” →", xs(0), bot + 20);
+    ctx.restore();
+  }
   function drawSample() {
     if (!sample.length) return;
     const ph = sceneT - Math.floor(sceneT / 2.4) * 2.4, Rg = regions();
@@ -301,24 +328,32 @@
   function curveAt(key, n) {
     const c = SITE[key] && SITE[key].curve; if (!c) return null;
     let best = 0; c.n.forEach((v, i) => { if (Math.abs(Math.log(v / n)) < Math.abs(Math.log(c.n[best] / n))) best = i; });
-    return { skew: c.skew[best], lower: c.lower[best], upper: c.upper[best], qq: c.qq[best] };
+    return { skew: c.skew[best], lower: c.lower[best], upper: c.upper[best], qq: c.qq[best], kurt: c.kurt ? c.kurt[best] : null };
   }
   function updateHud() {
     if (scene === 4) {
-      const n = nAt(prog).n, r = curveAt("exponential", n), nMain = (SITE.exponential && SITE.exponential.n_main) || 71, ok = n >= nMain - 0.5;
-      const skew = r ? r.skew : 2 / Math.sqrt(n), w = clamp(Math.abs(skew) / 0.5, 0, 1) * 100;
-      hud.innerHTML = `<div class="row"><span>SAMPLE SIZE</span><span class="big">n = ${fmt(n)}</span></div>
-        <div class="row"><span>SKEWNESS</span><span class="val">${skew.toFixed(2)} <span style="opacity:.5">/ limit 0.25</span></span></div>
-        <div class="bar"><i style="width:${w}%;background:${Math.abs(skew) <= 0.25 ? COL.cyan : COL.coral}"></i></div>
-        ${r ? `<div class="row"><span>TAILS</span><span class="val">${(100 * r.lower).toFixed(1)}% · ${(100 * r.upper).toFixed(1)}%</span></div>` : ""}
-        <div class="verdict ${ok ? "ok" : ""}"><span class="dot"></span>${ok ? "NORMAL ENOUGH" : "NOT NORMAL YET"}</div>`;
+      const n = nAt(prog).n, r = curveAt("exponential", n), nMain = (SITE.exponential && SITE.exponential.n_main) || 71;
+      const skew = r ? r.skew : 2 / Math.sqrt(n);
+      const checks = r ? [
+        [Math.abs(skew) <= 0.25, "Not lopsided", `${Math.abs(skew).toFixed(3)} <span class="dim">(0 = even, must be at most 0.25)</span>`],
+        [r.kurt == null || Math.abs(r.kurt) <= 0.5, "Not too many far-out averages", ""],
+        [r.qq >= 0.998, "Matches the bell outline", ""],
+        [[r.lower, r.upper].every((t) => t >= 0.0175 && t <= 0.0325), "“95%” range catches 95%",
+          `<span class="dim">misses ${(100 * r.lower).toFixed(1)}% low · ${(100 * r.upper).toFixed(1)}% high (2.5% each is right)</span>`]] : [];
+      const all = checks.length && checks.every((c) => c[0]), ok = n >= nMain - 0.5;
+      const verdict = ok ? "BELL CURVE: YES" : all ? "BELL CURVE: ALMOST" : "BELL CURVE: NOT YET";
+      const marks = checks.map(([pass]) => `<i class="${pass ? "pass" : "fail"}">${pass ? "✓" : "✗"}</i>`).join("");
+      hud.innerHTML = `<div class="row"><span>VALUES PER STUDY</span><span class="big">n = ${fmt(n)}</span></div>` +
+        `<div class="marks">${marks}</div>` +
+        checks.map(([pass, label, extra]) => `<div class="check ${pass ? "pass" : "fail"}"><span class="mark">${pass ? "✓" : "✗"}</span><span>${label}${extra ? "<br>" + extra : ""}</span></div>`).join("") +
+        `<div class="verdict ${ok ? "ok" : ""}"><span class="dot"></span>${verdict}` +
+        (!ok && all ? `<div class="dim" style="letter-spacing:0;margin-top:4px">All ✓ here, but they must stay ✓ for every bigger study too.</div>` : "") + `</div>`;
       hud.classList.add("show");
     } else if (scene === 6) {
       const n = Math.round(Math.pow(10, clamp(prog / 0.8, 0, 1) * Math.log10(5000)));
-      hud.innerHTML = `<div class="row"><span>SAMPLE SIZE</span><span class="big">n = ${fmt(Math.max(1, n))}</span></div>
-        <div class="row"><span>MIDDLE 50% OF AVERAGES</span><span class="val">−1 to +1</span></div>
-        <div class="row"><span>CHANGE SINCE n = 1</span><span class="val">none</span></div>
-        <div class="verdict"><span class="dot"></span>NEVER NORMAL</div>`;
+      hud.innerHTML = `<div class="row"><span>VALUES PER STUDY</span><span class="big">n = ${fmt(Math.max(1, n))}</span></div>
+        <div class="row"><span>SPREAD OF THE AVERAGES</span><span class="val">unchanged</span></div>
+        <div class="verdict"><span class="dot"></span>BELL CURVE: NEVER</div>`;
       hud.classList.add("show");
     } else hud.classList.remove("show");
   }
@@ -340,7 +375,7 @@
     const Rg = regions();
     if (scene >= 1 && scene <= 3) axis(scene === 1 ? Rg.popBig : Rg.popTop, 0, 6, "waiting time (minutes)", [0, 1, 2, 3, 4, 5, 6]);
     if ((scene === 2 || scene === 3 || scene === 4) && region) axis(region, range[0], range[1], scene === 4 ? `average of n = ${fmt(nAt(prog).n)} waiting times` : "average of 5 waiting times", scene === 4 ? niceTicks(range[0], range[1]) : [0, 1, 2, 3, 4, 5, 6]);
-    if (scene === 6) axis(Rg.full, -8, 8, "average of n Cauchy values", [-8, -4, 0, 4, 8]);
+    if (scene === 6) axis(Rg.full, -8, 8, "average of n extreme-outlier values", [-8, -4, 0, 4, 8]);
 
     ctx.globalCompositeOperation = "lighter";
     for (const p of P) {
@@ -353,6 +388,7 @@
     if (curveAlpha > 0.01) drawCurve(scene === 4 ? nAt(prog).n : 200);
     if (chartAlpha > 0.01) drawChart(scene === 5 ? sceneT : 99);
     if (scene === 2) drawSample();
+    if (scene === 8) drawWhy();
     if (scene === 7) drawStrike(prog);
     updateHud();
   }

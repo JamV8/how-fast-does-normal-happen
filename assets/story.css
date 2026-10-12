@@ -54,7 +54,7 @@ b { color: #fff; font-weight: 600; }
 @keyframes cue { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 
 /* HUD */
-.hud { position: absolute; right: 4vw; top: 92px; min-width: 260px; padding: 16px 18px; border-radius: 12px; background: rgba(13, 16, 28, .7);
+.hud { position: absolute; right: 4vw; top: 92px; min-width: 260px; max-width: 330px; padding: 16px 18px; border-radius: 12px; background: rgba(13, 16, 28, .7);
   border: 1px solid var(--line); backdrop-filter: blur(10px); font: 500 .82rem "JetBrains Mono", monospace; color: var(--muted);
   opacity: 0; transform: translateY(-8px); transition: opacity .4s, transform .4s; pointer-events: none; }
 .hud.show { opacity: 1; transform: none; }
@@ -63,6 +63,13 @@ b { color: #fff; font-weight: 600; }
 .hud .big { font-size: 1.6rem; color: #fff; font-weight: 600; }
 .hud .bar { height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .08); margin: 6px 0 10px; overflow: hidden; }
 .hud .bar i { display: block; height: 100%; background: var(--coral); transition: width .3s, background .3s; }
+.hud .marks { display: none; }
+.hud .marks i { font-style: normal; font-weight: 700; margin-right: 4px; }
+.hud .marks i.pass { color: var(--cyan); } .hud .marks i.fail { color: var(--coral); }
+.hud .check { display: flex; gap: 10px; padding: 5px 0; color: #dfe3ec; line-height: 1.35; }
+.hud .check .mark { width: 14px; flex: none; font-weight: 700; }
+.hud .check.pass .mark { color: var(--cyan); } .hud .check.fail .mark { color: var(--coral); }
+.hud .dim { color: var(--muted); font-size: .74rem; }
 .hud .verdict { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); color: #fff; letter-spacing: .06em; }
 .hud .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; background: var(--coral); box-shadow: 0 0 10px var(--coral); }
 .hud .ok .dot { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
@@ -72,7 +79,8 @@ b { color: #fff; font-weight: 600; }
 /* outro */
 .outro { position: relative; z-index: 3; background: var(--bg); border-top: 1px solid var(--line); padding: 110px 4vw 60px; }
 .outro-inner { max-width: 1100px; margin: 0 auto; }
-.outro h2 { font: 700 clamp(2rem, 4vw, 3rem) "Inter Tight", sans-serif; letter-spacing: -.03em; margin: 0 0 34px; }
+.outro h2 { font: 700 clamp(2rem, 4vw, 3rem) "Inter Tight", sans-serif; letter-spacing: -.03em; margin: 0 0 14px; }
+.outro .how { color: #aab1c3; max-width: 760px; line-height: 1.6; margin: 0 0 34px; }
 .links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
 .links a { background: var(--bg); padding: 26px 24px; transition: background .2s; }
 .links a:hover { background: #0f1323; }
@@ -94,9 +102,11 @@ b { color: #fff; font-weight: 600; }
   .card .answer { font-size: 3.2rem; }
   .step.hero { padding-top: 14vh; align-items: flex-start; }
   .hud { left: 14px; right: 14px; top: 62px; min-width: 0; padding: 8px 12px; font-size: .74rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .hud .row:not(:first-child), .hud .bar { display: none; }
+  .hud .row:not(:first-child), .hud .bar, .hud .check { display: none; }
   .hud .row:first-child span:first-child { display: none; }
   .hud .verdict { margin: 0; padding: 0; border: 0; }
+  .hud .verdict .dim { display: none; }
+  .hud .marks { display: block; font-size: .95rem; }
   .hud .big { font-size: 1.1rem; }
   .links { grid-template-columns: 1fr; }
 }
