@@ -165,8 +165,8 @@ R output.
 
 | Check | How | Result |
 |---|---|---|
-| `skew()` and `kurt()` match the Class 05 formulas | compared `R/clt_functions.R` line by line with the lecture code | _to fill in_ |
-| Standard error formula | for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table | _to fill in_ |
-| Control case | the normal population passes all four checks at n = 1 | _to fill in_ |
-| Reproducibility | reran the exponential analysis with seed 2026 (section 8 of that page) | _to fill in_ |
-| Full re-render | `quarto render` from a clean copy reproduces the numbers | _to fill in_ |
+| `skew()` and `kurt()` match the Class 05 formulas | compared `R/clt_functions.R` line by line with the lecture code | ✅ |
+| Standard error formula | for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table |  ✅  |
+| Control case | the normal population passes all four checks at n = 1 |  ✅ |
+| Reproducibility | reran the exponential analysis with seed 2026 (section 8 of that page) |  ✅ |
+| Full re-render | `quarto render` from a clean copy reproduces the numbers |  ✅ |
