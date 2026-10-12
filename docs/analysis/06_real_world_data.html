@@ -77,10 +77,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-176b1e44b272a30ec08500e73512b2cc.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-25f5178607a8434d3dc15e7f82424d63.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-b65a9f5615e514d5d9b06dbfe6bda7e1.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -110,35 +110,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -405,7 +376,7 @@ Figure&nbsp;2: 100,000 simulated polls of 1,000 people each. The shaded band is 
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"discoveries"</span>, <span class="at">name =</span> <span class="st">"Great inventions per year (1860-1959)"</span>, <span class="at">short =</span> <span class="st">"Inventions / year"</span>,</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(discoveries), <span class="at">twin =</span> <span class="st">"Binomial(5, 0.1)"</span>,</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"diamonds"</span>, <span class="at">name =</span> <span class="st">"Diamond prices (USD)"</span>, <span class="at">short =</span> <span class="st">"Diamond price ($)"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"diamonds"</span>, <span class="at">name =</span> <span class="st">"Diamond prices (USD)"</span>, <span class="at">short =</span> <span class="st">"Diamond price (USD)"</span>,</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(ggplot2<span class="sc">::</span>diamonds<span class="sc">$</span>price), <span class="at">twin =</span> <span class="st">"Exponential(1)"</span>,</span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
 <span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"flights"</span>, <span class="at">name =</span> <span class="st">"NYC flight arrival delays, 2013 (minutes)"</span>, <span class="at">short =</span> <span class="st">"Flight delay (min)"</span>,</span>
@@ -552,7 +523,7 @@ Figure&nbsp;3: The five populations. The geyser is bimodal; the other four have 
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 18%">
+<col style="width: 19%">
 <col style="width: 8%">
 <col style="width: 11%">
 <col style="width: 11%">
@@ -591,7 +562,7 @@ Figure&nbsp;3: The five populations. The geyser is bimodal; the other four have 
 <td style="text-align: center;"><strong>no</strong></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Diamond price ($)</td>
+<td style="text-align: left;">Diamond price (USD)</td>
 <td style="text-align: right;">1.62</td>
 <td style="text-align: right;">42</td>
 <td style="text-align: right;"><strong>51</strong></td>
@@ -708,7 +679,7 @@ Figure&nbsp;4: Skewness of the sample means as n grows, one panel per dataset. D
 <colgroup>
 <col style="width: 22%">
 <col style="width: 6%">
-<col style="width: 30%">
+<col style="width: 29%">
 <col style="width: 19%">
 <col style="width: 20%">
 </colgroup>
@@ -765,56 +736,62 @@ Figure&nbsp;4: Skewness of the sample means as n grows, one panel per dataset. D
 <td style="text-align: right;">1.2%</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Diamond price (<span class="math inline">\()  |    30|                     93.0%|             6.2%|              0.8%|
-|Diamond price (\)</span>)</td>
+<td style="text-align: left;">Diamond price (USD)</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">93.0%</td>
+<td style="text-align: right;">6.2%</td>
+<td style="text-align: right;">0.8%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Diamond price (USD)</td>
 <td style="text-align: right;">100</td>
 <td style="text-align: right;">94.4%</td>
 <td style="text-align: right;">4.2%</td>
 <td style="text-align: right;">1.4%</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Diamond price ($)</td>
+<tr class="odd">
+<td style="text-align: left;">Diamond price (USD)</td>
 <td style="text-align: right;">51</td>
 <td style="text-align: right;">93.8%</td>
 <td style="text-align: right;">5.1%</td>
 <td style="text-align: right;">1.1%</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Flight delay (min)</td>
 <td style="text-align: right;">30</td>
 <td style="text-align: right;">89.8%</td>
 <td style="text-align: right;">9.8%</td>
 <td style="text-align: right;">0.4%</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">Flight delay (min)</td>
 <td style="text-align: right;">100</td>
 <td style="text-align: right;">92.9%</td>
 <td style="text-align: right;">6.3%</td>
 <td style="text-align: right;">0.7%</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Flight delay (min)</td>
 <td style="text-align: right;">235</td>
 <td style="text-align: right;">94.1%</td>
 <td style="text-align: right;">4.7%</td>
 <td style="text-align: right;">1.1%</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">County population</td>
 <td style="text-align: right;">30</td>
 <td style="text-align: right;">71.7%</td>
 <td style="text-align: right;">28.3%</td>
 <td style="text-align: right;">0.0%</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">County population</td>
 <td style="text-align: right;">100</td>
 <td style="text-align: right;">80.3%</td>
 <td style="text-align: right;">19.7%</td>
 <td style="text-align: right;">0.0%</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">County population</td>
 <td style="text-align: right;">2,450</td>
 <td style="text-align: right;">93.7%</td>
@@ -1435,7 +1412,7 @@ Figure&nbsp;5: 100 of the simulated studies of 30 flights. Each line is one stud
 <span id="cb11-122"><a href="#cb11-122" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"discoveries"</span>, <span class="at">name =</span> <span class="st">"Great inventions per year (1860-1959)"</span>, <span class="at">short =</span> <span class="st">"Inventions / year"</span>,</span>
 <span id="cb11-123"><a href="#cb11-123" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(discoveries), <span class="at">twin =</span> <span class="st">"Binomial(5, 0.1)"</span>,</span>
 <span id="cb11-124"><a href="#cb11-124" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
-<span id="cb11-125"><a href="#cb11-125" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"diamonds"</span>, <span class="at">name =</span> <span class="st">"Diamond prices (USD)"</span>, <span class="at">short =</span> <span class="st">"Diamond price ($)"</span>,</span>
+<span id="cb11-125"><a href="#cb11-125" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"diamonds"</span>, <span class="at">name =</span> <span class="st">"Diamond prices (USD)"</span>, <span class="at">short =</span> <span class="st">"Diamond price (USD)"</span>,</span>
 <span id="cb11-126"><a href="#cb11-126" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(ggplot2<span class="sc">::</span>diamonds<span class="sc">$</span>price), <span class="at">twin =</span> <span class="st">"Exponential(1)"</span>,</span>
 <span id="cb11-127"><a href="#cb11-127" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
 <span id="cb11-128"><a href="#cb11-128" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"flights"</span>, <span class="at">name =</span> <span class="st">"NYC flight arrival delays, 2013 (minutes)"</span>, <span class="at">short =</span> <span class="st">"Flight delay (min)"</span>,</span>

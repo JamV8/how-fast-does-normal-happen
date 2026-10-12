@@ -1,34 +1,84 @@
 /*-- scss:defaults --*/
-$font-family-sans-serif: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+// Same paper / ink / red look as the story (assets/story.css) and Play mode.
+$font-family-sans-serif: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$font-family-monospace: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+$headings-font-family: "Source Serif 4", Georgia, serif;
 $font-size-root: 17px;
-$primary: #6d4aff;
-$link-color: #5233d9;
 $headings-font-weight: 700;
-$navbar-bg: #ffffff;
+
+$body-bg: #f4f1ea;
+$body-color: #1d1d1b;
+$primary: #c8442d;
+$secondary: #57544d;
+$success: #3c8d5a;
+$info: #2d5f8a;
+$warning: #c4900f;
+$danger: #c8442d;
+$link-color: #1d1d1b;
+$link-hover-color: #c8442d;
+
+$navbar-bg: #f4f1ea;
+$navbar-fg: #57544d;
+$navbar-hl: #1d1d1b;
+$footer-bg: #f4f1ea;
+$footer-fg: #8b867b;
+$toc-color: #c8442d;
+$border-color: #d6cfc1;
+$table-border-color: #d6cfc1;
+$code-color: #8a3a26;
+$code-bg: #ece7dc;
+$callout-color-tip: #3c8d5a;
+$callout-color-note: #2d5f8a;
 
 /*-- scss:rules --*/
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-body { color: #1f1a33; line-height: 1.65; background: #faf7f2; }
-.navbar { background: rgba(250, 247, 242, .95) !important; }
-h1.title { font-weight: 800; letter-spacing: -0.02em; }
-h2 { margin-top: 2.2rem; padding-bottom: .3rem; border-bottom: 1px solid #ececec; }
-.navbar { border-bottom: 1px solid #ececec; }
-.navbar-title { font-weight: 700; }
+body { line-height: 1.65; -webkit-font-smoothing: antialiased; }
+a { text-decoration: underline; text-decoration-color: #c8442d; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+.navbar a, .sidebar a, #TOC a, .nav-link, .dropdown-item, .quarto-title-meta a { text-decoration: none; }
+
+.navbar { border-bottom: 1px solid #d6cfc1; }
+.navbar-title { font-family: "Source Serif 4", Georgia, serif; font-weight: 700; color: #1d1d1b !important; }
+.navbar .nav-link { font-size: .92rem; }
+.dropdown-menu { background: #f4f1ea; border-color: #d6cfc1; }
+.dropdown-item:hover { background: #ece7dc; }
+
+h1.title { font-weight: 700; letter-spacing: -0.015em; font-size: 2.6rem; }
+.quarto-title .subtitle { font-family: "Source Serif 4", Georgia, serif; color: #57544d; font-size: 1.25rem; }
+h2 { margin-top: 2.4rem; padding-bottom: .35rem; border-bottom: 1px solid #d6cfc1; letter-spacing: -0.01em; }
+h3 { margin-top: 1.8rem; }
+
+/* R figures are drawn on white; multiply lets the paper colour show through */
+.cell-output-display img, .quarto-figure img, figure img { mix-blend-mode: multiply; }
+.figure-caption, figcaption { color: #57544d; font-size: .88rem; }
 
 /* answer box at the top of each analysis */
 .answer-box {
-  border-left: 5px solid #6d4aff; background: #f2eeff; padding: 1rem 1.25rem;
-  border-radius: 6px; margin: 1.2rem 0 1.6rem;
+  border-left: 3px solid #1d1d1b; background: #ece7dc; padding: 1rem 1.25rem;
+  margin: 1.2rem 0 1.6rem;
 }
-.answer-box.fail { border-left-color: #C62828; background: #fbf3f3; }
-.answer-box .big { font-size: 1.6rem; font-weight: 800; }
+.answer-box.fail { border-left-color: #c8442d; }
+.answer-box .big { font-family: "Source Serif 4", Georgia, serif; font-size: 1.7rem; font-weight: 700; }
+
+/* callouts: flat, like margin notes */
+div.callout { border-radius: 0; border-color: #d6cfc1 !important; background: transparent; }
+div.callout.callout-style-simple { border-left-width: 3px !important; }
 
 /* tables */
 table { font-size: 0.86rem; }
-thead th { background: #f6f7f9; }
+thead th { background: #ece7dc; font-weight: 600; }
+.table > :not(caption) > * > * { background-color: transparent; }
 td, th { white-space: nowrap; }
 .table-wrap { overflow-x: auto; }
 
+/* code */
+pre, div.sourceCode { background: #ece7dc !important; border: 0; border-radius: 0; }
+.code-tools-button, .code-with-copy .code-copy-button { color: #57544d; }
+details > summary { color: #57544d; }
+
 /* quotes used for "my prediction" / "what surprised me" */
-blockquote { border-left: 4px solid #c9d6e3; color: #333; font-size: 1rem; }
+blockquote { border-left: 3px solid #c4900f; color: #2c2b28; font-family: "Source Serif 4", Georgia, serif; font-size: 1.05rem; }
+
+#TOC .nav-link.active, .sidebar nav[role=doc-toc] ul > li > a.active { color: #c8442d; border-left-color: #c8442d; }
+.nav-footer { border-top: 1px solid #d6cfc1; font-size: .85rem; }

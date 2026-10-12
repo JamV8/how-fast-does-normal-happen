@@ -23,7 +23,7 @@ b { font-weight: 700; }
 /* ---------- nav ---------- */
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: baseline; justify-content: space-between;
   padding: 14px 5vw 12px; font-family: var(--sans); transition: background-color .3s, border-color .3s; border-bottom: 1px solid transparent; }
-.nav.solid { background-color: rgba(244, 241, 234, .94); border-color: var(--rule); }
+.nav.solid { background-color: var(--paper); border-color: var(--rule); }
 .logo { font-family: var(--serif); font-weight: 700; font-size: 1rem; text-decoration: none; }
 .nav-links { display: flex; gap: 22px; font-size: .88rem; }
 .nav-links a { text-decoration: none; color: var(--ink-2); }
@@ -37,9 +37,9 @@ b { font-weight: 700; }
 .step { min-height: 120vh; display: flex; align-items: center; padding: 0 5vw; }
 .step.tall { min-height: 230vh; align-items: flex-start; padding-top: 28vh; }
 .card, .hero-text { pointer-events: auto; }
-.card { max-width: 400px; padding: 22px 24px 18px 22px; background: rgba(244, 241, 234, .96); border-left: 3px solid var(--ink);
-  position: sticky; top: 28vh; opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .2, 1); will-change: opacity, transform; }
-.card.in { opacity: 1; transform: none; }
+.card { max-width: 400px; padding: 22px 24px 18px 22px; background: var(--paper); border-left: 3px solid var(--ink);
+  position: sticky; top: 28vh; opacity: 0; transform: translateY(14px); transition: opacity .3s ease, transform .3s ease; will-change: opacity, transform; }
+.card.in { opacity: 1; transform: none; transition: opacity .6s ease .05s, transform .7s cubic-bezier(.2, .7, .2, 1) .05s; }
 .card h2 { font-weight: 700; font-size: 1.62rem; line-height: 1.2; letter-spacing: -.01em; margin: 0 0 12px; }
 .card p { font-size: 1.08rem; line-height: 1.58; color: #2c2b28; margin: 0 0 12px; }
 .card p.small { font-family: var(--sans); font-size: .86rem; line-height: 1.5; color: var(--ink-2); }
@@ -71,12 +71,12 @@ b { font-weight: 700; }
 .note .marks { display: none; font-family: var(--mono); }
 .note .marks .pass { color: var(--green); } .note .marks .fail { color: var(--red); }
 
-.progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--paper-2); }
-.progress span { display: block; height: 100%; width: 100%; background: var(--ink); transform-origin: left; transform: scaleX(0); }
+.progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; }
+.progress span { display: block; height: 100%; width: 100%; background: var(--red); transform-origin: left; transform: scaleX(0); }
 
 /* outro */
 .outro { position: relative; z-index: 3; background: var(--paper); border-top: 1px solid var(--rule); padding: 70px 5vw 60px; }
-.outro-inner { max-width: 1060px; margin: 0 auto; display: grid; grid-template-columns: 1.3fr 1fr; gap: 60px; }
+.outro-inner { max-width: 1060px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 60px; }
 .outro h2 { font-size: 1.7rem; margin: 0 0 12px; }
 .outro h3 { font-family: var(--sans); font-size: .76rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); margin: 0 0 6px; }
 .outro p { font-size: 1.02rem; line-height: 1.6; color: #2c2b28; margin: 0 0 22px; }

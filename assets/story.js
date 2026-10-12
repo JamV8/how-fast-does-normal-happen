@@ -43,9 +43,6 @@
   }
   const dnorm = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));
 
-  // ---------- cards fade in as they arrive ----------
-  const cardIO = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) e.target.classList.add("in"); }), { threshold: 0.2 });
-  document.querySelectorAll(".card").forEach((c) => cardIO.observe(c));
 
   // ---------- data ----------
   const POP_N = 1100, MEAN_N = 2000, ALL = POP_N + MEAN_N;
@@ -120,6 +117,7 @@
     const bw = reg.w / nb, dy = Math.min(maxDy || 6, reg.h / (mx + 1)), fill = new Int32Array(nb);
     for (let j = 0; j < ids.length; j++) {
       const p = P[ids[j]], b = bins[j];
+      p.inR = b >= 0;
       if (b < 0) { p.ta = 0; continue; }
       p.tx = reg.x + (b + 0.5) * bw + (p.j1 - 0.5) * bw * 0.5;
       p.ty = reg.y + reg.h - (fill[b]++ + 0.5) * dy;
@@ -129,15 +127,15 @@
   }
 
   // ---------- scroll ----------
-  let scene = "hero", prog = 0, progS = 0, sceneT = 0, last = "", navSolid = false;
+  let scene = "hero", prog = 0, progS = 0, sceneT = 0, last = "", navSolid = false, cardsSet = false;
   function readScroll() {
     const mid = window.innerHeight * 0.55;
     let s = "hero", pr = 0;
     for (const el of steps) {
       const r = el.getBoundingClientRect();
       if (r.top <= mid) { s = el.dataset.scene; pr = clamp((mid - r.top) / Math.max(1, r.height - window.innerHeight * 0.5), 0, 1); }
-      if (r.top < window.innerHeight * 0.9 && r.bottom > 0) { const c = el.querySelector(".card"); if (c && !c.classList.contains("in")) c.classList.add("in"); }
     }
+    if (s !== scene || !cardsSet) { cardsSet = true; for (const el of steps) { const c = el.querySelector(".card"); if (c) c.classList.toggle("in", el.dataset.scene === s); } }
     scene = s; prog = pr;
     const solid = window.scrollY > 30; if (solid !== navSolid) { navSolid = solid; nav.classList.toggle("solid", solid); }
     const total = scrolly.offsetHeight - window.innerHeight;
@@ -163,13 +161,13 @@
 
     if (scene === "hero") {
       const st = stack(P.map((_, i) => i), (i) => D.bellZ[i], Rg.hero, -3.3, 3.3, narrow ? 64 : 92, 5);
-      for (const p of P) { p.ta = 0.78; p.ty += Math.sin(sceneT * 1.1 + p.tx * 0.015) * 1.6; }
+      for (const p of P) { if (!p.inR) continue; p.ta = 0.78; p.ty += Math.sin(sceneT * 1.1 + p.tx * 0.015) * 1.6; }
       anno.heroCurve = { reg: Rg.hero, dy: st.dy, binW: 6.6 / (narrow ? 64 : 92) };
     }
     if (scene === "data" || scene === "one" || scene === "many") {
       const pr = scene === "data" ? Rg.popBig : Rg.popTop;
       const st = stack(popIds, (i) => D.popVals[P[i].k], pr, -60, 180, narrow ? 48 : 80, 6);
-      for (const id of popIds) { const p = P[id]; p.ta = scene === "many" ? 0.28 : 0.85; p.c = "blue"; }
+      for (const id of popIds) { const p = P[id]; p.c = "blue"; if (p.inR) p.ta = scene === "many" ? 0.28 : 0.85; }
       anno.pop = { reg: pr, st };
     }
     if (scene === "one") {
@@ -184,7 +182,7 @@
       sample.forEach((i) => { const p = P[i]; p.c = "red"; p.ta = 1; p.ts = 2.8; if (ph > 0.7 && ph < 1.5) { p.tx = mx; p.ty = my; } });
       const shown = meanIds.slice(0, live.length - (ph < 1.5 ? 1 : 0));
       stack(shown, (id) => live[P[id].k], reg, range[0], range[1], narrow ? 46 : 70, 7);
-      shown.forEach((id) => { const p = P[id]; p.ta = 1; p.ts = 2.4; p.c = "mustard"; });
+      shown.forEach((id) => { const p = P[id]; if (!p.inR) return; p.ta = 1; p.ts = 2.4; p.c = "mustard"; });
       if (ph >= 1.5 && ph < 1.6) { const p = P[meanIds[live.length - 1]]; p.x = mx; p.y = my; }
       anno.sample = { mx, my, m, a: ph < 0.2 ? ph / 0.2 : ph < 1.6 ? 1 : Math.max(0, 1 - (ph - 1.6) / 0.5) };
     }
@@ -196,6 +194,7 @@
       const st = stack(ids, valueOf, reg, range[0], range[1], narrow ? 56 : 90, 5);
       for (const id of ids) {
         const p = P[id];
+        if (!p.inR) continue;
         if (scene === "many" && p.a < 0.02) { p.x = Rg.popTop.x + Math.random() * Rg.popTop.w; p.y = Rg.popTop.y + Rg.popTop.h * 0.7; }
         p.ta = 0.85; p.c = "ink";
       }
@@ -203,7 +202,7 @@
     }
     if (scene === "never") {
       stack(meanIds, (id) => D.cauchy[P[id].k], Rg.full, -8, 8, narrow ? 56 : 90, 5);
-      for (const id of meanIds) { const p = P[id]; p.ta = Math.abs(D.cauchy[p.k]) > 8 ? 0 : 0.85; p.c = "red"; }
+      for (const id of meanIds) { const p = P[id]; p.ta = p.inR ? 0.85 : 0; p.c = "red"; }
       kick += dt;
       while (kick > 0.09) { kick -= 0.09; for (let j = 0; j < 12; j++) { const p = P[meanIds[(Math.random() * MEAN_N) | 0]]; p.x += (Math.random() - 0.5) * W * 0.4; p.y -= Math.random() * H * 0.35; } }
     }
@@ -247,8 +246,9 @@
 
   function drawWhy(t) {
     if (!WHY) return;
-    const iv = WHY.intervals, lo = Math.min(...iv.map((v) => v[0])) - 2, hi = Math.max(...iv.map((v) => v[1])) + 2;
-    const top = narrow ? 6 : 128, r = { x: B.x, y: B.y + top, w: B.w, h: B.h - 24 - top + (narrow ? 0 : 40) }, xs = (v) => r.x + (v - lo) / (hi - lo) * r.w, rh = r.h / 100;
+    const iv = WHY.intervals, lo = -25, hi = 55;
+    const top = narrow ? 6 : 128, r = { x: B.x, y: B.y + top, w: B.w, h: B.h - 24 - top + (narrow ? -34 : 40) }, rh = r.h / 100;
+    const xs = (v) => r.x + (clamp(v, lo, hi) - lo) / (hi - lo) * r.w;
     const shown = Math.round(clamp(progS * 1.35, 0, 1) * 100);
     ctx.save(); ctx.globalAlpha = whyA;
     let hit = 0, low = 0, high = 0;
@@ -260,6 +260,7 @@
       ctx.globalAlpha = whyA * easeOut(age); ctx.strokeStyle = miss ? C.red : C.ink2; ctx.lineWidth = miss ? 2 : 1.2;
       const off = (1 - easeOut(age)) * 30;
       ctx.beginPath(); ctx.moveTo(xs(a) + off, y); ctx.lineTo(xs(b) + off, y); ctx.stroke();
+      if (b > hi) { ctx.beginPath(); ctx.moveTo(xs(hi) + off - 5, y - 3); ctx.lineTo(xs(hi) + off, y); ctx.lineTo(xs(hi) + off - 5, y + 3); ctx.stroke(); }
       ctx.fillStyle = miss ? C.red : C.ink; ctx.fillRect(xs((a + b) / 2) + off - 1, y - 1, 2, 2);
     }
     ctx.globalAlpha = whyA; ctx.strokeStyle = C.ink; ctx.lineWidth = 1.2; ctx.setLineDash([5, 4]);
@@ -381,7 +382,7 @@
     if ((scene === "many" || scene === "grow") && reg && reg.dy) {
       const x = reg.x + (D.MU - range[0]) / (range[1] - range[0]) * reg.w;
       ctx.save(); ctx.globalAlpha = 0.7; ctx.strokeStyle = C.ink; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(x, reg.y - 6); ctx.lineTo(x, reg.y + reg.h + 6); ctx.stroke(); ctx.restore();
-      label(`true average ${D.MU.toFixed(1)} min`, x + 6, reg.y + 4, { a: 0.85, size: 12 });
+      label(`true average ${D.MU.toFixed(1)} min`, x - 6, reg.y + 4, { a: 0.85, size: 12, align: "right" });
       if (scene === "many") label(["the tail: studies that", "caught a very late flight →"], reg.x + reg.w - 4, reg.y + reg.h - 50, { a: labelA, size: 12.5, align: "right" });
     }
     if (curveA > 0.01 && reg && reg.dy) { const n = scene === "grow" ? nAt(progS).n : 400; curve(reg, D.MU, D.SIG / Math.sqrt(n), range[0], range[1], MEAN_N, reg.binW, reg.dy, curveA); }

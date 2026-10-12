@@ -252,17 +252,17 @@
     const box = $("verdict");
     if (!done) {
       box.className = "verdict-box idle";
-      box.innerHTML = `<div class="icon">⏳</div><div><div class="t">${S.running ? "Simulating…" : "Run more studies to get a verdict"}</div><div class="d">The verdict needs at least 1,000 studies.</div></div>`;
+      box.innerHTML = `<div class="icon">…</div><div><div class="t">${S.running ? "Simulating…" : "Run more studies to get a verdict"}</div><div class="d">The verdict needs at least 1,000 studies.</div></div>`;
     } else {
       const failed = tiles.filter((t) => !t.ok).map((t) => t.k.toLowerCase());
       if (!failed.length) {
         box.className = "verdict-box pass";
-        box.innerHTML = `<div class="icon">✅</div><div><div class="t">Normal enough at n = ${fmt(S.n)}</div><div class="d">All four checks pass under the ${S.std} standard. The bell curve can be trusted here.</div></div>`;
+        box.innerHTML = `<div class="icon" style="color:var(--pass)">✓</div><div><div class="t">Normal enough at n = ${fmt(S.n)}</div><div class="d">All four checks pass under the ${S.std} standard. The bell curve can be trusted here.</div></div>`;
       } else {
         box.className = "verdict-box fail";
         const extra = S.pop === "cauchy" ? " For this population no n will work: try n = 1,000 and compare with n = 1."
           : " Try a larger n.";
-        box.innerHTML = `<div class="icon">❌</div><div><div class="t">Not normal enough at n = ${fmt(S.n)}</div><div class="d">Failed: ${failed.join(", ")}.${extra}</div></div>`;
+        box.innerHTML = `<div class="icon" style="color:var(--fail)">✗</div><div><div class="t">Not normal enough at n = ${fmt(S.n)}</div><div class="d">Failed: ${failed.join(", ")}.${extra}</div></div>`;
       }
     }
     if (final) drawQQ(st);
