@@ -102,7 +102,7 @@
     "href": "AI_prompts.html#how-i-validated-the-code",
     "title": "AI log",
     "section": "How I validated the code",
-    "text": "How I validated the code\n\n\n\n\n\n\n\n\nCheck\nHow\nResult\n\n\n\n\nskew() and kurt() match the Class 05 formulas\ncompared R/clt_functions.R line by line with the lecture code\nto fill in\n\n\nStandard error formula\nfor the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table\nto fill in\n\n\nControl case\nthe normal population passes all four checks at n = 1\nto fill in\n\n\nReproducibility\nreran the exponential analysis with seed 2026 (section 8 of that page)\nto fill in\n\n\nFull re-render\nquarto render from a clean copy reproduces the numbers\nto fill in"
+    "text": "How I validated the code\n\n\n\n\n\n\n\n\nCheck\nHow\nResult\n\n\n\n\nskew() and kurt() match the Class 05 formulas\ncompared R/clt_functions.R line by line with the lecture code\n✅\n\n\nStandard error formula\nfor the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table\n✅\n\n\nControl case\nthe normal population passes all four checks at n = 1\n✅\n\n\nReproducibility\nreran the exponential analysis with seed 2026 (section 8 of that page)\n✅\n\n\nFull re-render\nquarto render from a clean copy reproduces the numbers\n✅"
   },
   {
     "objectID": "methods.html",
