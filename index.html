@@ -4,161 +4,117 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How Fast Does Normal Happen?</title>
-<meta name="description" content="A playful, interactive tour of the Central Limit Theorem: roll dice, feed the Average Machine, and race ten populations to the bell curve.">
+<meta name="description" content="A visual essay on the Central Limit Theorem: when averages become a bell curve, why the rule of 30 fails, and when no sample size is enough.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/play.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/story.css">
 </head>
 <body>
 
-<header class="topbar">
-  <a class="brand" href="#top">🔔 How fast does normal happen?</a>
-  <nav class="dots" id="dots" aria-label="Levels"></nav>
-  <a class="toplink" href="report.html">Full report →</a>
-</header>
-
-<!-- ============ HERO ============ -->
-<section class="hero" id="top">
-  <div class="hero-text">
-    <h1>How fast does<br><span class="wiggle">normal</span> happen?</h1>
-    <p class="tag">A 3-minute game about the most famous idea in statistics.</p>
-    <a class="btn purple big" href="#level1">Play ▶</a>
+<nav class="nav" id="nav">
+  <a class="logo" href="#top"><span class="logo-mark"></span>How fast does normal happen?</a>
+  <div class="nav-links">
+    <a href="play.html">Play mode</a>
+    <a href="simulator.html">Lab</a>
+    <a href="report.html">Findings</a>
+    <a href="https://github.com/JamV8/how-fast-does-normal-happen">Code</a>
   </div>
-  <canvas id="galton" class="galton" aria-label="Animated Galton board: balls bounce off pegs and pile up into a bell curve"></canvas>
-</section>
+</nav>
 
-<!-- ============ LEVEL 1 ============ -->
-<section class="level tint-yellow" id="level1" data-level="1">
-  <div class="level-head">
-    <span class="pill yellow">Level 1</span>
-    <h2>Roll a die 🎲</h2>
-    <p>Every number is equally likely. What shape do you get?</p>
+<main class="scrolly" id="top">
+  <div class="stage">
+    <canvas id="viz" aria-label="Animated visualization that changes as you scroll"></canvas>
+    <div class="hud" id="hud" aria-live="polite"></div>
+    <div class="progress"><span id="progress-bar"></span></div>
   </div>
-  <div class="game two-col">
-    <div class="toy">
-      <div class="dice-row" id="l1-dice"></div>
-      <div class="btn-row">
-        <button class="btn yellow" id="l1-roll">Roll</button>
-        <button class="btn ghost" id="l1-roll100">Roll ×100</button>
+
+  <div class="steps">
+    <section class="step hero" data-scene="0">
+      <div class="hero-inner">
+        <p class="kicker">A visual essay on the Central Limit Theorem</p>
+        <h1>How fast does<br><em>normal</em> happen?</h1>
+        <p class="sub">Statistics runs on one promise: average enough data and you get a bell curve. Textbooks say thirty observations is enough. I tested it.</p>
+        <div class="scroll-cue"><span></span>Scroll</div>
       </div>
-      <div class="readout" id="l1-readout">&nbsp;</div>
-    </div>
-    <div class="chart-wrap"><canvas id="l1-hist" class="hist"></canvas><div class="count" id="l1-count">0 rolls</div></div>
-  </div>
-  <p class="aha" id="l1-aha">Flat. No bell here. 🤷</p>
-</section>
+    </section>
 
-<!-- ============ LEVEL 2 ============ -->
-<section class="level tint-teal" id="level2" data-level="2">
-  <div class="level-head">
-    <span class="pill teal">Level 2</span>
-    <h2>Now average <em>two</em> dice</h2>
-    <p>Roll two, take the middle of them. Watch where the averages land.</p>
-  </div>
-  <div class="game two-col">
-    <div class="toy">
-      <div class="dice-row" id="l2-dice"></div>
-      <div class="btn-row">
-        <button class="btn teal" id="l2-roll">Roll</button>
-        <button class="btn ghost" id="l2-roll100">Roll ×100</button>
+    <section class="step" data-scene="1">
+      <div class="card">
+        <span class="num">01</span>
+        <h2>Every dataset has a shape.</h2>
+        <p>These are 1,100 waiting times. Most are short. A few are very long, which stretches the shape to the right.</p>
       </div>
-      <div class="readout" id="l2-readout">&nbsp;</div>
-    </div>
-    <div class="chart-wrap"><canvas id="l2-hist" class="hist"></canvas><div class="count" id="l2-count">0 rolls</div></div>
-  </div>
-  <p class="aha" id="l2-aha">The middle gets crowded. ⛰️ Extremes need <em>both</em> dice to agree.</p>
-</section>
+    </section>
 
-<!-- ============ LEVEL 3 ============ -->
-<section class="level tint-purple" id="level3" data-level="3">
-  <div class="level-head">
-    <span class="pill purple">Level 3</span>
-    <h2>Add more dice</h2>
-    <p>Slide to average more dice at once. 20,000 rolls every time.</p>
-  </div>
-  <div class="game">
-    <div class="slider-box">
-      <div class="big-n"><span id="l3-k">1</span> <span class="unit" id="l3-unit">die</span></div>
-      <input type="range" id="l3-slider" min="1" max="30" value="1" aria-label="Number of dice to average">
-      <div class="mini-dice" id="l3-mini"></div>
-    </div>
-    <div class="chart-wrap wide"><canvas id="l3-hist" class="hist tall"></canvas>
-      <div class="badge-pop" id="l3-badge">🔔 Bell unlocked!</div>
-    </div>
-  </div>
-  <p class="aha big">Average enough random things and you get a <span class="bellword">bell curve</span>.<br>That’s the <b>Central Limit Theorem</b>.</p>
-</section>
-
-<!-- ============ LEVEL 4 ============ -->
-<section class="level tint-coral" id="level4" data-level="4">
-  <div class="level-head">
-    <span class="pill coral">Level 4</span>
-    <h2>The Average Machine ⚙️</h2>
-    <p>Does it work for <em>anything</em>? Pick something weird, then find the smallest sample that rings the bell.</p>
-  </div>
-  <div class="cards" id="l4-cards"></div>
-  <div class="machine">
-    <canvas id="l4-canvas" class="machine-canvas"></canvas>
-    <div class="machine-ui">
-      <div class="slider-box compact">
-        <div class="big-n">n = <span id="l4-n">5</span></div>
-        <input type="range" id="l4-slider" min="0" max="1000" value="200" aria-label="Sample size">
-        <div class="hint-row"><span>values averaged each time</span><button class="chip" id="l4-try30">try 30</button></div>
+    <section class="step" data-scene="2">
+      <div class="card">
+        <span class="num">02</span>
+        <h2>Take a sample. Average it.</h2>
+        <p>Pick five at random and collapse them into a single number: their average.</p>
       </div>
-      <div class="meter">
-        <svg id="l4-gauge" viewBox="0 0 220 130" aria-label="Bell-o-meter"></svg>
-        <div class="meter-label" id="l4-verdict">Bell-o-meter</div>
+    </section>
+
+    <section class="step" data-scene="3">
+      <div class="card">
+        <span class="num">03</span>
+        <h2>Now repeat it, thousands of times.</h2>
+        <p>The averages pile up into a shape of their own. With samples of five, it still leans to one side.</p>
       </div>
-      <div class="lights" id="l4-lights"></div>
+    </section>
+
+    <section class="step tall" data-scene="4">
+      <div class="card">
+        <span class="num">04</span>
+        <h2>Make every sample bigger.</h2>
+        <p>Keep scrolling. As each sample grows, the averages tighten and straighten toward the bell curve.</p>
+        <p class="dim">At <b>n = 30</b> it still leans. At <b>n = 71</b> it passes all four of my normality tests.</p>
+      </div>
+    </section>
+
+    <section class="step" data-scene="5">
+      <div class="card">
+        <span class="num">05</span>
+        <h2>The answer depends on the data.</h2>
+        <p>Same test, ten populations. Symmetric data settle in a handful of observations. Real-world prices, delays and populations need hundreds, or thousands.</p>
+      </div>
+    </section>
+
+    <section class="step tall" data-scene="6">
+      <div class="card">
+        <span class="num">06</span>
+        <h2>Some data never settle.</h2>
+        <p>The Cauchy distribution produces extreme values so often that averaging never tames it. Watch the sample size climb to 5,000. The shape does not move.</p>
+      </div>
+    </section>
+
+    <section class="step tall" data-scene="7">
+      <div class="card">
+        <span class="num">07</span>
+        <h2>So, is it thirty?</h2>
+        <p class="answer">No.</p>
+        <p>It can be <b>8</b>. It can be <b>71</b>. It can be <b>2,450</b>. And for some data, no number works.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<section class="outro">
+  <div class="outro-inner">
+    <p class="kicker">Built on 100,000 simulated studies for every sample size</p>
+    <h2>Explore the study</h2>
+    <div class="links">
+      <a href="play.html"><span>Play mode</span><small>Roll dice, feed the Average Machine, race to the bell curve.</small></a>
+      <a href="simulator.html"><span>Lab</span><small>Any population, any sample size, all four checks.</small></a>
+      <a href="report.html"><span>Findings</span><small>Results, the final table, and the research questions.</small></a>
+      <a href="methods.html"><span>Method</span><small>How “normal enough” was defined and calibrated.</small></a>
+      <a href="analysis/06_real_world_data.html"><span>Real data</span><small>Flights, diamonds, geysers, counties.</small></a>
+      <a href="https://github.com/JamV8/how-fast-does-normal-happen"><span>Code</span><small>R, Quarto and JavaScript. Seed 9426.</small></a>
     </div>
-    <div class="challenge" id="l4-challenge"></div>
+    <p class="fine">MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem</p>
   </div>
 </section>
 
-<!-- ============ LEVEL 5 ============ -->
-<section class="level tint-blue" id="level5" data-level="5">
-  <div class="level-head">
-    <span class="pill blue">Level 5</span>
-    <h2>So… is 30 the magic number? 🏁</h2>
-    <p>Textbooks say 30 is enough. Ten racers, one finish line: the bell curve.</p>
-  </div>
-  <div class="race" id="race"></div>
-  <div class="btn-row center"><button class="btn blue" id="race-go">Start the race ▶</button></div>
-  <p class="aha big" id="race-verdict">Nope. Sometimes <b>8</b> is plenty. Sometimes you need <b>2,450</b>. Sometimes <b>no number</b> works.</p>
-</section>
-
-<!-- ============ LEVEL 6 ============ -->
-<section class="level tint-yellow" id="level6" data-level="6">
-  <div class="level-head">
-    <span class="pill yellow">Level 6</span>
-    <h2>Why should you care? 📰</h2>
-    <p>Every poll in the news says something like <b>“52% ± 3%”</b>. That ± comes from the bell curve.</p>
-  </div>
-  <div class="game">
-    <div class="chart-wrap wide"><canvas id="l6-canvas" class="hist"></canvas></div>
-    <div class="btn-row center"><button class="btn yellow" id="l6-go">Run 100 polls of 1,000 people</button></div>
-    <div class="readout center" id="l6-readout">&nbsp;</div>
-  </div>
-  <p class="aha">If the bell isn’t there yet, the “± 3%” is a lie. That’s why <em>how fast</em> normal happens matters.</p>
-</section>
-
-<!-- ============ OUTRO ============ -->
-<section class="outro" id="outro">
-  <h2>You just learned the Central Limit Theorem. 🎉</h2>
-  <p>Want the real math? Everything here comes from millions of simulations in R.</p>
-  <div class="outro-grid">
-    <a class="ocard" href="report.html"><span>📊</span>Findings</a>
-    <a class="ocard" href="analysis/03_exponential.html"><span>🔬</span>Population analyses</a>
-    <a class="ocard" href="analysis/06_real_world_data.html"><span>✈️</span>Real data</a>
-    <a class="ocard" href="methods.html"><span>📐</span>Method</a>
-    <a class="ocard" href="simulator.html"><span>🧪</span>Lab mode</a>
-    <a class="ocard" href="https://github.com/JamV8/how-fast-does-normal-happen"><span>💻</span>Code</a>
-  </div>
-  <p class="foot">MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem</p>
-</section>
-
-<canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
-<script src="assets/play.js" defer></script>
+<script src="assets/story.js" defer></script>
 </body>
 </html>

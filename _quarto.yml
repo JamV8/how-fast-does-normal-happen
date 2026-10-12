@@ -10,6 +10,7 @@ project:
   resources:
     - assets/
     - index.html
+    - play.html
 
 website:
   title: "How Fast Does Normal Happen?"
@@ -20,7 +21,9 @@ website:
     background: light
     left:
       - href: index.html
-        text: "▶ Play"
+        text: Story
+      - href: play.html
+        text: Play
       - href: simulator.qmd
         text: Lab
       - href: report.qmd

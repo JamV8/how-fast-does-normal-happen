@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play · How Fast Does Normal Happen?</title>
+<meta name="description" content="A playful, interactive tour of the Central Limit Theorem: roll dice, feed the Average Machine, and race ten populations to the bell curve.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/play.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="index.html">🔔 How fast does normal happen?</a>
+  <nav class="dots" id="dots" aria-label="Levels"></nav>
+  <a class="toplink" href="index.html">← Story mode</a>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero-text">
+    <h1>How fast does<br><span class="wiggle">normal</span> happen?</h1>
+    <p class="tag">A 3-minute game about the most famous idea in statistics.</p>
+    <a class="btn purple big" href="#level1">Play ▶</a>
+  </div>
+  <canvas id="galton" class="galton" aria-label="Animated Galton board: balls bounce off pegs and pile up into a bell curve"></canvas>
+</section>
+
+<!-- ============ LEVEL 1 ============ -->
+<section class="level tint-yellow" id="level1" data-level="1">
+  <div class="level-head">
+    <span class="pill yellow">Level 1</span>
+    <h2>Roll a die 🎲</h2>
+    <p>Every number is equally likely. What shape do you get?</p>
+  </div>
+  <div class="game two-col">
+    <div class="toy">
+      <div class="dice-row" id="l1-dice"></div>
+      <div class="btn-row">
+        <button class="btn yellow" id="l1-roll">Roll</button>
+        <button class="btn ghost" id="l1-roll100">Roll ×100</button>
+      </div>
+      <div class="readout" id="l1-readout">&nbsp;</div>
+    </div>
+    <div class="chart-wrap"><canvas id="l1-hist" class="hist"></canvas><div class="count" id="l1-count">0 rolls</div></div>
+  </div>
+  <p class="aha" id="l1-aha">Flat. No bell here. 🤷</p>
+</section>
+
+<!-- ============ LEVEL 2 ============ -->
+<section class="level tint-teal" id="level2" data-level="2">
+  <div class="level-head">
+    <span class="pill teal">Level 2</span>
+    <h2>Now average <em>two</em> dice</h2>
+    <p>Roll two, take the middle of them. Watch where the averages land.</p>
+  </div>
+  <div class="game two-col">
+    <div class="toy">
+      <div class="dice-row" id="l2-dice"></div>
+      <div class="btn-row">
+        <button class="btn teal" id="l2-roll">Roll</button>
+        <button class="btn ghost" id="l2-roll100">Roll ×100</button>
+      </div>
+      <div class="readout" id="l2-readout">&nbsp;</div>
+    </div>
+    <div class="chart-wrap"><canvas id="l2-hist" class="hist"></canvas><div class="count" id="l2-count">0 rolls</div></div>
+  </div>
+  <p class="aha" id="l2-aha">The middle gets crowded. ⛰️ Extremes need <em>both</em> dice to agree.</p>
+</section>
+
+<!-- ============ LEVEL 3 ============ -->
+<section class="level tint-purple" id="level3" data-level="3">
+  <div class="level-head">
+    <span class="pill purple">Level 3</span>
+    <h2>Add more dice</h2>
+    <p>Slide to average more dice at once. 20,000 rolls every time.</p>
+  </div>
+  <div class="game">
+    <div class="slider-box">
+      <div class="big-n"><span id="l3-k">1</span> <span class="unit" id="l3-unit">die</span></div>
+      <input type="range" id="l3-slider" min="1" max="30" value="1" aria-label="Number of dice to average">
+      <div class="mini-dice" id="l3-mini"></div>
+    </div>
+    <div class="chart-wrap wide"><canvas id="l3-hist" class="hist tall"></canvas>
+      <div class="badge-pop" id="l3-badge">🔔 Bell unlocked!</div>
+    </div>
+  </div>
+  <p class="aha big">Average enough random things and you get a <span class="bellword">bell curve</span>.<br>That’s the <b>Central Limit Theorem</b>.</p>
+</section>
+
+<!-- ============ LEVEL 4 ============ -->
+<section class="level tint-coral" id="level4" data-level="4">
+  <div class="level-head">
+    <span class="pill coral">Level 4</span>
+    <h2>The Average Machine ⚙️</h2>
+    <p>Does it work for <em>anything</em>? Pick something weird, then find the smallest sample that rings the bell.</p>
+  </div>
+  <div class="cards" id="l4-cards"></div>
+  <div class="machine">
+    <canvas id="l4-canvas" class="machine-canvas"></canvas>
+    <div class="machine-ui">
+      <div class="slider-box compact">
+        <div class="big-n">n = <span id="l4-n">5</span></div>
+        <input type="range" id="l4-slider" min="0" max="1000" value="200" aria-label="Sample size">
+        <div class="hint-row"><span>values averaged each time</span><button class="chip" id="l4-try30">try 30</button></div>
+      </div>
+      <div class="meter">
+        <svg id="l4-gauge" viewBox="0 0 220 130" aria-label="Bell-o-meter"></svg>
+        <div class="meter-label" id="l4-verdict">Bell-o-meter</div>
+      </div>
+      <div class="lights" id="l4-lights"></div>
+    </div>
+    <div class="challenge" id="l4-challenge"></div>
+  </div>
+</section>
+
+<!-- ============ LEVEL 5 ============ -->
+<section class="level tint-blue" id="level5" data-level="5">
+  <div class="level-head">
+    <span class="pill blue">Level 5</span>
+    <h2>So… is 30 the magic number? 🏁</h2>
+    <p>Textbooks say 30 is enough. Ten racers, one finish line: the bell curve.</p>
+  </div>
+  <div class="race" id="race"></div>
+  <div class="btn-row center"><button class="btn blue" id="race-go">Start the race ▶</button></div>
+  <p class="aha big" id="race-verdict">Nope. Sometimes <b>8</b> is plenty. Sometimes you need <b>2,450</b>. Sometimes <b>no number</b> works.</p>
+</section>
+
+<!-- ============ LEVEL 6 ============ -->
+<section class="level tint-yellow" id="level6" data-level="6">
+  <div class="level-head">
+    <span class="pill yellow">Level 6</span>
+    <h2>Why should you care? 📰</h2>
+    <p>Every poll in the news says something like <b>“52% ± 3%”</b>. That ± comes from the bell curve.</p>
+  </div>
+  <div class="game">
+    <div class="chart-wrap wide"><canvas id="l6-canvas" class="hist"></canvas></div>
+    <div class="btn-row center"><button class="btn yellow" id="l6-go">Run 100 polls of 1,000 people</button></div>
+    <div class="readout center" id="l6-readout">&nbsp;</div>
+  </div>
+  <p class="aha">If the bell isn’t there yet, the “± 3%” is a lie. That’s why <em>how fast</em> normal happens matters.</p>
+</section>
+
+<!-- ============ OUTRO ============ -->
+<section class="outro" id="outro">
+  <h2>You just learned the Central Limit Theorem. 🎉</h2>
+  <p>Want the real math? Everything here comes from millions of simulations in R.</p>
+  <div class="outro-grid">
+    <a class="ocard" href="report.html"><span>📊</span>Findings</a>
+    <a class="ocard" href="analysis/03_exponential.html"><span>🔬</span>Population analyses</a>
+    <a class="ocard" href="analysis/06_real_world_data.html"><span>✈️</span>Real data</a>
+    <a class="ocard" href="methods.html"><span>📐</span>Method</a>
+    <a class="ocard" href="simulator.html"><span>🧪</span>Lab mode</a>
+    <a class="ocard" href="https://github.com/JamV8/how-fast-does-normal-happen"><span>💻</span>Code</a>
+  </div>
+  <p class="foot">MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem</p>
+</section>
+
+<canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+<script src="assets/play.js" defer></script>
+</body>
+</html>

@@ -100,6 +100,13 @@ that turns averages of dice into a bell curve, an "Average Machine" with a chall
 rings the bell (checked by the same four tests as the R study), a race of ten populations to the bell curve, and
 simulated polls. The technical report stayed as separate pages for readers who want the details.
 
+**Follow-up prompt:** "The game is cool, but it feels too relaxed and playful. I want something that looks slick and
+professional, more like an animation than a game. Keep the game as a second option."
+
+**What changed:** a new home page ("Story mode"): a dark, scroll-driven visual essay in which about 3,000 particles
+re-form into each step of the argument (population, one sample, many averages, growing n with a live HUD of the R
+results, ten populations, the Cauchy case, and "30" crossed out). The game moved to "Play mode".
+
 ## Problems the AI found while building
 
 These were flagged by the AI during coding; I reviewed and accepted each fix.

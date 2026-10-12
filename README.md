@@ -2,9 +2,10 @@
 
 ### Stress-testing the Central Limit Theorem with Monte Carlo simulation, real data, and an interactive simulator
 
-**🎮 Play:** https://jamv8.github.io/how-fast-does-normal-happen/ (an interactive, game-like tour of the CLT)
-&nbsp;·&nbsp; **📄 Findings:** [full summary](https://jamv8.github.io/how-fast-does-normal-happen/report.html)
+**✨ Story:** https://jamv8.github.io/how-fast-does-normal-happen/ (a scroll-driven visual essay)
+&nbsp;·&nbsp; **🎮 Play:** [game mode](https://jamv8.github.io/how-fast-does-normal-happen/play.html)
 &nbsp;·&nbsp; **🧪 Lab:** [detailed simulator](https://jamv8.github.io/how-fast-does-normal-happen/simulator.html)
+&nbsp;·&nbsp; **📄 Findings:** [full summary](https://jamv8.github.io/how-fast-does-normal-happen/report.html)
 
 Statistics courses teach a rule of thumb: **with 30 or more observations, the sample mean is approximately
 normal.** That assumption is behind every margin of error and most confidence intervals. This project tests the
@@ -77,8 +78,9 @@ under a strict (skewness ≤ 0.1) and a lenient (≤ 0.5) standard.
 ## Repository structure
 
 ```
-├── index.html                Interactive home page: six playable levels (dice, the
-│                             Average Machine, a race to the bell curve, polls)
+├── index.html                Story mode: scroll-driven particle visualization (home page)
+├── play.html                 Play mode: six playable levels (dice, the Average Machine,
+│                             a race to the bell curve, polls)
 ├── simulator.qmd             Lab: detailed simulator with all four checks
 ├── report.qmd                Findings: cross-population summary and research questions
 ├── methods.qmd               Simulation design and calibration of the standard
@@ -93,7 +95,7 @@ under a strict (skewness ≤ 0.1) and a lenient (≤ 0.5) standard.
 │   ├── clt_functions.R       Shared simulation, diagnostics and plotting code
 │   └── export_site_data.R    Exports results to JSON for the website
 ├── results/                  Saved results for every population (CSV)
-├── assets/                   Website styles, scripts (play.js, simulator.js) and data
+├── assets/                   Website styles, scripts (story.js, play.js, simulator.js) and data
 ├── docs/                     Rendered website (GitHub Pages)
 └── AI_prompts.md             Log of key AI prompts and validation
 ```
