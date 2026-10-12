@@ -5,11 +5,11 @@ project:
     - analysis/*.qmd
     - report.qmd
     - methods.qmd
-    - index.qmd
     - simulator.qmd
     - AI_prompts.md
   resources:
     - assets/
+    - index.html
 
 website:
   title: "How Fast Does Normal Happen?"
@@ -19,10 +19,10 @@ website:
   navbar:
     background: light
     left:
-      - href: index.qmd
-        text: Home
+      - href: index.html
+        text: "▶ Play"
       - href: simulator.qmd
-        text: Try it yourself
+        text: Lab
       - href: report.qmd
         text: Findings
       - text: Populations

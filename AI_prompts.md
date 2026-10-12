@@ -89,6 +89,17 @@ discreteness. That turned out to be right, even though it is less skewed.
 the direction of skewness (I judged it by the peak instead of the tail), the meaning of kurtosis (I confused it
 with skewness), and how to use the formula skewness/√n to predict n. I asked follow-up questions until both were clear (the river-length histogram with mean vs. median).
 
+## Iteration 8: presentation for a non-technical audience
+
+**My prompt:** after seeing the first version of the website: "I don't like it. It looks too technical and has too much
+text. I want as little text as possible, as interactive as possible, with animation, almost like a game, so that a
+non-technical person can understand the Central Limit Theorem, and more colorful."
+
+**What changed:** the home page was rebuilt as six short playable levels: rolling dice into a histogram, a slider
+that turns averages of dice into a bell curve, an "Average Machine" with a challenge to find the smallest n that
+rings the bell (checked by the same four tests as the R study), a race of ten populations to the bell curve, and
+simulated polls. The technical report stayed as separate pages for readers who want the details.
+
 ## Problems the AI found while building
 
 These were flagged by the AI during coding; I reviewed and accepted each fix.

@@ -1,805 +1,164 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
-
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How Fast Does Normal Happen?</title>
-<style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: 1.5em;}
-div.column{flex: auto;}
-@media screen {
-div.columns{gap: min(4vw, 1.5em);}
-div.column{overflow-x: auto;}
-}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-ul.task-list{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-  width: 0.8em;
-  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
-  vertical-align: middle;
-}
-</style>
-
-
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-0d97d4800fce7e8be498074810d7b290.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script id="quarto-search-options" type="application/json">{
-  "location": "navbar",
-  "copy-button": false,
-  "collapse-after": 3,
-  "panel-placement": "end",
-  "type": "overlay",
-  "limit": 50,
-  "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
-  ],
-  "show-item-context": false,
-  "language": {
-    "search-no-results-text": "No results",
-    "search-matching-documents-text": "matching documents",
-    "search-copy-link-title": "Copy link to search",
-    "search-hide-matches-text": "Hide additional matches",
-    "search-more-match-text": "more match in this document",
-    "search-more-matches-text": "more matches in this document",
-    "search-clear-button-title": "Clear",
-    "search-text-placeholder": "",
-    "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit",
-    "search-label": "Search"
-  }
-}</script>
-<style>html{ scroll-behavior: smooth; }</style>
-
-
+<meta name="description" content="A playful, interactive tour of the Central Limit Theorem: roll dice, feed the Average Machine, and race ten populations to the bell curve.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/play.css">
 </head>
+<body>
 
-<body class="nav-fixed fullcontent quarto-light">
-
-<div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
-      <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">How Fast Does Normal Happen?</span>
-    </a>
-  </div>
-            <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-  <span class="navbar-toggler-icon"></span>
-</button>
-          <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav navbar-nav-scroll me-auto">
-  <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
-<span class="menu-text">Home</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./simulator.html"> 
-<span class="menu-text">Try it yourself</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./report.html"> 
-<span class="menu-text">Findings</span></a>
-  </li>  
-  <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-populations" role="link" data-bs-toggle="dropdown" aria-expanded="false">
- <span class="menu-text">Populations</span>
-    </a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-populations">    
-        <li>
-    <a class="dropdown-item" href="./analysis/01_normal.html">
- <span class="dropdown-text">1 · Normal</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./analysis/02_die.html">
- <span class="dropdown-text">2 · Six-sided die</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./analysis/03_exponential.html">
- <span class="dropdown-text">3 · Exponential</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./analysis/04_binomial.html">
- <span class="dropdown-text">4 · Binomial (5, 0.1)</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="./analysis/05_cauchy.html">
- <span class="dropdown-text">5 · Cauchy</span></a>
-  </li>  
-    </ul>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="./analysis/06_real_world_data.html"> 
-<span class="menu-text">Real data</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./methods.html"> 
-<span class="menu-text">Method</span></a>
-  </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./AI_prompts.html"> 
-<span class="menu-text">AI log</span></a>
-  </li>  
-</ul>
-          </div> <!-- /navcollapse -->
-            <div class="quarto-navbar-tools">
-</div>
-      </div> <!-- /container-fluid -->
-    </nav>
+<header class="topbar">
+  <a class="brand" href="#top">🔔 How fast does normal happen?</a>
+  <nav class="dots" id="dots" aria-label="Levels"></nav>
+  <a class="toplink" href="report.html">Full report →</a>
 </header>
-<!-- content -->
-<div id="quarto-content" class="quarto-container page-layout-custom page-navbar">
-<!-- sidebar -->
-<!-- margin-sidebar -->
-<!-- main -->
-
-
-
-
-<link rel="stylesheet" href="assets/site.css">
-<div class="lp">
 
 <!-- ============ HERO ============ -->
-<section class="hero">
-  <div class="wrap">
-    <div class="eyebrow">A statistics experiment · Central Limit Theorem</div>
-    <h1>How fast does<br><span class="bell">normal</span> happen?</h1>
-    <p class="lead">
-      Statistics classes teach a rule of thumb: once you average <b>30 or more</b> observations,
-      the average follows a bell curve. That bell curve is what makes margins of error and
-      confidence intervals work. I put the rule to the test with millions of simulated studies,
-      on textbook distributions and on real data.
-    </p>
-    <div class="ctas">
-      <a class="btn primary" href="simulator.html">Try the simulator →</a>
-      <a class="btn ghost" href="report.html">Read the findings</a>
-    </div>
-    <div class="facts">
-      <div class="fact"><div class="num">10</div><div class="lbl">populations: 5 textbook, 5 real datasets</div></div>
-      <div class="fact"><div class="num">100,000</div><div class="lbl">simulated studies for every sample size</div></div>
-      <div class="fact"><div class="num">1</div><div class="lbl">rule of thumb under the microscope: n = 30</div></div>
-    </div>
+<section class="hero" id="top">
+  <div class="hero-text">
+    <h1>How fast does<br><span class="wiggle">normal</span> happen?</h1>
+    <p class="tag">A 3-minute game about the most famous idea in statistics.</p>
+    <a class="btn purple big" href="#level1">Play ▶</a>
   </div>
+  <canvas id="galton" class="galton" aria-label="Animated Galton board: balls bounce off pegs and pile up into a bell curve"></canvas>
 </section>
 
-<!-- ============ THE IDEA ============ -->
-<section class="band">
-  <div class="wrap">
-    <div class="eyebrow">The idea in three pictures</div>
-    <h2 class="lp-h2">Averages forget where they came from</h2>
-    <p class="lead">
-      Take any population, even a lopsided one. Pick a few values at random and average them.
-      Repeat that thousands of times. The averages pile up into a bell curve. That is the
-      Central Limit Theorem. The only question is <b>how many values</b> each average needs.
-    </p>
-    <div class="steps">
-      <div class="card">
-        <div class="step-num">1</div>
-        <h3>Start with a lopsided population</h3>
-        <svg class="mini" id="mini-pop" viewbox="0 0 320 150" role="img" aria-label="Histogram of waiting times: most are short, a few are long"></svg>
-        <p>Waiting times: most waits are short, a few are very long.</p>
+<!-- ============ LEVEL 1 ============ -->
+<section class="level tint-yellow" id="level1" data-level="1">
+  <div class="level-head">
+    <span class="pill yellow">Level 1</span>
+    <h2>Roll a die 🎲</h2>
+    <p>Every number is equally likely. What shape do you get?</p>
+  </div>
+  <div class="game two-col">
+    <div class="toy">
+      <div class="dice-row" id="l1-dice"></div>
+      <div class="btn-row">
+        <button class="btn yellow" id="l1-roll">Roll</button>
+        <button class="btn ghost" id="l1-roll100">Roll ×100</button>
       </div>
-      <div class="card">
-        <div class="step-num">2</div>
-        <h3>Average 5 at a time</h3>
-        <svg class="mini" id="mini-n5" viewbox="0 0 320 150" role="img" aria-label="Averages of 5 waiting times compared with a bell curve"></svg>
-        <p>Averages of 5 are still lopsided. The red bell curve does not fit yet.</p>
+      <div class="readout" id="l1-readout">&nbsp;</div>
+    </div>
+    <div class="chart-wrap"><canvas id="l1-hist" class="hist"></canvas><div class="count" id="l1-count">0 rolls</div></div>
+  </div>
+  <p class="aha" id="l1-aha">Flat. No bell here. 🤷</p>
+</section>
+
+<!-- ============ LEVEL 2 ============ -->
+<section class="level tint-teal" id="level2" data-level="2">
+  <div class="level-head">
+    <span class="pill teal">Level 2</span>
+    <h2>Now average <em>two</em> dice</h2>
+    <p>Roll two, take the middle of them. Watch where the averages land.</p>
+  </div>
+  <div class="game two-col">
+    <div class="toy">
+      <div class="dice-row" id="l2-dice"></div>
+      <div class="btn-row">
+        <button class="btn teal" id="l2-roll">Roll</button>
+        <button class="btn ghost" id="l2-roll100">Roll ×100</button>
       </div>
-      <div class="card">
-        <div class="step-num">3</div>
-        <h3>Average 71 at a time</h3>
-        <svg class="mini" id="mini-n71" viewbox="0 0 320 150" role="img" aria-label="Averages of 71 waiting times matching a bell curve"></svg>
-        <p>Averages of 71 match the bell curve. For this population, 30 was not enough.</p>
+      <div class="readout" id="l2-readout">&nbsp;</div>
+    </div>
+    <div class="chart-wrap"><canvas id="l2-hist" class="hist"></canvas><div class="count" id="l2-count">0 rolls</div></div>
+  </div>
+  <p class="aha" id="l2-aha">The middle gets crowded. ⛰️ Extremes need <em>both</em> dice to agree.</p>
+</section>
+
+<!-- ============ LEVEL 3 ============ -->
+<section class="level tint-purple" id="level3" data-level="3">
+  <div class="level-head">
+    <span class="pill purple">Level 3</span>
+    <h2>Add more dice</h2>
+    <p>Slide to average more dice at once. 20,000 rolls every time.</p>
+  </div>
+  <div class="game">
+    <div class="slider-box">
+      <div class="big-n"><span id="l3-k">1</span> <span class="unit" id="l3-unit">die</span></div>
+      <input type="range" id="l3-slider" min="1" max="30" value="1" aria-label="Number of dice to average">
+      <div class="mini-dice" id="l3-mini"></div>
+    </div>
+    <div class="chart-wrap wide"><canvas id="l3-hist" class="hist tall"></canvas>
+      <div class="badge-pop" id="l3-badge">🔔 Bell unlocked!</div>
+    </div>
+  </div>
+  <p class="aha big">Average enough random things and you get a <span class="bellword">bell curve</span>.<br>That’s the <b>Central Limit Theorem</b>.</p>
+</section>
+
+<!-- ============ LEVEL 4 ============ -->
+<section class="level tint-coral" id="level4" data-level="4">
+  <div class="level-head">
+    <span class="pill coral">Level 4</span>
+    <h2>The Average Machine ⚙️</h2>
+    <p>Does it work for <em>anything</em>? Pick something weird, then find the smallest sample that rings the bell.</p>
+  </div>
+  <div class="cards" id="l4-cards"></div>
+  <div class="machine">
+    <canvas id="l4-canvas" class="machine-canvas"></canvas>
+    <div class="machine-ui">
+      <div class="slider-box compact">
+        <div class="big-n">n = <span id="l4-n">5</span></div>
+        <input type="range" id="l4-slider" min="0" max="1000" value="200" aria-label="Sample size">
+        <div class="hint-row"><span>values averaged each time</span><button class="chip" id="l4-try30">try 30</button></div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ WHY IT MATTERS ============ -->
-<section>
-  <div class="wrap poll">
-    <div>
-      <div class="eyebrow">Why anyone should care</div>
-      <div class="big-stat">52% <small>± 3.1%</small></div>
-    </div>
-    <div>
-      <h2 class="lp-h2">Every margin of error relies on this theorem</h2>
-      <p>
-        A pollster asks 1,000 people one question and reports “52%, plus or minus 3.1 points.”
-        They never repeat the poll; the bell curve tells them how far off a single poll could be.
-        The same logic is behind drug trials, A/B tests on websites, and quality control in factories.
-      </p>
-      <p>
-        <b>If the averages have not become a bell curve yet, those margins of error are wrong</b>,
-        and nobody notices, because in real life you only see one sample.
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ THE ANSWER ============ -->
-<section class="band" id="answer">
-  <div class="wrap">
-    <div class="eyebrow">The answer</div>
-    <h2 class="lp-h2">So, is 30 enough?</h2>
-    <p class="verdict">
-      <span class="g">Sometimes 30 is more than enough.</span>
-      <span class="o">Often it is not nearly enough.</span>
-      <span class="r">And sometimes no number is enough.</span>
-    </p>
-    <div class="chart-card">
-      <div class="legend">
-        <span><i style="background:var(--pass)"></i>30 is enough</span>
-        <span><i style="background:var(--warn)"></i>needs more than 30</span>
-        <span><i style="background:var(--fail)"></i>never becomes normal</span>
-        <span>◆ textbook &nbsp; ● real data</span>
+      <div class="meter">
+        <svg id="l4-gauge" viewBox="0 0 220 130" aria-label="Bell-o-meter"></svg>
+        <div class="meter-label" id="l4-verdict">Bell-o-meter</div>
       </div>
-      <svg id="answer-chart" viewbox="0 0 1000 520" role="img" aria-label="Sample size needed for each population, compared with 30"></svg>
-      <p class="note">Smallest sample size at which the averages pass all four of my “normal enough” checks,
-        and keep passing for every larger size tested. Log scale. Hover over a dot for details.</p>
+      <div class="lights" id="l4-lights"></div>
     </div>
+    <div class="challenge" id="l4-challenge"></div>
   </div>
 </section>
 
-<!-- ============ WHAT DECIDES IT ============ -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow">What decides the answer</div>
-    <h2 class="lp-h2">Three things slow the bell curve down</h2>
-    <div class="factors">
-      <div class="card factor">
-        <div class="icon">↗</div>
-        <h3>Lopsidedness</h3>
-        <p>The longer one tail, the more values each average needs. One simple formula predicted the
-          answer for most populations, textbook and real:</p>
-        <div class="formula">n ≈ (skewness ÷ 0.25)²</div>
-      </div>
-      <div class="card factor">
-        <div class="icon">▥</div>
-        <h3>Lumpiness</h3>
-        <p>Counts like 0, 1, 2 move in steps. Even when they are not very lopsided, the steps keep the
-          shape rough for longer. Rare-event counts needed <b><span data-n="binomial"></span></b> values,
-          more than the waiting times.</p>
-      </div>
-      <div class="card factor">
-        <div class="icon">⚡</div>
-        <h3>Extreme values</h3>
-        <p>If giant values are common enough, averaging never tames them. For the Cauchy distribution
-          no sample size works: averaging 5,000 values is no better than looking at one.</p>
-      </div>
-    </div>
+<!-- ============ LEVEL 5 ============ -->
+<section class="level tint-blue" id="level5" data-level="5">
+  <div class="level-head">
+    <span class="pill blue">Level 5</span>
+    <h2>So… is 30 the magic number? 🏁</h2>
+    <p>Textbooks say 30 is enough. Ten racers, one finish line: the bell curve.</p>
   </div>
+  <div class="race" id="race"></div>
+  <div class="btn-row center"><button class="btn blue" id="race-go">Start the race ▶</button></div>
+  <p class="aha big" id="race-verdict">Nope. Sometimes <b>8</b> is plenty. Sometimes you need <b>2,450</b>. Sometimes <b>no number</b> works.</p>
 </section>
 
-<!-- ============ REAL LIFE ============ -->
-<section class="band">
-  <div class="wrap">
-    <div class="eyebrow">Real data, real consequences</div>
-    <h2 class="lp-h2">What this means for actual data</h2>
-    <p class="lead">To trust an ordinary 95% interval for the average of…</p>
-    <div class="real">
-      <div class="card"><div class="what">…flight delays at NYC airports</div>
-        <div class="n bad"><span data-n="flights"></span> flights</div>
-        <p>Most flights are on time, but a few are hours late. With 30 flights the “95%” interval misses
-          on the high side <span data-tail="flights"></span> of the time instead of 2.5%.</p></div>
-      <div class="card"><div class="what">…diamond prices</div>
-        <div class="n bad"><span data-n="diamonds"></span> diamonds</div>
-        <p>A few very expensive stones stretch the price distribution, so 30 diamonds are not quite enough.</p></div>
-      <div class="card"><div class="what">…county populations in the US Midwest</div>
-        <div class="n bad"><span data-n="counties"></span> counties</div>
-        <p>A handful of giant counties (Chicago’s Cook County has 5 million people; the typical county has
-          35,000) make the average jump around. That is more than five times the 437 counties these five states actually have.</p></div>
-      <div class="card"><div class="what">…waiting times at Old Faithful geyser</div>
-        <div class="n ok"><span data-n="faithful"></span> eruptions</div>
-        <p>The waits come in two humps, short and long, but are nearly symmetric. Here the rule of 30 is
-          more than enough.</p></div>
-    </div>
+<!-- ============ LEVEL 6 ============ -->
+<section class="level tint-yellow" id="level6" data-level="6">
+  <div class="level-head">
+    <span class="pill yellow">Level 6</span>
+    <h2>Why should you care? 📰</h2>
+    <p>Every poll in the news says something like <b>“52% ± 3%”</b>. That ± comes from the bell curve.</p>
   </div>
+  <div class="game">
+    <div class="chart-wrap wide"><canvas id="l6-canvas" class="hist"></canvas></div>
+    <div class="btn-row center"><button class="btn yellow" id="l6-go">Run 100 polls of 1,000 people</button></div>
+    <div class="readout center" id="l6-readout">&nbsp;</div>
+  </div>
+  <p class="aha">If the bell isn’t there yet, the “± 3%” is a lie. That’s why <em>how fast</em> normal happens matters.</p>
 </section>
 
-<!-- ============ TRY IT ============ -->
-<section>
-  <div class="wrap">
-    <div class="cta-band">
-      <div>
-        <h2 class="lp-h2">See it happen yourself</h2>
-        <p>Pick a population (a textbook one or real data), choose a sample size, and watch
-          thousands of averages pile up into a bell curve, or refuse to.</p>
-      </div>
-      <a class="btn" href="simulator.html">Open the simulator →</a>
-    </div>
+<!-- ============ OUTRO ============ -->
+<section class="outro" id="outro">
+  <h2>You just learned the Central Limit Theorem. 🎉</h2>
+  <p>Want the real math? Everything here comes from millions of simulations in R.</p>
+  <div class="outro-grid">
+    <a class="ocard" href="report.html"><span>📊</span>Findings</a>
+    <a class="ocard" href="analysis/03_exponential.html"><span>🔬</span>Population analyses</a>
+    <a class="ocard" href="analysis/06_real_world_data.html"><span>✈️</span>Real data</a>
+    <a class="ocard" href="methods.html"><span>📐</span>Method</a>
+    <a class="ocard" href="simulator.html"><span>🧪</span>Lab mode</a>
+    <a class="ocard" href="https://github.com/JamV8/how-fast-does-normal-happen"><span>💻</span>Code</a>
   </div>
+  <p class="foot">MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem</p>
 </section>
 
-<!-- ============ HOW JUDGED ============ -->
-<section class="band">
-  <div class="wrap">
-    <div class="eyebrow">How I judged “normal enough”</div>
-    <h2 class="lp-h2">Four checks, one standard for everyone</h2>
-    <p class="lead">There is no official cutoff, so I defined one and applied it to every population.
-      The averages count as normal enough only when all four checks pass.</p>
-    <div class="checks">
-      <div class="card"><h3>Not lopsided</h3><p>Skewness between −0.25 and 0.25.</p></div>
-      <div class="card"><h3>No excess extremes</h3><p>Excess kurtosis between −0.5 and 0.5.</p></div>
-      <div class="card"><h3>Straight Q-Q plot</h3><p>Correlation of at least 0.998 with a perfect bell curve.</p></div>
-      <div class="card"><h3>Honest 95% intervals</h3><p>On each side, 1.75%–3.25% of averages fall outside (the ideal is 2.5%).</p></div>
-    </div>
-    <p class="note" style="margin-top:18px">Each threshold was calibrated by simulation:
-      <a href="methods.html">see how and why</a>. I also report every result under a stricter and a more lenient standard.</p>
-  </div>
-</section>
-
-<!-- ============ EXPLORE ============ -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow">Explore the full study</div>
-    <h2 class="lp-h2">The technical report</h2>
-    <div class="explore">
-      <a class="card" href="report.html"><h3>Findings →</h3><p>Summary table, answers to the research questions, reproducibility check.</p></a>
-      <a class="card" href="analysis/03_exponential.html"><h3>Population analyses →</h3><p>Normal, die, exponential, binomial and Cauchy: predictions, plots, evidence.</p></a>
-      <a class="card" href="analysis/06_real_world_data.html"><h3>Real data →</h3><p>Rivers, an election poll, and five real datasets put through the same test.</p></a>
-      <a class="card" href="methods.html"><h3>Method →</h3><p>Simulation design and how each “normal enough” threshold was calibrated.</p></a>
-      <a class="card" href="AI_prompts.html"><h3>AI log →</h3><p>The key prompts, what I questioned, and how I validated the code.</p></a>
-      <a class="card" href="https://github.com/JamV8/how-fast-does-normal-happen"><h3>Code on GitHub →</h3><p>Every number on this site can be reproduced with R, Quarto and seed 9426.</p></a>
-    </div>
-  </div>
-</section>
-
-<div class="tip" id="tip"></div>
-</div>
-<script src="assets/home.js" defer=""></script>
-
-
-
-
-<script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
-        }
-      }
-      return false;
-    }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
-    }
-    const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
-    });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
-    }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
-        }
-      }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
-        },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
-    }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
-      });
-    }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
-          }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
-            }
-          }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
-          }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
-          }
-          return note.innerHTML;
-        }
-      } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
-        }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(note);
-        }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
-      }
-    }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
-            }
-          } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
-            });
-          }
-        } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
-          .then(res => res.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
-            if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
-              instance.setContent(html);
-            } 
-          }).finally(() => {
-            instance.enable();
-            instance.show();
-          });
-        }
-      }, function(instance) {
-      });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
-        };
-      }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
-            }
-          });
-        }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
-      } else {
-        return undefined;
-      }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
-            }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
-        });
-      }
-    }
-  });
-  </script>
-</div> <!-- /content -->
-<footer class="footer">
-  <div class="nav-footer">
-    <div class="nav-footer-left">
-      &nbsp;
-    </div>   
-    <div class="nav-footer-center">
-<p>MATH 167R · Project 1 · Monte Carlo study of the Central Limit Theorem · R + Quarto</p>
-</div>
-    <div class="nav-footer-right">
-      &nbsp;
-    </div>
-  </div>
-</footer>
-
-
-
-
-<script src="site_libs/quarto-html/zenscroll-min.js"></script>
-</body></html>
+<canvas id="confetti" class="confetti" aria-hidden="true"></canvas>
+<script src="assets/play.js" defer></script>
+</body>
+</html>
