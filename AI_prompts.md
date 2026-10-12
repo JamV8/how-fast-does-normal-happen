@@ -165,8 +165,8 @@ R output.
 
 | Check | How | Result |
 |---|---|---|
-| `skew()` and `kurt()` match the Class 05 formulas | compared `R/clt_functions.R` line by line with the lecture code | ✅ |
-| Standard error formula | for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table |  ✅  |
-| Control case | the normal population passes all four checks at n = 1 |  ✅ |
-| Reproducibility | reran the exponential analysis with seed 2026 (section 8 of that page) |  ✅ |
-| Full re-render | `quarto render` from a clean copy reproduces the numbers |  ✅ |
+| `skew()` and `kurt()` match the Class 05 formulas | compared `R/clt_functions.R` line by line with the lecture code | Identical: same third/fourth central moments, kurtosis reported as excess (−3) |
+| Standard error formula | for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table | Simulated SE 0.1194 vs 0.1187 (ratio 1.006). Across every n for the normal, die, exponential and binomial the ratio stayed between 0.997 and 1.008 |
+| Control case | the normal population passes all four checks at n = 1 | Passes: skewness −0.008, excess kurtosis −0.014, Q-Q r = 0.99999, tails 2.55% / 2.49%; it also passes at every larger n tested |
+| Reproducibility | reran the exponential analysis with seed 2026 (section 8 of that page) | Main answer 69 with seed 2026 vs 71 with seed 9426; strict (600) and lenient (20) answers unchanged |
+| Full re-render | `quarto render` from a clean copy reproduces the numbers | Fresh clone with cached results deleted, everything re-simulated: all 13 results files byte-for-byte identical; `summary.csv` has the same values in a different row order |

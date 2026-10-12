@@ -372,27 +372,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="odd">
 <td><code>skew()</code> and <code>kurt()</code> match the Class 05 formulas</td>
 <td>compared <code>R/clt_functions.R</code> line by line with the lecture code</td>
-<td>✅</td>
+<td>Identical: same third/fourth central moments, kurtosis reported as excess (−3)</td>
 </tr>
 <tr class="even">
 <td>Standard error formula</td>
 <td>for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table</td>
-<td>✅</td>
+<td>Simulated SE 0.1194 vs 0.1187 (ratio 1.006). Across every n for the normal, die, exponential and binomial the ratio stayed between 0.997 and 1.008</td>
 </tr>
 <tr class="odd">
 <td>Control case</td>
 <td>the normal population passes all four checks at n = 1</td>
-<td>✅</td>
+<td>Passes: skewness −0.008, excess kurtosis −0.014, Q-Q r = 0.99999, tails 2.55% / 2.49%; it also passes at every larger n tested</td>
 </tr>
 <tr class="even">
 <td>Reproducibility</td>
 <td>reran the exponential analysis with seed 2026 (section 8 of that page)</td>
-<td>✅</td>
+<td>Main answer 69 with seed 2026 vs 71 with seed 9426; strict (600) and lenient (20) answers unchanged</td>
 </tr>
 <tr class="odd">
 <td>Full re-render</td>
 <td><code>quarto render</code> from a clean copy reproduces the numbers</td>
-<td>✅</td>
+<td>Fresh clone with cached results deleted, everything re-simulated: all 13 results files byte-for-byte identical; <code>summary.csv</code> has the same values in a different row order</td>
 </tr>
 </tbody>
 </table>
@@ -1026,11 +1026,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Check <span class="pp">|</span> How <span class="pp">|</span> Result <span class="pp">|</span></span>
 <span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
-<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`skew()`</span> and <span class="in">`kurt()`</span> match the Class 05 formulas <span class="pp">|</span> compared <span class="in">`R/clt_functions.R`</span> line by line with the lecture code <span class="pp">|</span> ✅ <span class="pp">|</span></span>
-<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Standard error formula <span class="pp">|</span> for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table <span class="pp">|</span>  ✅  <span class="pp">|</span></span>
-<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Control case <span class="pp">|</span> the normal population passes all four checks at n = 1 <span class="pp">|</span>  ✅ <span class="pp">|</span></span>
-<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Reproducibility <span class="pp">|</span> reran the exponential analysis with seed 2026 (section 8 of that page) <span class="pp">|</span>  ✅ <span class="pp">|</span></span>
-<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Full re-render <span class="pp">|</span> <span class="in">`quarto render`</span> from a clean copy reproduces the numbers <span class="pp">|</span>  ✅ <span class="pp">|</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`skew()`</span> and <span class="in">`kurt()`</span> match the Class 05 formulas <span class="pp">|</span> compared <span class="in">`R/clt_functions.R`</span> line by line with the lecture code <span class="pp">|</span> Identical: same third/fourth central moments, kurtosis reported as excess (−3) <span class="pp">|</span></span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Standard error formula <span class="pp">|</span> for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table <span class="pp">|</span> Simulated SE 0.1194 vs 0.1187 (ratio 1.006). Across every n for the normal, die, exponential and binomial the ratio stayed between 0.997 and 1.008 <span class="pp">|</span></span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Control case <span class="pp">|</span> the normal population passes all four checks at n = 1 <span class="pp">|</span> Passes: skewness −0.008, excess kurtosis −0.014, Q-Q r = 0.99999, tails 2.55% / 2.49%; it also passes at every larger n tested <span class="pp">|</span></span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Reproducibility <span class="pp">|</span> reran the exponential analysis with seed 2026 (section 8 of that page) <span class="pp">|</span> Main answer 69 with seed 2026 vs 71 with seed 9426; strict (600) and lenient (20) answers unchanged <span class="pp">|</span></span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Full re-render <span class="pp">|</span> <span class="in">`quarto render`</span> from a clean copy reproduces the numbers <span class="pp">|</span> Fresh clone with cached results deleted, everything re-simulated: all 13 results files byte-for-byte identical; <span class="in">`summary.csv`</span> has the same values in a different row order <span class="pp">|</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">
