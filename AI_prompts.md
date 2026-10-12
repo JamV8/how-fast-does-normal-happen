@@ -126,6 +126,22 @@ results showed a 50/50 yes/no question needs very few observations, so the examp
 - Smoother scrolling: the scroll position is smoothed before it drives the animation, and the page avoids
   re-layout on every frame.
 
+## Iteration 10: "sometimes I scroll and nothing happens"
+
+**My prompts:** "The site displays very strangely." Then: "The scroll doesn't feel perfect. There are moments when you
+scroll and nothing happens. Whenever you scroll, it should be visible on the screen."
+
+**What we found:** two text cards were on screen at once, stray dots floated outside the charts, a `$` sign in a
+table label was being read as a math formula, and the report pages still used the old purple theme. For the scroll,
+we wrote a small test that scrolls the story one mouse-wheel step at a time and checks whether anything on the screen
+changed. Before the fix, 43 of 141 steps changed nothing: several sections ran on a timer instead of the scroll, and
+each section's progress finished half a screen before the section did.
+
+**What changed:** every section is now driven by the scroll position (the population pile fills in, studies run one
+by one and then faster, a line sweeps across the "every kind of data" chart, the end of a section slides into the
+next one). After the change the same test found no scroll step where the screen stayed still, on a laptop and on a
+phone-sized screen.
+
 ## Problems the AI found while building
 
 These were flagged by the AI during coding; I reviewed and accepted each fix.

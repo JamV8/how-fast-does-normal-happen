@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f4f1ea'/%3E%3Cpath d='M2 27 C10 27 11 5 16 5 S22 27 30 27' fill='none' stroke='%23c8442d' stroke-width='3'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/story.css?v=3">
+<link rel="stylesheet" href="assets/story.css?v=8">
 </head>
 <body>
 
@@ -56,10 +56,11 @@
       </div>
     </section>
 
-    <section class="step" data-scene="one">
+    <section class="step tall" data-scene="one">
       <div class="card">
         <h2>One study, one average</h2>
         <p>A study takes 30 flights and averages their delays. Most of the time it misses the rare disasters, so its average comes out a little low.</p>
+        <p class="small">Scroll to run the next study. Each average drops into the pile below.</p>
       </div>
     </section>
 
@@ -82,6 +83,7 @@
       <div class="card">
         <h2>Every kind of data has its own number</h2>
         <p>I ran the same test on ten kinds of data. Dice rolls settled after 8 values and the time between Old Faithful eruptions after 6. Diamond prices needed 51, flight delays 235, and county populations 2,450. The more lopsided the data, the bigger the number.</p>
+        <p class="small">As you scroll, the line moves to bigger studies. Each dot stops at the size where that kind of data first passed.</p>
       </div>
     </section>
 
@@ -89,6 +91,7 @@
       <div class="card">
         <h2>Some data never settle</h2>
         <p>A few kinds of data produce giant outliers so often that averaging doesn’t help at all. The textbook case is called the Cauchy distribution. As you scroll, each study averages more and more values, up to 5,000. The pile looks the same as it did with one.</p>
+        <p class="small">The blue line shows where averages of ordinary data would end up with the same number of values.</p>
       </div>
     </section>
 
@@ -128,6 +131,6 @@
   </div>
 </footer>
 
-<script src="assets/story.js?v=3" defer></script>
+<script src="assets/story.js?v=8" defer></script>
 </body>
 </html>
