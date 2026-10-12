@@ -44,7 +44,7 @@
     ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h); ctx.closePath(); ctx.fill();
   }
   function text(ctx, s, x, y, opt = {}) {
-    ctx.font = `${opt.weight || 700} ${opt.size || 13}px "Plus Jakarta Sans", sans-serif`;
+    ctx.font = `${opt.weight || 500} ${opt.size || 13}px "IBM Plex Sans", sans-serif`;
     ctx.fillStyle = opt.color || INK2; ctx.textAlign = opt.align || "center"; ctx.textBaseline = opt.base || "alphabetic";
     ctx.fillText(s, x, y);
   }
@@ -138,7 +138,7 @@
         for (let i = 0; i <= rows; i++) disp[i] = lerp(disp[i], bins[i], Math.min(1, dt * 10));
         // draw
         ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = "#cdbfe9";
+        ctx.fillStyle = "#c9c0b0";
         for (let r = 0; r < rows; r++) for (let j = 0; j <= r; j++) { ctx.beginPath(); ctx.arc(x0 + (j - r / 2) * dx, pegTop + r * rowGap + 6, 4, 0, 7); ctx.fill(); }
         const scale = (base - binTop) / Math.max(40, Math.max(...disp) * 1.1);
         for (let k = 0; k <= rows; k++) {
@@ -222,8 +222,8 @@
       } };
     register(part, cv);
   }
-  diceGame({ k: 1, dice: "l1-dice", roll: "l1-roll", roll100: "l1-roll100", canvas: "l1-hist", count: "l1-count", readout: "l1-readout", aha: "l1-aha", color: cssv("--yellow") });
-  diceGame({ k: 2, dice: "l2-dice", roll: "l2-roll", roll100: "l2-roll100", canvas: "l2-hist", count: "l2-count", readout: "l2-readout", aha: "l2-aha", color: cssv("--teal") });
+  diceGame({ k: 1, dice: "l1-dice", roll: "l1-roll", roll100: "l1-roll100", canvas: "l1-hist", count: "l1-count", readout: "l1-readout", aha: "l1-aha", color: cssv("--purple") });
+  diceGame({ k: 2, dice: "l2-dice", roll: "l2-roll", roll100: "l2-roll100", canvas: "l2-hist", count: "l2-count", readout: "l2-readout", aha: "l2-aha", color: cssv("--purple") });
 
   // =====================================================================
   // LEVEL 3: slide the number of dice; the histogram morphs into a bell
@@ -268,7 +268,7 @@
         ctx.clearRect(0, 0, W, H);
         const bw = Math.max(1.5, (xs(lo + w) - xs(lo)) * 0.84);
         for (let i = 0; i < disp.length; i++) {
-          ctx.fillStyle = PAL[Math.round(clamp((centers[i] - 1) / 5, 0, 1) * 4)] || PAL[0];
+          ctx.fillStyle = cssv("--purple");
           ctx.globalAlpha = 0.9; rrect(ctx, xs(centers[i]) - bw / 2, ys(disp[i]), bw, (H - B) - ys(disp[i]), Math.min(7, bw / 2)); ctx.globalAlpha = 1;
         }
         ctx.fillStyle = "#e9e1d4"; ctx.fillRect(L, H - B, W - L - R, 3);
@@ -279,7 +279,7 @@
         ctx.beginPath();
         for (let i = 0; i <= 300; i++) { const x = lo + (hi - lo) * i / 300, y = ys(dnorm(x, 3.5, se)); i ? ctx.lineTo(xs(x), y) : ctx.moveTo(xs(x), y); }
         ctx.stroke(); ctx.setLineDash([]); ctx.shadowBlur = 0;
-        text(ctx, k >= DIE_N ? "🔔 bell curve" : "bell curve (not yet…)", xs(3.5), T - 22, { size: 15, color: CORAL });
+        text(ctx, k >= DIE_N ? "bell curve" : "bell curve (not reached yet)", xs(3.5), T - 22, { size: 14, color: CORAL, weight: 500 });
       } };
     register(part, cv);
   })();
@@ -291,15 +291,15 @@
   let SITE = {};
   const binomPmf = [0.59049, 0.32805, 0.0729, 0.0081, 0.00045, 0.00001];
   const POP = {
-    exponential: { emo: "⏱️", nm: "Waiting times", mu: 1, sigma: 1, draw: () => -Math.log(1 - rand()), range: [0, 5], sup: [0, Infinity] },
-    diamonds: { emo: "💎", nm: "Diamond prices", real: true },
-    flights: { emo: "✈️", nm: "Flight delays", real: true },
-    faithful: { emo: "🌋", nm: "Geyser waits", real: true },
-    counties: { emo: "🏙️", nm: "County sizes", real: true },
-    binomial: { emo: "🎯", nm: "Rare events", mu: 0.5, sigma: Math.sqrt(0.45), step: 1, range: [-0.5, 5.5], sup: [0, 5],
+    exponential: { nm: "Waiting times", mu: 1, sigma: 1, draw: () => -Math.log(1 - rand()), range: [0, 5], sup: [0, Infinity] },
+    diamonds: { nm: "Diamond prices", real: true },
+    flights: { nm: "Flight delays", real: true },
+    faithful: { nm: "Geyser waits", real: true },
+    counties: { nm: "County sizes", real: true },
+    binomial: { nm: "Rare events", mu: 0.5, sigma: Math.sqrt(0.45), step: 1, range: [-0.5, 5.5], sup: [0, 5],
       draw: () => { let c = 0; for (let i = 0; i < 5; i++) if (rand() < 0.1) c++; return c; } },
-    die: { emo: "🎲", nm: "Dice", mu: 3.5, sigma: Math.sqrt(35 / 12), step: 1, range: [0.5, 6.5], sup: [1, 6], draw: () => 1 + ((rand() * 6) | 0) },
-    cauchy: { emo: "☄️", nm: "Chaos", mu: null, sigma: null, range: [-8, 8], sup: [-Infinity, Infinity], draw: () => Math.tan(Math.PI * (rand() - 0.5)) },
+    die: { nm: "Dice", mu: 3.5, sigma: Math.sqrt(35 / 12), step: 1, range: [0.5, 6.5], sup: [1, 6], draw: () => 1 + ((rand() * 6) | 0) },
+    cauchy: { nm: "Extreme outliers", mu: null, sigma: null, range: [-8, 8], sup: [-Infinity, Infinity], draw: () => Math.tan(Math.PI * (rand() - 0.5)) },
   };
   const ORDER = ["exponential", "diamonds", "flights", "faithful", "counties", "binomial", "die", "cauchy"];
 
@@ -323,7 +323,7 @@
     const cards = $("l4-cards");
     ORDER.forEach((key) => {
       const P = POP[key], c = document.createElement("div"); c.className = "card"; c.dataset.key = key;
-      c.innerHTML = `<div class="emo">${P.emo}</div><div class="nm">${P.nm}</div><canvas></canvas><div class="done"></div>`;
+      c.innerHTML = `<div class="nm">${P.nm}</div><canvas></canvas><div class="done"></div>`;
       c.addEventListener("click", () => select(key));
       cards.appendChild(c);
       requestAnimationFrame(() => {
@@ -335,11 +335,11 @@
     // gauge + lights
     const gauge = $("l4-gauge");
     gauge.innerHTML = `
-      <path d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="#f3dfe3" stroke-width="22" stroke-linecap="round"/>
-      <path d="M20 110 A90 90 0 0 1 110 20" fill="none" stroke="#ffd2d9" stroke-width="22" stroke-linecap="round"/>
-      <path d="M110 20 A90 90 0 0 1 200 110" fill="none" stroke="#bdf0cf" stroke-width="22" stroke-linecap="round"/>
-      <text x="200" y="128" text-anchor="end" font-family="Plus Jakarta Sans" font-size="13" fill="#2b9a55">bell!</text>
-      <text x="20" y="128" text-anchor="start" font-family="Plus Jakarta Sans" font-size="13" fill="#c0475b">nope</text>
+      <path d="M20 110 A90 90 0 0 1 200 110" fill="none" stroke="#e6e0d4" stroke-width="16" stroke-linecap="round"/>
+      <path d="M20 110 A90 90 0 0 1 110 20" fill="none" stroke="#e9cfc8" stroke-width="16" stroke-linecap="round"/>
+      <path d="M110 20 A90 90 0 0 1 200 110" fill="none" stroke="#cfe0d2" stroke-width="16" stroke-linecap="round"/>
+      <text x="200" y="128" text-anchor="end" font-family="IBM Plex Sans" font-size="13" fill="#3c8d5a">bell</text>
+      <text x="20" y="128" text-anchor="start" font-family="IBM Plex Sans" font-size="13" fill="#c8442d">no bell</text>
       <g id="needle" style="transform-origin:110px 110px; transition: transform .9s cubic-bezier(.3,1.5,.5,1); transform: rotate(-90deg)">
         <line x1="110" y1="110" x2="110" y2="32" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>
       </g>
@@ -415,7 +415,7 @@
       const worst = Math.max(...Object.values(bad)), score = 100 / (1 + worst), pass = worst <= 1;
       needle.style.transform = `rotate(${-90 + score * 1.8}deg)`;
       ["skew", "kurt", "qq", "tail"].forEach((k) => $("lt-" + k).className = "light " + (bad[k] <= 1 ? "ok" : "no"));
-      $("l4-verdict").textContent = pass ? "🔔 Ding! It’s a bell" : cur === "cauchy" ? "☄️ Never a bell" : "Not a bell yet";
+      $("l4-verdict").textContent = pass ? "Bell-shaped" : cur === "cauchy" ? "Never bell-shaped" : "Not bell-shaped yet";
       if (pass && (!best[cur] || n < best[cur])) {
         const first = !best[cur]; best[cur] = n;
         const card = cards.querySelector(`[data-key=${cur}] .done`); card.textContent = `✓ n = ${fmt(n)}`;
@@ -427,15 +427,15 @@
     function challenge() {
       const s = SITE[cur], el = $("l4-challenge");
       if (cur === "cauchy") {
-        el.innerHTML = best.cauchyTried ? "☄️ Chaos never rings the bell. The study tried up to n = 5,000. Averaging doesn’t tame it."
-          : "Can you make <b>Chaos</b> ring the bell? Try a <i>huge</i> n.";
+        el.innerHTML = best.cauchyTried ? "This one never passes. My study went up to n = 5,000 and averaging didn’t help at all."
+          : "Can you get the <b>extreme outliers</b> to pass? Try a very large n.";
         return;
       }
       if (!best[cur]) { el.innerHTML = `Find the <b>smallest n</b> that rings the bell for <b>${POP[cur].nm.toLowerCase()}</b>.`; return; }
       const study = s && s.n_main;
-      const stars = study ? (best[cur] <= study * 1.25 ? "⭐⭐⭐" : best[cur] <= study * 2 ? "⭐⭐" : "⭐") : "";
-      el.innerHTML = `Your best: <b>n = ${fmt(best[cur])}</b> ${stars} &nbsp;·&nbsp; the study’s answer: <span class="gold">n = ${study ? fmt(study) : "?"}</span>` +
-        (best[cur] > (study || 0) * 1.25 ? " &nbsp;·&nbsp; can you go lower?" : "");
+      const stars = "";
+      el.innerHTML = `Your best: <b>n = ${fmt(best[cur])}</b>. My R study needed <b>n = ${study ? fmt(study) : "?"}</b>.` +
+        (best[cur] > (study || 0) * 1.25 ? " Try going lower." : " That’s close.");
     }
 
     // ---- drawing: population → funnel → histogram of averages ----
@@ -456,9 +456,9 @@
         const pmx = Math.max(...ph.bars.map((b) => b.h)), pxs = (x) => Z.pop[0] + (x - ph.lo) / (ph.hi - ph.lo) * (Z.pop[1] - Z.pop[0]);
         const pbw = (Z.pop[1] - Z.pop[0]) / ph.bars.length;
         ph.bars.forEach((b) => { const h = b.h / pmx * (base - top - 30); ctx.fillStyle = "#c9bfb0"; rrect(ctx, pxs(b.x) - (ph.discrete ? pbw * 0.3 : pbw * 0.45), base - h, ph.discrete ? pbw * 0.6 : pbw * 0.9, h, 4); });
-        text(ctx, narrow ? "population" : `${P.emo} the population`, (Z.pop[0] + Z.pop[1]) / 2, top - 18, { size: narrow ? 13 : 15, color: INK });
+        text(ctx, "the data", (Z.pop[0] + Z.pop[1]) / 2, top - 18, { size: 13, color: INK, weight: 500 });
         // funnel
-        ctx.fillStyle = "#ffe1e6"; ctx.beginPath();
+        ctx.fillStyle = "#e6dfd2"; ctx.beginPath();
         ctx.moveTo(Z.fx - fw, top + 30); ctx.lineTo(Z.fx + fw, top + 30); ctx.lineTo(Z.fx + 7, top + 100); ctx.lineTo(Z.fx - 7, top + 100); ctx.closePath(); ctx.fill();
         text(ctx, "average", Z.fx, top + 125, { size: 13, color: CORAL });
         text(ctx, `${fmt(n)} in`, Z.fx, top + 18, { size: 13, color: INK2 });
@@ -472,7 +472,7 @@
         const bw = (Z.hist[1] - Z.hist[0]) / hist.nb;
         for (let i = 0; i < hist.nb; i++) {
           hist.disp[i] = lerp(hist.disp[i], dens[i], Math.min(1, dt * 10));
-          ctx.fillStyle = PAL[i % 2 ? 4 : 3]; ctx.globalAlpha = 0.85;
+          ctx.fillStyle = cssv("--purple"); ctx.globalAlpha = 0.8;
           rrect(ctx, Z.hist[0] + i * bw + 0.8, ys(hist.disp[i]), Math.max(bw - 1.6, 1), base - ys(hist.disp[i]), Math.min(5, bw / 2));
           ctx.globalAlpha = 1;
         }
@@ -483,7 +483,7 @@
           ctx.strokeStyle = CORAL; ctx.lineWidth = 3.5; ctx.beginPath();
           for (let i = 0; i <= 240; i++) { const x = hist.lo + (hist.hi - hist.lo) * i / 240, y = ys(dnorm(x, P.mu, se)); i ? ctx.lineTo(hx(x), y) : ctx.moveTo(hx(x), y); }
           ctx.stroke();
-        } else text(ctx, "no bell curve exists for chaos", (Z.hist[0] + Z.hist[1]) / 2, top + 4, { size: 13, color: CORAL });
+        } else text(ctx, "no bell curve to compare with: this data has no finite spread", (Z.hist[0] + Z.hist[1]) / 2, top + 4, { size: 12, color: CORAL });
         // sparks: a few sample values fly into the funnel, then their average drops into the histogram
         spawnAcc += dt;
         if (spawnAcc > 0.55) {
@@ -516,20 +516,20 @@
   // LEVEL 5: the race to the bell curve
   // =====================================================================
   const RACERS = [
-    ["normal", "🔔", "Bell curve"], ["die", "🎲", "Dice"], ["faithful", "🌋", "Geyser waits"], ["discoveries", "💡", "Inventions"],
-    ["diamonds", "💎", "Diamond prices"], ["exponential", "⏱️", "Waiting times"], ["binomial", "🎯", "Rare events"],
-    ["flights", "✈️", "Flight delays"], ["counties", "🏙️", "County sizes"], ["cauchy", "☄️", "Chaos"]];
+    ["normal", "Already bell-shaped"], ["die", "Dice"], ["faithful", "Old Faithful waits"], ["discoveries", "Inventions per year"],
+    ["diamonds", "Diamond prices"], ["exponential", "Waiting times"], ["binomial", "Rare events"],
+    ["flights", "Flight delays"], ["counties", "County populations"], ["cauchy", "Extreme outliers"]];
   function level5() {
     const race = $("race"), pos = (n) => 4 + Math.log10(n) / 4 * 88;   // % of the track
-    race.innerHTML = RACERS.map(([k, e, nm]) =>
-      `<div class="lane"><div class="name">${e} ${nm}</div><div class="track"><span class="runner" id="run-${k}">${e}</span><span class="result" id="res-${k}"></span></div></div>`).join("") +
+    race.innerHTML = RACERS.map(([k, nm]) =>
+      `<div class="lane"><div class="name">${nm}</div><div class="track"><span class="runner dot" id="run-${k}"></span><span class="result" id="res-${k}"></span></div></div>`).join("") +
       `<div class="axis"><div></div><div class="ticks">${[1, 10, 30, 100, 1000, 10000].map((v) => `<span style="left:${pos(v)}%">${fmt(v)}</span>`).join("")}</div></div>`;
     const tracks = race.querySelectorAll(".track");
     const flag = document.createElement("div"); flag.className = "flagline"; race.appendChild(flag);
     function placeFlag() {
       const t = tracks[0].getBoundingClientRect(), r = race.getBoundingClientRect();
       flag.style.left = (t.left - r.left + t.width * pos(30) / 100) + "px"; flag.style.top = "16px";
-      flag.innerHTML = `<span class="flag">🚩 30</span>`;
+      flag.innerHTML = `<span class="flag">textbook rule: 30</span>`;
     }
     placeFlag(); window.addEventListener("resize", placeFlag);
     let t0 = null, running = false, played = false;
@@ -555,7 +555,7 @@
             }
           } else {
             el.style.left = Math.min(pos(nNow), 99) + "%";
-            if (k === "cauchy" && p >= 1) { res.textContent = "never ∞"; res.className = "result show never left"; res.style.left = "92%"; el.style.opacity = 0.35; }
+            if (k === "cauchy" && p >= 1) { res.textContent = "never"; res.className = "result show never left"; res.style.left = "92%"; el.style.opacity = 0.35; }
           }
         });
         if (p >= 1.08) { running = false; $("race-verdict").classList.add("show"); }
@@ -566,32 +566,39 @@
   // =====================================================================
   // LEVEL 6: polls land around the truth
   // =====================================================================
-  (function level6() {
-    const cv = $("l6-canvas"); let g = fit(cv), dots = [], stacks = {}, queue = 0, acc = 0, inside = 0, total = 0;
-    const lo = 45, hi = 59, truth = 52, se = 100 * Math.sqrt(0.52 * 0.48 / 1000), moe = 1.96 * se, bin = 0.35;
-    $("l6-go").addEventListener("click", () => { dots = []; stacks = {}; inside = 0; total = 0; queue = 100; });
+  function level6(real) {
+    const cv = $("l6-canvas"), fl = Float64Array.from(real.flights.values), MU = real.flights.mu;
+    let g = fit(cv), lines = [], queue = 0, acc = 0, nPer = 30, tally = { hit: 0, low: 0, high: 0 };
+    const tcrit = (df) => 1.96 + 2.4 / df;   // close enough to qt(0.975, df) for df >= 29
+    function run(n) { nPer = n; lines = []; tally = { hit: 0, low: 0, high: 0 }; queue = 100; }
+    $("l6-go").addEventListener("click", () => run(30));
+    $("l6-go2").addEventListener("click", () => run(235));
     const part = { resize() { g = fit(cv); },
       step(dt) {
-        const { ctx, W, H } = g, L = 20, R = 20, base = H - 34, xs = (x) => L + (x - lo) / (hi - lo) * (W - L - R);
-        if (queue > 0) { acc += dt; while (acc > 0.05 && queue > 0) { acc -= 0.05; queue--;
-          let yes = 0; for (let i = 0; i < 1000; i++) if (rand() < 0.52) yes++;
-          const v = yes / 10, b = Math.round(v / bin), level = (stacks[b] = (stacks[b] || 0) + 1);
-          const ok = Math.abs(v - truth) <= moe; dots.push({ x: b * bin, level, t: 0, ok }); total++; if (ok) inside++; } }
+        if (queue > 0) { acc += dt; while (acc > 0.035 && queue > 0) { acc -= 0.035; queue--;
+          let s = 0, ss = 0; const x = new Float64Array(nPer);
+          for (let i = 0; i < nPer; i++) { x[i] = fl[(rand() * fl.length) | 0]; s += x[i]; }
+          const m = s / nPer; for (let i = 0; i < nPer; i++) ss += (x[i] - m) ** 2;
+          const h = tcrit(nPer - 1) * Math.sqrt(ss / (nPer - 1)) / Math.sqrt(nPer), lo = m - h, hi = m + h;
+          const kind = hi < MU ? "low" : lo > MU ? "high" : "hit"; tally[kind]++;
+          lines.push({ lo, hi, kind, t: 0 }); } }
+        const { ctx, W, H } = g, L = 24, R = 24, T = 26, Bm = 40, lo = -25, hi = 45, xs = (v) => L + (clamp(v, lo, hi) - lo) / (hi - lo) * (W - L - R);
         ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = "#e3f8ea"; ctx.fillRect(xs(truth - moe), 20, xs(truth + moe) - xs(truth - moe), base - 20);
-        text(ctx, `52% ± ${moe.toFixed(1)}%`, xs(truth), 40, { size: 16, color: "#1f8a4c" });
-        ctx.fillStyle = "#e9e1d4"; ctx.fillRect(L, base, W - L - R, 3);
-        for (let v = 46; v <= 58; v += 2) text(ctx, v + "%", xs(v), base + 22, { size: 13 });
-        const r = Math.min(9, (W - L - R) / ((hi - lo) / bin) * 0.45);
-        dots.forEach((d) => {
-          d.t = Math.min(1, d.t + dt * 2.6);
-          const y = lerp(10, base - r - (d.level - 1) * r * 2.1, d.t * d.t);
-          ctx.fillStyle = d.ok ? GREEN : cssv("--red"); ctx.beginPath(); ctx.arc(xs(d.x), y, r, 0, 7); ctx.fill();
+        const rh = (H - T - Bm) / 100;
+        lines.forEach((ln, i) => {
+          ln.t = Math.min(1, ln.t + dt * 4); const y = T + (i + 0.5) * rh, off = (1 - ln.t) * 24;
+          ctx.globalAlpha = ln.t; ctx.strokeStyle = ln.kind === "hit" ? INK2 : CORAL; ctx.lineWidth = ln.kind === "hit" ? 1.2 : 2;
+          ctx.beginPath(); ctx.moveTo(xs(ln.lo) + off, y); ctx.lineTo(xs(ln.hi) + off, y); ctx.stroke();
         });
-        if (total) $("l6-readout").innerHTML = `<span style="color:#1f8a4c">${inside}</span> of ${total} polls landed inside the ± ${moe.toFixed(1)}% zone`;
+        ctx.globalAlpha = 1; ctx.strokeStyle = INK; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(xs(MU), T - 10); ctx.lineTo(xs(MU), H - Bm + 4); ctx.stroke(); ctx.setLineDash([]);
+        text(ctx, `true average delay ${MU.toFixed(1)} min`, xs(MU) + 6, T - 12, { size: 12, align: "left", color: INK });
+        ctx.fillStyle = INK; ctx.fillRect(L, H - Bm + 6, W - L - R, 1);
+        for (let v = -20; v <= 40; v += 10) text(ctx, String(v), xs(v), H - Bm + 24, { size: 12 });
+        text(ctx, "95% range for the average delay (minutes)", L, H - 4, { size: 12, align: "left" });
+        if (lines.length) $("l6-readout").innerHTML = `${nPer} flights per study: <b>${tally.hit}</b> caught the true average, <b style="color:var(--red)">${tally.low}</b> too low, <b>${tally.high}</b> too high`;
       } };
     register(part, cv);
-  })();
+  }
 
   // ---------- data, then start ----------
   Promise.all([fetch("assets/data/site.json").then((r) => r.json()), fetch("assets/data/real_data.json").then((r) => r.json())])
@@ -599,7 +606,7 @@
       SITE = Object.fromEntries(site.populations.map((p) => [p.key, p]));
       if (SITE.die && SITE.die.n_main) DIE_N = SITE.die.n_main;
       Object.assign(STD, site.standards.main);
-      level4(real); level5();
+      level4(real); level5(); level6(real);
     })
     .catch(() => { level5(); });
   requestAnimationFrame(loop);

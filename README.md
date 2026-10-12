@@ -1,6 +1,6 @@
 # How Fast Does Normal Happen?
 
-**Is "30 data points" really enough to trust an average? I tested the most famous rule of thumb in statistics, and found that the honest answer is "it depends": sometimes 8, sometimes 2,450, sometimes never.**
+**Statistics classes say 30 data points are enough for an average to behave like a bell curve. I tested that rule. Depending on the data it took anywhere from 8 to 2,450 values, and for one kind of data no sample size worked.**
 
 **[Visual story](https://jamv8.github.io/how-fast-does-normal-happen/)** (start here, no statistics background needed)
 &nbsp;·&nbsp; **[Play mode](https://jamv8.github.io/how-fast-does-normal-happen/play.html)**
@@ -13,16 +13,20 @@
 
 ## In plain words
 
-### Why this matters
+### What goes wrong with 30 flights
 
-When a news poll says **"52% of voters, plus or minus 3%"**, the pollster asked about 1,000 people *once*. That 52%
-is an average: every "yes" counts as 1 and every "no" as 0. The "± 3%" comes from a piece of math that says
-averages behave like a **bell curve**: if the poll were repeated many times, 95% of the results would land within 3
-points of the truth. The same math is behind drug trials, website experiments, and quality checks in factories.
+Say you want the average arrival delay at New York's airports. You take 30 random flights, average their delays,
+and add the usual "95% range" around that average, the way a statistics class teaches. That range is supposed to
+contain the true average 95 times out of 100.
 
-That math has a catch: it only works once each average is built from **enough data**. Statistics classes teach a
-rule of thumb: **30 data points is enough**. If that rule is wrong for your data, the "± 3%" is wrong too, and
-nobody notices, because in real life you only ever get one set of data.
+I ran that exact procedure 100,000 times on the real 2013 flight records. The range caught the true average only
+**89.8%** of the time. When it missed, it almost always missed low: in **9.8%** of tries the whole range sat below the
+real delay, four times the 2.5% the method promises. For county populations it was worse: the range was right only
+**71.7%** of the time.
+
+The textbook range relies on the average behaving like a **bell curve**, and the rule of thumb says 30 data points
+are enough for that. With lopsided data like delays, prices or populations, they aren't, and the range itself gives
+no sign that it's off.
 
 ### What I investigated
 
@@ -57,22 +61,22 @@ county populations).
 
 ### What I found
 
-1. **There is no magic number.** Depending on the data, the answer ranged from **1** (data that are already
-   bell-shaped) to **2,450**.
-2. **Even, not-lopsided data are fast.** Dice rolls needed only **8** values per study; the time between Old Faithful
-   eruptions only **6**. For them, 30 is more than enough.
-3. **Lopsided data are slow.** Waiting times for the next customer needed **71**, diamond prices **51**, flight delays
-   **235**, and county populations **2,450**. The more lopsided the data, the more values each study needs. A simple
-   calculation based on how lopsided the data are came close: for flight delays it predicted 222, and the
-   simulation found 235.
-4. **Some data never get there.** For "extreme-outlier" data (statisticians call it the Cauchy distribution),
-   averaging 5,000 values was no better than looking at one. No study size works.
-5. **The rule of 30 failed for 4 of the 5 real datasets.** Prices, delays and populations are exactly the kind of data
-   people analyze every day.
-6. **And the poll?** Yes/no answers split close to 50–50 are not lopsided, so 1,000 people is plenty: that "± 3%" is honest.
+1. No single number works. Depending on the data, the answer ranged from **1** (data that are already bell-shaped)
+   to **2,450**.
+2. Dice rolls needed only **8** values per study, and the time between Old Faithful eruptions only **6**. For data
+   that are roughly symmetric, 30 is more than enough.
+3. Lopsided data needed far more: waiting times for the next customer **71**, diamond prices **51**, flight delays
+   **235**, and county populations **2,450**. A rule of thumb based on skewness (a measure of how lopsided data are)
+   came close; for flight delays it predicted 222 and the simulation found 235.
+4. For "extreme-outlier" data (statisticians call it the Cauchy distribution), averaging 5,000 values was no better
+   than looking at one. No sample size works there.
+5. The rule of 30 failed for 4 of my 5 real datasets, including prices, delays and populations, which people analyze
+   all the time.
+6. In practice, the usual 95% range built from 30 flights missed the true average delay 10.2% of the time, almost
+   always on the low side. With 235 flights it missed 5.9%.
 
-**Bottom line:** before trusting a "± something" built on an average, look at how lopsided your data are. The more
-lopsided they are, the more data you need, and sometimes an average is simply the wrong tool.
+So before trusting a "± something" built on an average, check how lopsided the data are. Lopsided data need a lot more
+than 30 values.
 
 ---
 

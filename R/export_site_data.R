@@ -77,8 +77,17 @@ illustration <- list(
   n71 = c(bins(m71, 0.5, 1.5), list(n = 71, mu = 1, se = 1 / sqrt(71), skew = round(skew(m71), 2)))
 )
 
+# ---- "why it matters": coverage of the usual 95% interval (from analysis/06) ----
+ci <- read.csv("results/ci_coverage.csv"); ex <- read.csv("results/ci_flights_examples.csv")
+row_of <- function(k, n) { r <- ci[ci$key == k & ci$n == n, ]; list(n = n, covers = r$covers, too_low = r$too_low, too_high = r$too_high) }
+why <- list(mu = mean(flights_delay), sigma = pop_sd(flights_delay), max = max(flights_delay),
+            share_early = mean(flights_delay < 0), share_within20 = mean(abs(flights_delay) <= 20),
+            intervals = unname(lapply(seq_len(nrow(ex)), function(i) round(c(ex$lo[i], ex$hi[i]), 2))),
+            flights30 = row_of("flights", 30), flights100 = row_of("flights", 100),
+            flights_main = row_of("flights", max(ci$n[ci$key == "flights"])), counties30 = row_of("counties", 30))
+
 jsonlite::write_json(list(standards = standards, B = B, seed = student_id,
-                          populations = summary_rows, illustration = illustration),
+                          populations = summary_rows, illustration = illustration, why = why),
                      "assets/data/site.json", auto_unbox = TRUE, null = "null", na = "null", digits = NA)
 
 # ---- datasets for the simulator ---------------------------------

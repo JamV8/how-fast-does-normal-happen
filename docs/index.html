@@ -4,131 +4,128 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How Fast Does Normal Happen?</title>
-<meta name="description" content="A visual essay on the Central Limit Theorem: when averages become a bell curve, why the rule of 30 fails, and when no sample size is enough.">
+<meta name="description" content="Statistics classes say 30 data points are enough for an average to behave like a bell curve. I tested that rule with simulations on textbook examples and real data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/story.css">
 </head>
 <body>
 
 <nav class="nav" id="nav">
-  <a class="logo" href="#top"><span class="logo-mark"></span>How fast does normal happen?</a>
+  <a class="logo" href="#top">How fast does normal happen?</a>
   <div class="nav-links">
-    <a href="play.html">Play mode</a>
+    <a href="play.html">Play</a>
     <a href="simulator.html">Lab</a>
-    <a href="report.html">Findings</a>
+    <a href="report.html">Report</a>
     <a href="https://github.com/JamV8/how-fast-does-normal-happen">Code</a>
   </div>
 </nav>
 
 <main class="scrolly" id="top">
   <div class="stage">
-    <canvas id="viz" aria-label="Animated visualization that changes as you scroll"></canvas>
-    <div class="hud" id="hud" aria-live="polite"></div>
+    <canvas id="viz" aria-label="Chart that changes as you scroll"></canvas>
+    <div class="note" id="note" aria-live="polite"></div>
     <div class="progress"><span id="progress-bar"></span></div>
   </div>
 
   <div class="steps">
-    <section class="step hero" data-scene="0">
-      <div class="hero-inner">
-        <p class="kicker">A visual story about averages</p>
-        <h1>How fast does<br><em>normal</em> happen?</h1>
-        <p class="sub">Average a group of random numbers. Do it again and again, and the averages pile up into a bell curve. Statisticians call that shape <b>“normal”</b>, and the rule behind it the <b>Central Limit Theorem</b>. Textbooks say groups of 30 are enough. I tested how many numbers it really takes.</p>
-        <div class="scroll-cue"><span></span>Scroll</div>
+    <section class="step hero" data-scene="hero">
+      <div class="hero-text">
+        <h1>How fast does <em>normal</em> happen?</h1>
+        <p class="dek">Statistics classes teach that once each sample has about 30 numbers, the averages from repeated samples follow a bell curve, the shape statisticians call <i>normal</i>. A lot of everyday statistics leans on that rule. For a class project I tested it with computer simulations, on textbook examples and on real data, to find out how many numbers it actually takes.</p>
+        <p class="byline">MATH 167R &nbsp;·&nbsp; Project 1 &nbsp;·&nbsp; Fall 2026</p>
+        <p class="cue">Scroll to start ↓</p>
       </div>
     </section>
 
-    <section class="step" data-scene="8">
+    <section class="step tall" data-scene="why">
       <div class="card">
-        <span class="num">01 · WHY IT MATTERS</span>
-        <h2>Most “± 3%” figures rely on this curve.</h2>
-        <p>A news poll asks 1,000 people and reports “52%, plus or minus 3%.” That 52% is an average: every “yes” counts as 1 and every “no” as 0.</p>
-        <p>The poll is never repeated, so the bell curve fills in what would happen if it were: 95% of repeated polls would land within 3 points of the truth.</p>
-        <p class="dim">Drug trials and website experiments work the same way. If the averages are not bell-shaped yet, that ± is wrong, and nobody notices.</p>
+        <h2>A “95% sure” range that’s right 90% of the time</h2>
+        <p>Say you want the average arrival delay at New York’s airports. You pull 30 random flights from the 2013 records, average their delays, and add the usual 95% range around that average.</p>
+        <p>I ran that exact procedure 100,000 times on the real flight data. The range caught the true average only <b>89.8%</b> of the time, and when it missed, it almost always missed low: in <b>9.8%</b> of tries the whole range sat below the real delay. The method promises 2.5%.</p>
+        <p class="small hide-m">Each line on the chart is one of those tries. The red ones missed.</p>
       </div>
     </section>
 
-    <section class="step" data-scene="1">
+    <section class="step" data-scene="data">
       <div class="card">
-        <span class="num">02 · THE DATA</span>
-        <h2>Real data are rarely bell-shaped.</h2>
-        <p>Each dot is one waiting time: minutes until the next customer arrives. Most waits are short, a few are very long. The shape is lopsided, nothing like a bell.</p>
+        <h2>The trouble is the shape of the data</h2>
+        <p>These dots are 1,100 real arrival delays. Most flights land within 20 minutes of schedule, and more than half land early. A few are hours late. The longest delay in the data is about 21 hours, far off the right edge of this chart.</p>
       </div>
     </section>
 
-    <section class="step" data-scene="2">
+    <section class="step" data-scene="one">
       <div class="card">
-        <span class="num">03 · ONE STUDY</span>
-        <h2>A study takes a few values and averages them.</h2>
-        <p>Pick five waiting times at random and report their average. That single number is all one study sees.</p>
+        <h2>One study, one average</h2>
+        <p>A study takes 30 flights and averages their delays. Most of the time it misses the rare disasters, so its average comes out a little low.</p>
       </div>
     </section>
 
-    <section class="step" data-scene="3">
+    <section class="step" data-scene="many">
       <div class="card">
-        <span class="num">04 · HOW I TESTED IT</span>
-        <h2>A computer can repeat the study 100,000 times.</h2>
-        <p>Each dot below is one study’s average. Together they show how far a single study can land from the truth. This pile is the kind of curve behind a ±.</p>
-        <p class="dim">With five values per study it is still lopsided. I repeated this for every study size: 5, 10, 20 values and up.</p>
+        <h2>Repeat it, and the averages make their own shape</h2>
+        <p>These are 2,000 studies of 30 flights each. If 30 were enough, this pile would be a symmetric bell. It still leans right, with a tail of unlucky studies that happened to include a very late flight.</p>
       </div>
     </section>
 
-    <section class="step tall" data-scene="4">
+    <section class="step tall" data-scene="grow">
       <div class="card">
-        <span class="num">05 · BIGGER STUDIES</span>
-        <h2>Give every study more values.</h2>
-        <p>Keep scrolling. <b>n</b> is the number of values each study averages. As n grows, the averages squeeze together and settle onto the bell curve (red line).</p>
-        <p class="dim">I counted it as a bell curve once four checks passed (shown at the top). With 30 waiting times, a “95%” range still misses on the high side 3.4% of the time instead of 2.5%, about 40% more often than promised. It took <b>n = 71</b>.</p>
+        <h2>How many flights is enough?</h2>
+        <p>Keep scrolling to put more flights into every study. The pile tightens and evens out until it matches the bell curve (red line).</p>
+        <p class="small">I only count it as bell-shaped when four checks pass (box on the right) and keep passing for bigger studies. For flight delays that happened at 235 flights.</p>
       </div>
     </section>
 
-    <section class="step" data-scene="5">
+    <section class="step" data-scene="compare">
       <div class="card">
-        <span class="num">06 · WHAT I FOUND</span>
-        <h2>The answer depends on the data.</h2>
-        <p>Same test, ten kinds of data, from dice rolls to flight delays. Even, not-lopsided data need only a handful of values. Lopsided real-world data, like prices, delays and populations, need anywhere from about 40 to thousands.</p>
+        <h2>Every kind of data has its own number</h2>
+        <p>I ran the same test on ten kinds of data. Dice rolls settled after 8 values and the time between Old Faithful eruptions after 6. Diamond prices needed 51, flight delays 235, and county populations 2,450. The more lopsided the data, the bigger the number.</p>
       </div>
     </section>
 
-    <section class="step tall" data-scene="6">
+    <section class="step tall" data-scene="never">
       <div class="card">
-        <span class="num">07 · THE EXCEPTION</span>
-        <h2>Some data never settle.</h2>
-        <p>In some data, gigantic outliers show up so often that averaging can’t tame them. Watch n climb to 5,000: the averages stay as scattered as single values.</p>
-        <p class="dim">Real data with a few giant values come close. County populations needed 2,450. (The textbook example is called the Cauchy distribution.)</p>
+        <h2>Some data never settle</h2>
+        <p>A few kinds of data produce giant outliers so often that averaging doesn’t help at all. The textbook case is called the Cauchy distribution. As you scroll, each study averages more and more values, up to 5,000. The pile looks the same as it did with one.</p>
       </div>
     </section>
 
-    <section class="step tall" data-scene="7">
+    <section class="step tall" data-scene="answer">
       <div class="card">
-        <span class="num">08 · THE ANSWER</span>
-        <h2>So, is it thirty?</h2>
+        <h2>Is 30 enough?</h2>
         <p class="answer">No.</p>
-        <p>It is <b>8</b> for dice, <b>71</b> for waiting times, <b>2,450</b> for county populations, and for some data no number works.</p>
-        <p>And the poll? Yes/no answers split close to 50–50 are not lopsided, so 1,000 people is plenty. That ± 3% is honest.</p>
-        <p class="dim">The lesson: before trusting a ± built on an average, check how lopsided the data are. The more lopsided, the more data you need.</p>
+        <p>For flight delays it takes about 235 flights before the usual 95% range behaves. With 235, my simulation caught the true average 94.1% of the time, up from 89.8% with 30.</p>
+        <p class="small">If your data have a long tail, like the delays, prices and populations here, 30 values can produce a confident-looking range that’s wrong more often than it admits. So it’s worth plotting the data before trusting the ±.</p>
       </div>
     </section>
   </div>
 </main>
 
-<section class="outro">
+<footer class="outro">
   <div class="outro-inner">
-    <p class="kicker">How it was made</p>
-    <h2>Explore the study</h2>
-    <p class="how">Every number on this page comes from computer simulations written in R, a programming language for statistics: 100,000 simulated studies for every study size, on five computer-generated data types and five real datasets. The full report explains each step.</p>
-    <div class="links">
-      <a href="play.html"><span>Play mode</span><small>Roll dice, feed the Average Machine, race to the bell curve.</small></a>
-      <a href="simulator.html"><span>Lab</span><small>Any kind of data, any study size, all four checks.</small></a>
-      <a href="report.html"><span>Findings</span><small>Results, the final table, and the research questions.</small></a>
-      <a href="methods.html"><span>Method</span><small>How the four bell-curve checks were chosen.</small></a>
-      <a href="analysis/06_real_world_data.html"><span>Real data</span><small>Flights, diamonds, geysers, counties.</small></a>
-      <a href="https://github.com/JamV8/how-fast-does-normal-happen"><span>Code</span><small>All the code, so anyone can reproduce every number.</small></a>
+    <div>
+      <h2>About this project</h2>
+      <p>Every number here comes from simulations I wrote in R for MATH 167R: 100,000 simulated studies for every sample size, on five computer-generated data types and five real datasets. The report has the code, the full tables, and how I chose the four checks.</p>
+      <ul class="read">
+        <li><a href="report.html">Findings</a>: results and the summary table</li>
+        <li><a href="analysis/06_real_world_data.html">Real data</a>: flights, diamonds, geysers and counties, including the 95% range test</li>
+        <li><a href="methods.html">Method</a>: how “bell-shaped enough” was defined</li>
+        <li><a href="play.html">Play</a>: roll dice and race ten datasets to the bell curve</li>
+        <li><a href="simulator.html">Lab</a>: try any dataset and sample size yourself</li>
+        <li><a href="https://github.com/JamV8/how-fast-does-normal-happen">Code on GitHub</a></li>
+      </ul>
     </div>
-    <p class="fine">MATH 167R · Project 1 · A computer-simulation study of the Central Limit Theorem</p>
+    <div class="sources">
+      <h3>Data</h3>
+      <p>Flight delays: <i>nycflights13</i> (all flights leaving New York City airports in 2013).<br>
+         Diamond prices and Midwest counties: <i>ggplot2</i> sample datasets.<br>
+         Old Faithful eruptions and yearly inventions: datasets built into R.</p>
+      <h3>Method in one line</h3>
+      <p>Draw a sample, average it, repeat 100,000 times, check the shape of the averages, and find the smallest sample size where it passes. Seed 9426.</p>
+    </div>
   </div>
-</section>
+</footer>
 
 <script src="assets/story.js" defer></script>
 </body>

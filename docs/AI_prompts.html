@@ -210,6 +210,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#iteration-6-pilot-runs-before-predicting" id="toc-iteration-6-pilot-runs-before-predicting" class="nav-link" data-scroll-target="#iteration-6-pilot-runs-before-predicting">Iteration 6: pilot runs before predicting</a></li>
   <li><a href="#iteration-7-checking-my-own-understanding" id="toc-iteration-7-checking-my-own-understanding" class="nav-link" data-scroll-target="#iteration-7-checking-my-own-understanding">Iteration 7: checking my own understanding</a></li>
   <li><a href="#iteration-8-presentation-for-a-non-technical-audience" id="toc-iteration-8-presentation-for-a-non-technical-audience" class="nav-link" data-scroll-target="#iteration-8-presentation-for-a-non-technical-audience">Iteration 8: presentation for a non-technical audience</a></li>
+  <li><a href="#iteration-9-the-why-it-matters-part-isnt-believable" id="toc-iteration-9-the-why-it-matters-part-isnt-believable" class="nav-link" data-scroll-target="#iteration-9-the-why-it-matters-part-isnt-believable">Iteration 9: “the why-it-matters part isn’t believable”</a></li>
   <li><a href="#problems-the-ai-found-while-building" id="toc-problems-the-ai-found-while-building" class="nav-link" data-scroll-target="#problems-the-ai-found-while-building">Problems the AI found while building</a></li>
   <li><a href="#writing" id="toc-writing" class="nav-link" data-scroll-target="#writing">Writing</a></li>
   <li><a href="#how-i-validated-the-code" id="toc-how-i-validated-the-code" class="nav-link" data-scroll-target="#how-i-validated-the-code">How I validated the code</a></li>
@@ -325,6 +326,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>What changed:</strong> the home page was rebuilt as six short playable levels: rolling dice into a histogram, a slider that turns averages of dice into a bell curve, an “Average Machine” with a challenge to find the smallest n that rings the bell (checked by the same four tests as the R study), a race of ten populations to the bell curve, and simulated polls. The technical report stayed as separate pages for readers who want the details.</p>
 <p><strong>Follow-up prompt:</strong> “The game is cool, but it feels too relaxed and playful. I want something that looks slick and professional, more like an animation than a game. Keep the game as a second option.”</p>
 <p><strong>What changed:</strong> a new home page (“Story mode”): a dark, scroll-driven visual essay in which about 3,000 particles re-form into each step of the argument (population, one sample, many averages, growing n with a live HUD of the R results, ten populations, the Cauchy case, and “30” crossed out). The game moved to “Play mode”.</p>
+</section>
+<section id="iteration-9-the-why-it-matters-part-isnt-believable" class="level2">
+<h2 class="anchored" data-anchor-id="iteration-9-the-why-it-matters-part-isnt-believable">Iteration 9: “the why-it-matters part isn’t believable”</h2>
+<p><strong>My prompt:</strong> “Make the scroll animations smooth. Also think about the ‘why it matters’ part so it really matters: what’s there now isn’t believable. And make both the game and the story not look like AI, including the text.”</p>
+<p><strong>What I noticed:</strong> the website opened with a news poll (“52% ± 3%”) as the reason the CLT matters, but my own results showed a 50/50 yes/no question needs very few observations, so the example argued against my point.</p>
+<p><strong>What changed:</strong> - A new analysis in R (Real data, Part C): how often does the usual 95% t-interval, built from one sample, contain the true mean? With 30 real flight delays it caught the truth 89.8% of the time and was too low in 9.8% of samples (promised: 2.5%). With 235 flights it caught it 94.1% of the time. County populations at n = 30: 71.7%. - The story now follows that one real example (flight delays) from the problem to the answer, and Play mode’s last level lets the reader run the same 100 studies. - Design: no purple gradients, emoji or pill badges; a newspaper-style layout with a serif typeface, notes written directly on the charts, and data sources. Text rewritten in first person with specific numbers. - Smoother scrolling: the scroll position is smoothed before it drives the animation, and the page avoids re-layout on every frame.</p>
 </section>
 <section id="problems-the-ai-found-while-building" class="level2">
 <h2 class="anchored" data-anchor-id="problems-the-ai-found-while-building">Problems the AI found while building</h2>
@@ -954,34 +961,53 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>re-form into each step of the argument (population, one sample, many averages, growing n with a live HUD of the R</span>
 <span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a>results, ten populations, the Cauchy case, and "30" crossed out). The game moved to "Play mode".</span>
 <span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a><span class="fu">## Problems the AI found while building</span></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a><span class="fu">## Iteration 9: "the why-it-matters part isn't believable"</span></span>
 <span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>These were flagged by the AI during coding; I reviewed and accepted each fix.</span>
-<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Coarse-grid numbers.** Before I wrote my conclusions, the strict-standard values came from a coarse grid</span>
-<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>  (for the binomial, 1,000 was the edge of the grid). Refining changed the die's strict value from 50 to about 38</span>
-<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>  and confirmed that the binomial stays normal enough up to n = 3,000.</span>
-<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Seed placement.** The seed was first set once per grid, so adding a sample size to the grid changed the results for</span>
-<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>  all other sizes. Following the assignment ("set the seed immediately before each simulation experiment"), it is now</span>
-<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>  set before each n.</span>
-<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A crash in the refinement step** when there was no gap between the last failing and first passing n; fixed.</span>
-<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a><span class="fu">## Writing</span></span>
-<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a>I wrote my "What surprised me" observations in my own words (in Russian). The AI translated and edited them. I asked</span>
-<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>twice whether the result sounded professional and still like me, and the second version was simplified. I checked</span>
-<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a>every number in these sections against my results tables; in the final report they are inserted directly from the</span>
-<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a>R output.</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>**My prompt:** "Make the scroll animations smooth. Also think about the 'why it matters' part so it really matters:</span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>what's there now isn't believable. And make both the game and the story not look like AI, including the text."</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>**What I noticed:** the website opened with a news poll ("52% ± 3%") as the reason the CLT matters, but my own</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>results showed a 50/50 yes/no question needs very few observations, so the example argued against my point.</span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>**What changed:**</span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A new analysis in R (Real data, Part C): how often does the usual 95% t-interval, built from one sample, contain the</span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>  true mean? With 30 real flight delays it caught the truth 89.8% of the time and was too low in 9.8% of samples</span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>  (promised: 2.5%). With 235 flights it caught it 94.1% of the time. County populations at n = 30: 71.7%.</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The story now follows that one real example (flight delays) from the problem to the answer, and Play mode's last</span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>  level lets the reader run the same 100 studies.</span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Design: no purple gradients, emoji or pill badges; a newspaper-style layout with a serif typeface, notes written</span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>  directly on the charts, and data sources. Text rewritten in first person with specific numbers.</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Smoother scrolling: the scroll position is smoothed before it drives the animation, and the page avoids</span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a>  re-layout on every frame.</span>
 <span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a><span class="fu">## How I validated the code</span></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a><span class="fu">## Problems the AI found while building</span></span>
 <span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Check <span class="pp">|</span> How <span class="pp">|</span> Result <span class="pp">|</span></span>
-<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
-<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`skew()`</span> and <span class="in">`kurt()`</span> match the Class 05 formulas <span class="pp">|</span> compared <span class="in">`R/clt_functions.R`</span> line by line with the lecture code <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span>
-<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Standard error formula <span class="pp">|</span> for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span>
-<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Control case <span class="pp">|</span> the normal population passes all four checks at n = 1 <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span>
-<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Reproducibility <span class="pp">|</span> reran the exponential analysis with seed 2026 (section 8 of that page) <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span>
-<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Full re-render <span class="pp">|</span> <span class="in">`quarto render`</span> from a clean copy reproduces the numbers <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>These were flagged by the AI during coding; I reviewed and accepted each fix.</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Coarse-grid numbers.** Before I wrote my conclusions, the strict-standard values came from a coarse grid</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>  (for the binomial, 1,000 was the edge of the grid). Refining changed the die's strict value from 50 to about 38</span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>  and confirmed that the binomial stays normal enough up to n = 3,000.</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Seed placement.** The seed was first set once per grid, so adding a sample size to the grid changed the results for</span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>  all other sizes. Following the assignment ("set the seed immediately before each simulation experiment"), it is now</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>  set before each n.</span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**A crash in the refinement step** when there was no gap between the last failing and first passing n; fixed.</span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a><span class="fu">## Writing</span></span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a>I wrote my "What surprised me" observations in my own words (in Russian). The AI translated and edited them. I asked</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>twice whether the result sounded professional and still like me, and the second version was simplified. I checked</span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a>every number in these sections against my results tables; in the final report they are inserted directly from the</span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a>R output.</span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a><span class="fu">## How I validated the code</span></span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Check <span class="pp">|</span> How <span class="pp">|</span> Result <span class="pp">|</span></span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`skew()`</span> and <span class="in">`kurt()`</span> match the Class 05 formulas <span class="pp">|</span> compared <span class="in">`R/clt_functions.R`</span> line by line with the lecture code <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Standard error formula <span class="pp">|</span> for the exponential at n = 71: 1/√71 = 0.1187, compared with the simulated SE in the results table <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Control case <span class="pp">|</span> the normal population passes all four checks at n = 1 <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Reproducibility <span class="pp">|</span> reran the exponential analysis with seed 2026 (section 8 of that page) <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Full re-render <span class="pp">|</span> <span class="in">`quarto render`</span> from a clean copy reproduces the numbers <span class="pp">|</span> _to fill in_ <span class="pp">|</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

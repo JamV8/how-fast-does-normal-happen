@@ -107,6 +107,25 @@ professional, more like an animation than a game. Keep the game as a second opti
 re-form into each step of the argument (population, one sample, many averages, growing n with a live HUD of the R
 results, ten populations, the Cauchy case, and "30" crossed out). The game moved to "Play mode".
 
+## Iteration 9: "the why-it-matters part isn't believable"
+
+**My prompt:** "Make the scroll animations smooth. Also think about the 'why it matters' part so it really matters:
+what's there now isn't believable. And make both the game and the story not look like AI, including the text."
+
+**What I noticed:** the website opened with a news poll ("52% ± 3%") as the reason the CLT matters, but my own
+results showed a 50/50 yes/no question needs very few observations, so the example argued against my point.
+
+**What changed:**
+- A new analysis in R (Real data, Part C): how often does the usual 95% t-interval, built from one sample, contain the
+  true mean? With 30 real flight delays it caught the truth 89.8% of the time and was too low in 9.8% of samples
+  (promised: 2.5%). With 235 flights it caught it 94.1% of the time. County populations at n = 30: 71.7%.
+- The story now follows that one real example (flight delays) from the problem to the answer, and Play mode's last
+  level lets the reader run the same 100 studies.
+- Design: no purple gradients, emoji or pill badges; a newspaper-style layout with a serif typeface, notes written
+  directly on the charts, and data sources. Text rewritten in first person with specific numbers.
+- Smoother scrolling: the scroll position is smoothed before it drives the animation, and the page avoids
+  re-layout on every frame.
+
 ## Problems the AI found while building
 
 These were flagged by the AI during coding; I reviewed and accepted each fix.

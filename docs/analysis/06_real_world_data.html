@@ -110,6 +110,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 <style>html{ scroll-behavior: smooth; }</style>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -203,6 +232,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#part-a.-warm-up-two-examples-that-shaped-my-predictions" id="toc-part-a.-warm-up-two-examples-that-shaped-my-predictions" class="nav-link active" data-scroll-target="#part-a.-warm-up-two-examples-that-shaped-my-predictions">Part A. Warm-up: two examples that shaped my predictions</a></li>
   <li><a href="#part-b.-five-real-datasets-from-easy-to-extreme" id="toc-part-b.-five-real-datasets-from-easy-to-extreme" class="nav-link" data-scroll-target="#part-b.-five-real-datasets-from-easy-to-extreme">Part B. Five real datasets, from easy to extreme</a></li>
+  <li><a href="#part-c.-why-it-matters-do-real-95-intervals-catch-the-truth" id="toc-part-c.-why-it-matters-do-real-95-intervals-catch-the-truth" class="nav-link" data-scroll-target="#part-c.-why-it-matters-do-real-95-intervals-catch-the-truth">Part C. Why it matters: do real “95%” intervals catch the truth?</a></li>
   </ul>
 </nav>
     </div>
@@ -629,6 +659,197 @@ Figure&nbsp;4: Skewness of the sample means as n grows, one panel per dataset. D
 <li><strong>Heavy tails make the CLT slow.</strong> County populations have finite variance, so the CLT does eventually apply, but only after thousands of observations. In practice that is not far from the <a href="../analysis/05_cauchy.html">Cauchy</a> case. With a few giants in the data, the mean of a typical sample is dominated by whether a giant was included.</li>
 </ul>
 </section>
+</section>
+<section id="part-c.-why-it-matters-do-real-95-intervals-catch-the-truth" class="level2">
+<h2 class="anchored" data-anchor-id="part-c.-why-it-matters-do-real-95-intervals-catch-the-truth">Part C. Why it matters: do real “95%” intervals catch the truth?</h2>
+<p>Everything above judged the <em>shape</em> of the sample means using the true population SD. A real analyst does not know the true SD. They estimate it from the same sample and report the textbook interval x̄ ± t·s/√n.&nbsp;For lopsided data this goes wrong in a specific way: a small sample usually misses the rare huge values, so it underestimates both the mean and the spread, and the interval comes out too low and too narrow.</p>
+<p>So I asked the practical question directly. For each dataset I drew 100,000 samples, built the usual 95% t-interval from each, and counted how often the interval contained the true mean.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code: coverage of the usual 95% t-interval</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>coverage <span class="ot">&lt;-</span> <span class="cf">function</span>(x, n, <span class="at">reps =</span> B, <span class="at">seed =</span> student_id) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">replicate</span>(reps, {</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    s <span class="ot">&lt;-</span> <span class="fu">sample</span>(x, n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    half <span class="ot">&lt;-</span> <span class="fu">qt</span>(<span class="fl">0.975</span>, n <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">sd</span>(s) <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="fu">abs</span>(<span class="fu">mean</span>(s) <span class="sc">-</span> mu) <span class="sc">&lt;=</span> half,          <span class="co"># interval contains the true mean</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mean</span>(s) <span class="sc">+</span> half <span class="sc">&lt;</span> mu)                <span class="co"># whole interval below the truth</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">covers =</span> <span class="fu">mean</span>(res[<span class="dv">1</span>, ]), <span class="at">too_low =</span> <span class="fu">mean</span>(res[<span class="dv">2</span>, ]), <span class="at">too_high =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">mean</span>(res[<span class="dv">1</span>, ]) <span class="sc">-</span> <span class="fu">mean</span>(res[<span class="dv">2</span>, ]))</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>ci_rows <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(real, <span class="cf">function</span>(z) {</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  sizes <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">100</span>, z<span class="sc">$</span>n_main))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(sizes, <span class="cf">function</span>(n) {</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    cv <span class="ot">&lt;-</span> <span class="fu">coverage</span>(z<span class="sc">$</span>d<span class="sc">$</span>x, n)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">key =</span> z<span class="sc">$</span>d<span class="sc">$</span>key, <span class="at">dataset =</span> z<span class="sc">$</span>d<span class="sc">$</span>short, <span class="at">n =</span> n, <span class="at">covers =</span> cv[[<span class="st">"covers"</span>]],</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>               <span class="at">too_low =</span> cv[[<span class="st">"too_low"</span>]], <span class="at">too_high =</span> cv[[<span class="st">"too_high"</span>]])</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  }))</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(ci_rows, <span class="st">"../results/ci_coverage.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># 100 example intervals for flight delays at n = 30 (used by the website)</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>fl <span class="ot">&lt;-</span> datasets[[<span class="dv">4</span>]]<span class="sc">$</span>x</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>ex <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">replicate</span>(<span class="dv">100</span>, { s <span class="ot">&lt;-</span> <span class="fu">sample</span>(fl, <span class="dv">30</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>); h <span class="ot">&lt;-</span> <span class="fu">qt</span>(<span class="fl">0.975</span>, <span class="dv">29</span>) <span class="sc">*</span> <span class="fu">sd</span>(s) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="dv">30</span>); <span class="fu">c</span>(<span class="fu">mean</span>(s) <span class="sc">-</span> h, <span class="fu">mean</span>(s) <span class="sc">+</span> h) }))</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">data.frame</span>(<span class="at">lo =</span> ex[, <span class="dv">1</span>], <span class="at">hi =</span> ex[, <span class="dv">2</span>]), <span class="st">"../results/ci_flights_examples.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">Dataset =</span> ci_rows<span class="sc">$</span>dataset, <span class="at">n =</span> <span class="fu">num</span>(ci_rows<span class="sc">$</span>n),</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Interval caught the truth</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(ci_rows<span class="sc">$</span>covers),</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Interval too low</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(ci_rows<span class="sc">$</span>too_low),</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Interval too high</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(ci_rows<span class="sc">$</span>too_high), <span class="at">check.names =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">align =</span> <span class="st">"lrrrr"</span>, <span class="at">caption =</span> <span class="st">"A correct 95% interval catches the truth 95% of the time and misses 2.5% on each side."</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>A correct 95% interval catches the truth 95% of the time and misses 2.5% on each side.</caption>
+<colgroup>
+<col style="width: 22%">
+<col style="width: 6%">
+<col style="width: 30%">
+<col style="width: 19%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Dataset</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">Interval caught the truth</th>
+<th style="text-align: right;">Interval too low</th>
+<th style="text-align: right;">Interval too high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Geyser wait (min)</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">94.8%</td>
+<td style="text-align: right;">1.9%</td>
+<td style="text-align: right;">3.2%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Geyser wait (min)</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">94.9%</td>
+<td style="text-align: right;">2.2%</td>
+<td style="text-align: right;">2.9%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Geyser wait (min)</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">92.2%</td>
+<td style="text-align: right;">1.6%</td>
+<td style="text-align: right;">6.2%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Inventions / year</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">94.1%</td>
+<td style="text-align: right;">4.7%</td>
+<td style="text-align: right;">1.1%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Inventions / year</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">94.7%</td>
+<td style="text-align: right;">3.7%</td>
+<td style="text-align: right;">1.6%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Inventions / year</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">94.2%</td>
+<td style="text-align: right;">4.6%</td>
+<td style="text-align: right;">1.2%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Diamond price (<span class="math inline">\()  |    30|                     93.0%|             6.2%|              0.8%|
+|Diamond price (\)</span>)</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">94.4%</td>
+<td style="text-align: right;">4.2%</td>
+<td style="text-align: right;">1.4%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Diamond price ($)</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">93.8%</td>
+<td style="text-align: right;">5.1%</td>
+<td style="text-align: right;">1.1%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Flight delay (min)</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">89.8%</td>
+<td style="text-align: right;">9.8%</td>
+<td style="text-align: right;">0.4%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Flight delay (min)</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">92.9%</td>
+<td style="text-align: right;">6.3%</td>
+<td style="text-align: right;">0.7%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Flight delay (min)</td>
+<td style="text-align: right;">235</td>
+<td style="text-align: right;">94.1%</td>
+<td style="text-align: right;">4.7%</td>
+<td style="text-align: right;">1.1%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">County population</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">71.7%</td>
+<td style="text-align: right;">28.3%</td>
+<td style="text-align: right;">0.0%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">County population</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">80.3%</td>
+<td style="text-align: right;">19.7%</td>
+<td style="text-align: right;">0.0%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">County population</td>
+<td style="text-align: right;">2,450</td>
+<td style="text-align: right;">93.7%</td>
+<td style="text-align: right;">5.3%</td>
+<td style="text-align: right;">1.0%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mu_f <span class="ot">&lt;-</span> <span class="fu">mean</span>(fl)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>miss <span class="ot">&lt;-</span> ex[, <span class="dv">2</span>] <span class="sc">&lt;</span> mu_f <span class="sc">|</span> ex[, <span class="dv">1</span>] <span class="sc">&gt;</span> mu_f</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">style_par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">range</span>(ex), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">101</span>), <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="at">xlab =</span> <span class="st">"Average arrival delay (minutes)"</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(ex[, <span class="dv">1</span>], <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, ex[, <span class="dv">2</span>], <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, <span class="at">col =</span> <span class="fu">ifelse</span>(miss, pal<span class="sc">$</span>fail, <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.7</span>)), <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mu_f, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-ci-flights" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ci-flights-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06_real_world_data_files/figure-html/fig-ci-flights-1.png" class="img-fluid figure-img" width="990">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ci-flights-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: 100 of the simulated studies of 30 flights. Each line is one study’s 95% interval for the average delay; the dashed line is the true average. Red intervals missed it.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>What this means in practice.</strong> An analyst who estimates the average flight delay from 30 flights gets a “95%” interval that misses the true average 10.2% of the time instead of 5%. Almost all of those misses are on the same side: in 9.8% of studies the whole interval sits <em>below</em> the truth, four times the promised 2.5%, so the analyst reports delays as shorter than they really are. For county populations it is worse: the interval catches the truth only 71.7% of the time. With 235 flights per study, the number my shape tests required, coverage rises to 94.1%.</p>
+<p>This is the practical cost of trusting the rule of 30 with lopsided data: confidence intervals and tests that look standard but quietly overstate how sure we are.</p>
 <section id="limits-of-this-extension" class="level3">
 <h3 class="anchored" data-anchor-id="limits-of-this-extension">Limits of this extension</h3>
 <ul>
@@ -1100,227 +1321,307 @@ Figure&nbsp;4: Skewness of the sample means as n grows, one panel per dataset. D
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Real data"</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Does the rule of 30 hold outside the textbook? (extension beyond the assignment)"</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the setup code"</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../R/clt_functions.R"</span>)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Treat a real dataset as the population: each observation in a sample is</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># drawn at random (with replacement) from the dataset.</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>from_data <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="cf">function</span>(n) <span class="fu">sample</span>(x, n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>pop_sd    <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">sqrt</span>(<span class="fu">mean</span>((x <span class="sc">-</span> <span class="fu">mean</span>(x))<span class="sc">^</span><span class="dv">2</span>))   <span class="co"># SD of the whole population (divide by N)</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>Textbook distributions are useful because their properties are known exactly. But the reason anyone</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>cares about the Central Limit Theorem is **real data**: prices, waiting times, delays, populations. This</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>page applies the same method and the same "normal enough" standard to real datasets.</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>**How it works.** Each dataset is treated as a complete population. A "sample of size n" means picking n</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>records at random from it, each pick independent of the others (with replacement). Then everything is the</span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>same as before: 100,000 samples per n, the four checks, and the smallest n that passes.</span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part A. Warm-up: two examples that shaped my predictions</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>I worked through these two examples **before** making my predictions for the five assigned populations.</span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="fu">### River lengths: one sample, then thousands</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>R's <span class="in">`rivers`</span> dataset gives the lengths of the 141 longest rivers in North America. Most rivers are a few</span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>hundred miles long, but a few giants (up to <span class="in">`r num(max(rivers))`</span> miles) create a long right tail.</span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: rivers-samples</span></span>
-<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>riv <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(rivers)</span>
-<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
-<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>five <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">replicate</span>(<span class="dv">4</span>, <span class="fu">sample</span>(riv, <span class="dv">5</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)))</span>
-<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Sample =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
-<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>                        <span class="st">`</span><span class="at">Five river lengths (miles)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">apply</span>(five, <span class="dv">1</span>, paste, <span class="at">collapse =</span> <span class="st">", "</span>),</span>
-<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>                        <span class="st">`</span><span class="at">Sample mean</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">num</span>(<span class="fu">round</span>(<span class="fu">rowMeans</span>(five))), <span class="at">check.names =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>             <span class="at">align =</span> <span class="st">"clr"</span>, <span class="at">caption =</span> <span class="st">"Four random samples of n = 5 rivers. Each sample gives a different mean; each mean is one point in the sampling distribution."</span>)</span>
-<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-rivers</span></span>
-<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Left: the 141 rivers themselves. Right: 100,000 sample means for n = 5, 30 and 100, with the CLT normal curve."</span></span>
-<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.6</span></span>
-<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>mu_r <span class="ot">&lt;-</span> <span class="fu">mean</span>(riv); sd_r <span class="ot">&lt;-</span> <span class="fu">pop_sd</span>(riv)</span>
-<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>riv_exp <span class="ot">&lt;-</span> <span class="fu">run_clt_experiment</span>(<span class="fu">from_data</span>(riv), <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">30</span>, <span class="dv">100</span>), mu_r, sd_r)</span>
-<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>old <span class="ot">&lt;-</span> <span class="fu">style_par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">3.8</span>, <span class="fl">3.6</span>, <span class="fl">2.6</span>, <span class="fl">0.6</span>))</span>
-<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(riv, <span class="at">breaks =</span> <span class="dv">30</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="st">"gray60"</span>, <span class="at">border =</span> <span class="st">"white"</span>,</span>
-<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"Population (skew %.2f)"</span>, <span class="fu">skew</span>(riv)), <span class="at">xlab =</span> <span class="st">"Miles"</span>, <span class="at">ylab =</span> <span class="st">"Density"</span>)</span>
-<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">30</span>, <span class="dv">100</span>)) {</span>
-<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> riv_exp<span class="sc">$</span>means[[<span class="fu">as.character</span>(k)]]</span>
-<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hist</span>(m, <span class="at">breaks =</span> <span class="dv">50</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.75</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
-<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"n = %d (skew %.2f)"</span>, k, <span class="fu">skew</span>(m)), <span class="at">xlab =</span> <span class="st">"Mean length"</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
-<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">curve</span>(<span class="fu">dnorm</span>(x, mu_r, sd_r <span class="sc">/</span> <span class="fu">sqrt</span>(k)), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> pal<span class="sc">$</span>curve, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
-<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(old)</span>
-<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>Even at n = 30 the means are still clearly skewed (skewness</span>
-<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a><span class="in">`r f2(riv_exp$results$skewness[riv_exp$results$n == 30])`</span>). The formula skewness/√n predicts</span>
-<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a><span class="in">`r f2(skew(riv) / sqrt(30))`</span>, and the simulation agrees. This was my first sign that n = 30 is not a</span>
-<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>universal answer.</span>
-<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>**Caveats I noted.** (1) This dataset contains only the *longest* rivers, so it says nothing about rivers</span>
-<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>in general: a bigger sample cannot fix a biased population. (2) Sampling *without* replacement from only</span>
-<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>141 rivers would behave differently. At n = 141 every sample would be the whole dataset and the mean</span>
-<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>would never vary. That is why the main study samples from theoretical distributions, where every draw is</span>
-<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>independent.</span>
-<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a><span class="fu">### An election poll: where the CLT is used every day</span></span>
-<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>A poll asks n = 1,000 people a yes/no question. Suppose the true support is 52%. Each answer is a 0 or 1,</span>
-<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>which is about as far from a bell curve as possible, yet the CLT says the poll result is approximately normal.</span>
-<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-poll</span></span>
-<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "100,000 simulated polls of 1,000 people each. The shaded band is the familiar margin of error, 52% ± 3.1%."</span></span>
-<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
-<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fl">0.52</span>; n_poll <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
-<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>polls <span class="ot">&lt;-</span> <span class="fu">simulate_means</span>(<span class="cf">function</span>(k) <span class="fu">rbinom</span>(k, <span class="dv">1</span>, p), n_poll)</span>
-<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>se_p  <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p) <span class="sc">/</span> n_poll)</span>
-<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a>inside <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(polls <span class="sc">-</span> p) <span class="sc">&lt;=</span> <span class="fl">1.96</span> <span class="sc">*</span> se_p)</span>
-<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a><span class="fu">style_par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="dv">100</span> <span class="sc">*</span> polls, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">floor</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="fu">min</span>(polls)) <span class="sc">-</span> <span class="fl">0.05</span>, <span class="fu">ceiling</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="fu">max</span>(polls)) <span class="sc">+</span> <span class="fl">0.05</span>, <span class="at">by =</span> <span class="fl">0.1</span>),</span>
-<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>     <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.75</span>), <span class="at">border =</span> <span class="cn">NA</span>,</span>
-<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Poll result (% saying yes)"</span>, <span class="at">ylab =</span> <span class="st">"Density"</span>, <span class="at">main =</span> <span class="st">""</span>)</span>
-<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="dv">100</span> <span class="sc">*</span> (p <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> se_p), <span class="dv">0</span>, <span class="dv">100</span> <span class="sc">*</span> (p <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> se_p), <span class="dv">1</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>zone, <span class="fl">0.12</span>), <span class="at">border =</span> <span class="cn">NA</span>)</span>
-<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">100</span> <span class="sc">*</span> p, <span class="dv">100</span> <span class="sc">*</span> se_p), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> pal<span class="sc">$</span>curve, <span class="at">lwd =</span> <span class="fl">2.2</span>, <span class="at">n =</span> <span class="dv">400</span>)</span>
-<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a>A pollster runs **one** poll and reports "52% ± <span class="in">`r f2(100 * 1.96 * se_p)`</span> points". That margin comes from</span>
-<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a>the CLT formula, 1.96·√(p(1−p)/n), not from repeating the poll. The simulation checks the promise:</span>
-<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a><span class="in">`r pct(inside)`</span> of the simulated polls landed inside the margin, close to the promised 95%.</span>
-<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a>In real life B = 1 (one poll); in a simulation we can afford B = 100,000 and see whether the formula is honest.</span>
-<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part B. Five real datasets, from easy to extreme</span></span>
-<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb9-114"><a href="#cb9-114" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: datasets</span></span>
-<span id="cb9-115"><a href="#cb9-115" aria-hidden="true" tabindex="-1"></a>flights_delay <span class="ot">&lt;-</span> nycflights13<span class="sc">::</span>flights<span class="sc">$</span>arr_delay</span>
-<span id="cb9-116"><a href="#cb9-116" aria-hidden="true" tabindex="-1"></a>flights_delay <span class="ot">&lt;-</span> flights_delay[<span class="sc">!</span><span class="fu">is.na</span>(flights_delay)]</span>
-<span id="cb9-117"><a href="#cb9-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-118"><a href="#cb9-118" aria-hidden="true" tabindex="-1"></a>datasets <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb9-119"><a href="#cb9-119" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"faithful"</span>, <span class="at">name =</span> <span class="st">"Old Faithful: minutes between eruptions"</span>, <span class="at">short =</span> <span class="st">"Geyser wait (min)"</span>,</span>
-<span id="cb9-120"><a href="#cb9-120" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(faithful<span class="sc">$</span>waiting), <span class="at">twin =</span> <span class="st">"Six-sided die"</span>,</span>
-<span id="cb9-121"><a href="#cb9-121" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
-<span id="cb9-122"><a href="#cb9-122" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"discoveries"</span>, <span class="at">name =</span> <span class="st">"Great inventions per year (1860-1959)"</span>, <span class="at">short =</span> <span class="st">"Inventions / year"</span>,</span>
-<span id="cb9-123"><a href="#cb9-123" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(discoveries), <span class="at">twin =</span> <span class="st">"Binomial(5, 0.1)"</span>,</span>
-<span id="cb9-124"><a href="#cb9-124" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
-<span id="cb9-125"><a href="#cb9-125" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"diamonds"</span>, <span class="at">name =</span> <span class="st">"Diamond prices (USD)"</span>, <span class="at">short =</span> <span class="st">"Diamond price ($)"</span>,</span>
-<span id="cb9-126"><a href="#cb9-126" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(ggplot2<span class="sc">::</span>diamonds<span class="sc">$</span>price), <span class="at">twin =</span> <span class="st">"Exponential(1)"</span>,</span>
-<span id="cb9-127"><a href="#cb9-127" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
-<span id="cb9-128"><a href="#cb9-128" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"flights"</span>, <span class="at">name =</span> <span class="st">"NYC flight arrival delays, 2013 (minutes)"</span>, <span class="at">short =</span> <span class="st">"Flight delay (min)"</span>,</span>
-<span id="cb9-129"><a href="#cb9-129" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(flights_delay), <span class="at">twin =</span> <span class="st">"Heavier tail than the exponential"</span>,</span>
-<span id="cb9-130"><a href="#cb9-130" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">250</span>, <span class="dv">300</span>, <span class="dv">400</span>, <span class="dv">500</span>, <span class="dv">750</span>, <span class="dv">1000</span>), <span class="at">step =</span> <span class="dv">5</span>),</span>
-<span id="cb9-131"><a href="#cb9-131" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"counties"</span>, <span class="at">name =</span> <span class="st">"Population of Midwest US counties"</span>, <span class="at">short =</span> <span class="st">"County population"</span>,</span>
-<span id="cb9-132"><a href="#cb9-132" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(ggplot2<span class="sc">::</span>midwest<span class="sc">$</span>poptotal), <span class="at">twin =</span> <span class="st">"Closest real-world cousin of the Cauchy"</span>,</span>
-<span id="cb9-133"><a href="#cb9-133" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">30</span>, <span class="dv">100</span>, <span class="dv">300</span>, <span class="dv">1000</span>, <span class="dv">1500</span>, <span class="dv">2000</span>, <span class="dv">2500</span>, <span class="dv">3000</span>, <span class="dv">4000</span>, <span class="dv">5000</span>, <span class="dv">7500</span>), <span class="at">step =</span> <span class="dv">50</span>)</span>
-<span id="cb9-134"><a href="#cb9-134" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-135"><a href="#cb9-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-136"><a href="#cb9-136" aria-hidden="true" tabindex="-1"></a>info <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(datasets, <span class="cf">function</span>(d) <span class="fu">data.frame</span>(</span>
-<span id="cb9-137"><a href="#cb9-137" aria-hidden="true" tabindex="-1"></a>  <span class="at">Dataset =</span> d<span class="sc">$</span>name, <span class="at">Records =</span> <span class="fu">num</span>(<span class="fu">length</span>(d<span class="sc">$</span>x)), <span class="at">Mean =</span> <span class="fu">num</span>(<span class="fu">signif</span>(<span class="fu">mean</span>(d<span class="sc">$</span>x), <span class="dv">4</span>)),</span>
-<span id="cb9-138"><a href="#cb9-138" aria-hidden="true" tabindex="-1"></a>  <span class="at">Median =</span> <span class="fu">num</span>(<span class="fu">signif</span>(<span class="fu">median</span>(d<span class="sc">$</span>x), <span class="dv">4</span>)), <span class="at">Skewness =</span> <span class="fu">f2</span>(<span class="fu">skew</span>(d<span class="sc">$</span>x)),</span>
-<span id="cb9-139"><a href="#cb9-139" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Ex. kurtosis</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">num</span>(<span class="fu">round</span>(<span class="fu">kurt</span>(d<span class="sc">$</span>x), <span class="dv">1</span>)), <span class="st">`</span><span class="at">Behaves like</span><span class="st">`</span> <span class="ot">=</span> d<span class="sc">$</span>twin, <span class="at">check.names =</span> <span class="cn">FALSE</span>)))</span>
-<span id="cb9-140"><a href="#cb9-140" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(info, <span class="at">align =</span> <span class="st">"lrrrrrl"</span>)</span>
-<span id="cb9-141"><a href="#cb9-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-142"><a href="#cb9-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-145"><a href="#cb9-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb9-146"><a href="#cb9-146" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-real-populations</span></span>
-<span id="cb9-147"><a href="#cb9-147" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "The five populations. The geyser is bimodal; the other four have long right tails, and the county populations most extremely so (Cook County, Illinois, has 5.1 million people; the median county has 35,000). Values above the 99th percentile are not shown."</span></span>
-<span id="cb9-148"><a href="#cb9-148" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.4</span></span>
-<span id="cb9-149"><a href="#cb9-149" aria-hidden="true" tabindex="-1"></a>old <span class="ot">&lt;-</span> <span class="fu">style_par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">3.6</span>, <span class="fl">2.6</span>, <span class="fl">2.6</span>, <span class="fl">0.6</span>))</span>
-<span id="cb9-150"><a href="#cb9-150" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (d <span class="cf">in</span> datasets) {</span>
-<span id="cb9-151"><a href="#cb9-151" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> d<span class="sc">$</span>x[d<span class="sc">$</span>x <span class="sc">&lt;=</span> <span class="fu">quantile</span>(d<span class="sc">$</span>x, <span class="fl">0.99</span>)]</span>
-<span id="cb9-152"><a href="#cb9-152" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (d<span class="sc">$</span>key <span class="sc">==</span> <span class="st">"discoveries"</span>) {</span>
-<span id="cb9-153"><a href="#cb9-153" aria-hidden="true" tabindex="-1"></a>    <span class="fu">barplot</span>(<span class="fu">table</span>(<span class="fu">factor</span>(d<span class="sc">$</span>x, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">12</span>)) <span class="sc">/</span> <span class="fu">length</span>(d<span class="sc">$</span>x), <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.75</span>), <span class="at">border =</span> <span class="cn">NA</span>,</span>
-<span id="cb9-154"><a href="#cb9-154" aria-hidden="true" tabindex="-1"></a>            <span class="at">main =</span> d<span class="sc">$</span>short, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>, <span class="at">cex.names =</span> <span class="fl">0.7</span>)</span>
-<span id="cb9-155"><a href="#cb9-155" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb9-156"><a href="#cb9-156" aria-hidden="true" tabindex="-1"></a>    <span class="fu">hist</span>(x, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.75</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
-<span id="cb9-157"><a href="#cb9-157" aria-hidden="true" tabindex="-1"></a>         <span class="at">main =</span> d<span class="sc">$</span>short, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>)</span>
-<span id="cb9-158"><a href="#cb9-158" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb9-159"><a href="#cb9-159" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-160"><a href="#cb9-160" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(old)</span>
-<span id="cb9-161"><a href="#cb9-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-162"><a href="#cb9-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-163"><a href="#cb9-163" aria-hidden="true" tabindex="-1"></a><span class="fu">### Prediction first, then simulation</span></span>
-<span id="cb9-164"><a href="#cb9-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-165"><a href="#cb9-165" aria-hidden="true" tabindex="-1"></a>For each dataset I first **predicted** the threshold from its skewness, n ≈ (skewness / 0.25)², the same</span>
-<span id="cb9-166"><a href="#cb9-166" aria-hidden="true" tabindex="-1"></a>formula that predicted 64 for the exponential, and then ran the full two-stage search.</span>
-<span id="cb9-167"><a href="#cb9-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-170"><a href="#cb9-170" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb9-171"><a href="#cb9-171" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: real-simulate</span></span>
-<span id="cb9-172"><a href="#cb9-172" aria-hidden="true" tabindex="-1"></a>real <span class="ot">&lt;-</span> <span class="fu">lapply</span>(datasets, <span class="cf">function</span>(d) {</span>
-<span id="cb9-173"><a href="#cb9-173" aria-hidden="true" tabindex="-1"></a>  mu_d <span class="ot">&lt;-</span> <span class="fu">mean</span>(d<span class="sc">$</span>x); sd_d <span class="ot">&lt;-</span> <span class="fu">pop_sd</span>(d<span class="sc">$</span>x)</span>
-<span id="cb9-174"><a href="#cb9-174" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">run_with_refinement</span>(<span class="fu">from_data</span>(d<span class="sc">$</span>x), d<span class="sc">$</span>coarse, mu_d, sd_d, <span class="at">step =</span> d<span class="sc">$</span>step)</span>
-<span id="cb9-175"><a href="#cb9-175" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> e<span class="sc">$</span>results</span>
-<span id="cb9-176"><a href="#cb9-176" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save_results</span>(r, <span class="fu">paste0</span>(<span class="st">"real_"</span>, d<span class="sc">$</span>key))</span>
-<span id="cb9-177"><a href="#cb9-177" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">d =</span> d, <span class="at">res =</span> r, <span class="at">n_main =</span> <span class="fu">smallest_normal_n</span>(r),</span>
-<span id="cb9-178"><a href="#cb9-178" aria-hidden="true" tabindex="-1"></a>       <span class="at">n_pred =</span> <span class="fu">ceiling</span>((<span class="fu">skew</span>(d<span class="sc">$</span>x) <span class="sc">/</span> <span class="fl">0.25</span>)<span class="sc">^</span><span class="dv">2</span>), <span class="at">r30 =</span> r[r<span class="sc">$</span>n <span class="sc">==</span> <span class="dv">30</span>, ])</span>
-<span id="cb9-179"><a href="#cb9-179" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb9-180"><a href="#cb9-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-181"><a href="#cb9-181" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(real, <span class="cf">function</span>(z) <span class="fu">data.frame</span>(</span>
-<span id="cb9-182"><a href="#cb9-182" aria-hidden="true" tabindex="-1"></a>  <span class="at">Dataset =</span> z<span class="sc">$</span>d<span class="sc">$</span>short,</span>
-<span id="cb9-183"><a href="#cb9-183" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Skewness</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">f2</span>(<span class="fu">skew</span>(z<span class="sc">$</span>d<span class="sc">$</span>x)),</span>
-<span id="cb9-184"><a href="#cb9-184" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Predicted n</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">num</span>(z<span class="sc">$</span>n_pred),</span>
-<span id="cb9-185"><a href="#cb9-185" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Simulated n</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"**"</span>, <span class="fu">num</span>(z<span class="sc">$</span>n_main), <span class="st">"**"</span>),</span>
-<span id="cb9-186"><a href="#cb9-186" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Skewness at n = 30</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">f2</span>(z<span class="sc">$</span>r30<span class="sc">$</span>skewness),</span>
-<span id="cb9-187"><a href="#cb9-187" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Tails at n = 30</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="fu">pct</span>(z<span class="sc">$</span>r30<span class="sc">$</span>lower_tail), <span class="st">" / "</span>, <span class="fu">pct</span>(z<span class="sc">$</span>r30<span class="sc">$</span>upper_tail)),</span>
-<span id="cb9-188"><a href="#cb9-188" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">n = 30 enough?</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">ifelse</span>(z<span class="sc">$</span>r30<span class="sc">$</span>normal_enough, <span class="st">"yes"</span>, <span class="st">"**no**"</span>),</span>
-<span id="cb9-189"><a href="#cb9-189" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>)))</span>
-<span id="cb9-190"><a href="#cb9-190" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(tab, <span class="at">align =</span> <span class="st">"lrrrrrc"</span>)</span>
-<span id="cb9-191"><a href="#cb9-191" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-192"><a href="#cb9-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-195"><a href="#cb9-195" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb9-196"><a href="#cb9-196" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-real-skew</span></span>
-<span id="cb9-197"><a href="#cb9-197" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Skewness of the sample means as n grows, one panel per dataset. Dots: simulation. Orange: the prediction skewness/√n. Shaded: my ±0.25 pass zone. Dotted: n = 30."</span></span>
-<span id="cb9-198"><a href="#cb9-198" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.6</span></span>
-<span id="cb9-199"><a href="#cb9-199" aria-hidden="true" tabindex="-1"></a>old <span class="ot">&lt;-</span> <span class="fu">style_par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">3.8</span>, <span class="dv">3</span>, <span class="fl">2.6</span>, <span class="fl">0.6</span>))</span>
-<span id="cb9-200"><a href="#cb9-200" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (z <span class="cf">in</span> real) {</span>
-<span id="cb9-201"><a href="#cb9-201" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> z<span class="sc">$</span>res</span>
-<span id="cb9-202"><a href="#cb9-202" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r<span class="sc">$</span>n, r<span class="sc">$</span>skewness, <span class="at">log =</span> <span class="st">"x"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.7</span>,</span>
-<span id="cb9-203"><a href="#cb9-203" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">ifelse</span>(r<span class="sc">$</span>skew_ok, pal<span class="sc">$</span>pass, pal<span class="sc">$</span>fail), <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">c</span>(r<span class="sc">$</span>skewness, <span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>)),</span>
-<span id="cb9-204"><a href="#cb9-204" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> z<span class="sc">$</span>d<span class="sc">$</span>short, <span class="at">xlab =</span> <span class="st">"n (log)"</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
-<span id="cb9-205"><a href="#cb9-205" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(<span class="fl">1e-3</span>, <span class="sc">-</span><span class="fl">0.25</span>, <span class="fl">1e6</span>, <span class="fl">0.25</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>zone, <span class="fl">0.10</span>), <span class="at">border =</span> <span class="cn">NA</span>)</span>
-<span id="cb9-206"><a href="#cb9-206" aria-hidden="true" tabindex="-1"></a>  <span class="fu">curve</span>(<span class="fu">skew</span>(z<span class="sc">$</span>d<span class="sc">$</span>x) <span class="sc">/</span> <span class="fu">sqrt</span>(x), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> pal<span class="sc">$</span>accent, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">n =</span> <span class="dv">300</span>)</span>
-<span id="cb9-207"><a href="#cb9-207" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">30</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
-<span id="cb9-208"><a href="#cb9-208" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-209"><a href="#cb9-209" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(old)</span>
-<span id="cb9-210"><a href="#cb9-210" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-211"><a href="#cb9-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-212"><a href="#cb9-212" aria-hidden="true" tabindex="-1"></a><span class="fu">### What the real data show</span></span>
-<span id="cb9-213"><a href="#cb9-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-214"><a href="#cb9-214" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The rule of 30 fails for most real-world data.** It works for the geyser, whose distribution is</span>
-<span id="cb9-215"><a href="#cb9-215" aria-hidden="true" tabindex="-1"></a>  bimodal but nearly symmetric. It does not work for prices, delays, or populations, which are the kind of</span>
-<span id="cb9-216"><a href="#cb9-216" aria-hidden="true" tabindex="-1"></a>  data analysts handle every day. These need roughly</span>
-<span id="cb9-217"><a href="#cb9-217" aria-hidden="true" tabindex="-1"></a>  <span class="in">`r num(real[[3]]$n_main)`</span>, <span class="in">`r num(real[[4]]$n_main)`</span> and <span class="in">`r num(real[[5]]$n_main)`</span> observations.</span>
-<span id="cb9-218"><a href="#cb9-218" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The skewness formula predicts the threshold well**, even for messy real data: the simulated n lands</span>
-<span id="cb9-219"><a href="#cb9-219" aria-hidden="true" tabindex="-1"></a>  near (skewness/0.25)² for the continuous datasets. One number about the population, its skewness, tells</span>
-<span id="cb9-220"><a href="#cb9-220" aria-hidden="true" tabindex="-1"></a>  you most of what you need to know.</span>
-<span id="cb9-221"><a href="#cb9-221" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Discrete counts behave like the binomial.** The inventions data pass the skewness check early but need</span>
-<span id="cb9-222"><a href="#cb9-222" aria-hidden="true" tabindex="-1"></a>  extra observations because of the steps between possible values. This is the same pattern as in the</span>
-<span id="cb9-223"><a href="#cb9-223" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">binomial analysis</span><span class="co">](04_binomial.qmd)</span>.</span>
-<span id="cb9-224"><a href="#cb9-224" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Heavy tails make the CLT slow.** County populations have finite variance, so the CLT does eventually</span>
-<span id="cb9-225"><a href="#cb9-225" aria-hidden="true" tabindex="-1"></a>  apply, but only after thousands of observations. In practice that is not far from the</span>
-<span id="cb9-226"><a href="#cb9-226" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Cauchy</span><span class="co">](05_cauchy.qmd)</span> case. With a few giants in the data, the mean of a typical sample is dominated by</span>
-<span id="cb9-227"><a href="#cb9-227" aria-hidden="true" tabindex="-1"></a>  whether a giant was included.</span>
-<span id="cb9-228"><a href="#cb9-228" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-229"><a href="#cb9-229" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limits of this extension</span></span>
-<span id="cb9-230"><a href="#cb9-230" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-231"><a href="#cb9-231" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The dataset is treated as the whole population.** Real conclusions would also depend on how the data</span>
-<span id="cb9-232"><a href="#cb9-232" aria-hidden="true" tabindex="-1"></a>  were collected.</span>
-<span id="cb9-233"><a href="#cb9-233" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Independence is assumed.** Real flight delays on the same day are correlated (one storm delays many</span>
-<span id="cb9-234"><a href="#cb9-234" aria-hidden="true" tabindex="-1"></a>  flights), which would slow convergence further. The extra-credit dependent-process study is the place</span>
-<span id="cb9-235"><a href="#cb9-235" aria-hidden="true" tabindex="-1"></a>  to examine this.</span>
-<span id="cb9-236"><a href="#cb9-236" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Resampling with replacement** keeps the draws independent and identically distributed, matching the</span>
-<span id="cb9-237"><a href="#cb9-237" aria-hidden="true" tabindex="-1"></a>  CLT's assumptions.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Real data"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Does the rule of 30 hold outside the textbook? (extension beyond the assignment)"</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show the setup code"</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../R/clt_functions.R"</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Treat a real dataset as the population: each observation in a sample is</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># drawn at random (with replacement) from the dataset.</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>from_data <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="cf">function</span>(n) <span class="fu">sample</span>(x, n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>pop_sd    <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">sqrt</span>(<span class="fu">mean</span>((x <span class="sc">-</span> <span class="fu">mean</span>(x))<span class="sc">^</span><span class="dv">2</span>))   <span class="co"># SD of the whole population (divide by N)</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>Textbook distributions are useful because their properties are known exactly. But the reason anyone</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>cares about the Central Limit Theorem is **real data**: prices, waiting times, delays, populations. This</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>page applies the same method and the same "normal enough" standard to real datasets.</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>**How it works.** Each dataset is treated as a complete population. A "sample of size n" means picking n</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>records at random from it, each pick independent of the others (with replacement). Then everything is the</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>same as before: 100,000 samples per n, the four checks, and the smallest n that passes.</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part A. Warm-up: two examples that shaped my predictions</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>I worked through these two examples **before** making my predictions for the five assigned populations.</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="fu">### River lengths: one sample, then thousands</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>R's <span class="in">`rivers`</span> dataset gives the lengths of the 141 longest rivers in North America. Most rivers are a few</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>hundred miles long, but a few giants (up to <span class="in">`r num(max(rivers))`</span> miles) create a long right tail.</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: rivers-samples</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>riv <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(rivers)</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>five <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">replicate</span>(<span class="dv">4</span>, <span class="fu">sample</span>(riv, <span class="dv">5</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Sample =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>                        <span class="st">`</span><span class="at">Five river lengths (miles)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">apply</span>(five, <span class="dv">1</span>, paste, <span class="at">collapse =</span> <span class="st">", "</span>),</span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>                        <span class="st">`</span><span class="at">Sample mean</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">num</span>(<span class="fu">round</span>(<span class="fu">rowMeans</span>(five))), <span class="at">check.names =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>             <span class="at">align =</span> <span class="st">"clr"</span>, <span class="at">caption =</span> <span class="st">"Four random samples of n = 5 rivers. Each sample gives a different mean; each mean is one point in the sampling distribution."</span>)</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-rivers</span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Left: the 141 rivers themselves. Right: 100,000 sample means for n = 5, 30 and 100, with the CLT normal curve."</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.6</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>mu_r <span class="ot">&lt;-</span> <span class="fu">mean</span>(riv); sd_r <span class="ot">&lt;-</span> <span class="fu">pop_sd</span>(riv)</span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>riv_exp <span class="ot">&lt;-</span> <span class="fu">run_clt_experiment</span>(<span class="fu">from_data</span>(riv), <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">30</span>, <span class="dv">100</span>), mu_r, sd_r)</span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>old <span class="ot">&lt;-</span> <span class="fu">style_par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">3.8</span>, <span class="fl">3.6</span>, <span class="fl">2.6</span>, <span class="fl">0.6</span>))</span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(riv, <span class="at">breaks =</span> <span class="dv">30</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="st">"gray60"</span>, <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"Population (skew %.2f)"</span>, <span class="fu">skew</span>(riv)), <span class="at">xlab =</span> <span class="st">"Miles"</span>, <span class="at">ylab =</span> <span class="st">"Density"</span>)</span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">30</span>, <span class="dv">100</span>)) {</span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> riv_exp<span class="sc">$</span>means[[<span class="fu">as.character</span>(k)]]</span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hist</span>(m, <span class="at">breaks =</span> <span class="dv">50</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.75</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">sprintf</span>(<span class="st">"n = %d (skew %.2f)"</span>, k, <span class="fu">skew</span>(m)), <span class="at">xlab =</span> <span class="st">"Mean length"</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">curve</span>(<span class="fu">dnorm</span>(x, mu_r, sd_r <span class="sc">/</span> <span class="fu">sqrt</span>(k)), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> pal<span class="sc">$</span>curve, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(old)</span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>Even at n = 30 the means are still clearly skewed (skewness</span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a><span class="in">`r f2(riv_exp$results$skewness[riv_exp$results$n == 30])`</span>). The formula skewness/√n predicts</span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a><span class="in">`r f2(skew(riv) / sqrt(30))`</span>, and the simulation agrees. This was my first sign that n = 30 is not a</span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a>universal answer.</span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>**Caveats I noted.** (1) This dataset contains only the *longest* rivers, so it says nothing about rivers</span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>in general: a bigger sample cannot fix a biased population. (2) Sampling *without* replacement from only</span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>141 rivers would behave differently. At n = 141 every sample would be the whole dataset and the mean</span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a>would never vary. That is why the main study samples from theoretical distributions, where every draw is</span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>independent.</span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a><span class="fu">### An election poll: where the CLT is used every day</span></span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a>A poll asks n = 1,000 people a yes/no question. Suppose the true support is 52%. Each answer is a 0 or 1,</span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a>which is about as far from a bell curve as possible, yet the CLT says the poll result is approximately normal.</span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-poll</span></span>
+<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "100,000 simulated polls of 1,000 people each. The shaded band is the familiar margin of error, 52% ± 3.1%."</span></span>
+<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fl">0.52</span>; n_poll <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb11-92"><a href="#cb11-92" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
+<span id="cb11-93"><a href="#cb11-93" aria-hidden="true" tabindex="-1"></a>polls <span class="ot">&lt;-</span> <span class="fu">simulate_means</span>(<span class="cf">function</span>(k) <span class="fu">rbinom</span>(k, <span class="dv">1</span>, p), n_poll)</span>
+<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a>se_p  <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p) <span class="sc">/</span> n_poll)</span>
+<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a>inside <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(polls <span class="sc">-</span> p) <span class="sc">&lt;=</span> <span class="fl">1.96</span> <span class="sc">*</span> se_p)</span>
+<span id="cb11-96"><a href="#cb11-96" aria-hidden="true" tabindex="-1"></a><span class="fu">style_par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="dv">100</span> <span class="sc">*</span> polls, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fu">floor</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="fu">min</span>(polls)) <span class="sc">-</span> <span class="fl">0.05</span>, <span class="fu">ceiling</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="fu">max</span>(polls)) <span class="sc">+</span> <span class="fl">0.05</span>, <span class="at">by =</span> <span class="fl">0.1</span>),</span>
+<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a>     <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.75</span>), <span class="at">border =</span> <span class="cn">NA</span>,</span>
+<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Poll result (% saying yes)"</span>, <span class="at">ylab =</span> <span class="st">"Density"</span>, <span class="at">main =</span> <span class="st">""</span>)</span>
+<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="dv">100</span> <span class="sc">*</span> (p <span class="sc">-</span> <span class="fl">1.96</span> <span class="sc">*</span> se_p), <span class="dv">0</span>, <span class="dv">100</span> <span class="sc">*</span> (p <span class="sc">+</span> <span class="fl">1.96</span> <span class="sc">*</span> se_p), <span class="dv">1</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>zone, <span class="fl">0.12</span>), <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">dnorm</span>(x, <span class="dv">100</span> <span class="sc">*</span> p, <span class="dv">100</span> <span class="sc">*</span> se_p), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> pal<span class="sc">$</span>curve, <span class="at">lwd =</span> <span class="fl">2.2</span>, <span class="at">n =</span> <span class="dv">400</span>)</span>
+<span id="cb11-102"><a href="#cb11-102" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-103"><a href="#cb11-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-104"><a href="#cb11-104" aria-hidden="true" tabindex="-1"></a>A pollster runs **one** poll and reports "52% ± <span class="in">`r f2(100 * 1.96 * se_p)`</span> points". That margin comes from</span>
+<span id="cb11-105"><a href="#cb11-105" aria-hidden="true" tabindex="-1"></a>the CLT formula, 1.96·√(p(1−p)/n), not from repeating the poll. The simulation checks the promise:</span>
+<span id="cb11-106"><a href="#cb11-106" aria-hidden="true" tabindex="-1"></a><span class="in">`r pct(inside)`</span> of the simulated polls landed inside the margin, close to the promised 95%.</span>
+<span id="cb11-107"><a href="#cb11-107" aria-hidden="true" tabindex="-1"></a>In real life B = 1 (one poll); in a simulation we can afford B = 100,000 and see whether the formula is honest.</span>
+<span id="cb11-108"><a href="#cb11-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-109"><a href="#cb11-109" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part B. Five real datasets, from easy to extreme</span></span>
+<span id="cb11-110"><a href="#cb11-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-113"><a href="#cb11-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-114"><a href="#cb11-114" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: datasets</span></span>
+<span id="cb11-115"><a href="#cb11-115" aria-hidden="true" tabindex="-1"></a>flights_delay <span class="ot">&lt;-</span> nycflights13<span class="sc">::</span>flights<span class="sc">$</span>arr_delay</span>
+<span id="cb11-116"><a href="#cb11-116" aria-hidden="true" tabindex="-1"></a>flights_delay <span class="ot">&lt;-</span> flights_delay[<span class="sc">!</span><span class="fu">is.na</span>(flights_delay)]</span>
+<span id="cb11-117"><a href="#cb11-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-118"><a href="#cb11-118" aria-hidden="true" tabindex="-1"></a>datasets <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb11-119"><a href="#cb11-119" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"faithful"</span>, <span class="at">name =</span> <span class="st">"Old Faithful: minutes between eruptions"</span>, <span class="at">short =</span> <span class="st">"Geyser wait (min)"</span>,</span>
+<span id="cb11-120"><a href="#cb11-120" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(faithful<span class="sc">$</span>waiting), <span class="at">twin =</span> <span class="st">"Six-sided die"</span>,</span>
+<span id="cb11-121"><a href="#cb11-121" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
+<span id="cb11-122"><a href="#cb11-122" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"discoveries"</span>, <span class="at">name =</span> <span class="st">"Great inventions per year (1860-1959)"</span>, <span class="at">short =</span> <span class="st">"Inventions / year"</span>,</span>
+<span id="cb11-123"><a href="#cb11-123" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(discoveries), <span class="at">twin =</span> <span class="st">"Binomial(5, 0.1)"</span>,</span>
+<span id="cb11-124"><a href="#cb11-124" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
+<span id="cb11-125"><a href="#cb11-125" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"diamonds"</span>, <span class="at">name =</span> <span class="st">"Diamond prices (USD)"</span>, <span class="at">short =</span> <span class="st">"Diamond price ($)"</span>,</span>
+<span id="cb11-126"><a href="#cb11-126" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(ggplot2<span class="sc">::</span>diamonds<span class="sc">$</span>price), <span class="at">twin =</span> <span class="st">"Exponential(1)"</span>,</span>
+<span id="cb11-127"><a href="#cb11-127" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">75</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">300</span>), <span class="at">step =</span> <span class="dv">1</span>),</span>
+<span id="cb11-128"><a href="#cb11-128" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"flights"</span>, <span class="at">name =</span> <span class="st">"NYC flight arrival delays, 2013 (minutes)"</span>, <span class="at">short =</span> <span class="st">"Flight delay (min)"</span>,</span>
+<span id="cb11-129"><a href="#cb11-129" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(flights_delay), <span class="at">twin =</span> <span class="st">"Heavier tail than the exponential"</span>,</span>
+<span id="cb11-130"><a href="#cb11-130" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">150</span>, <span class="dv">200</span>, <span class="dv">250</span>, <span class="dv">300</span>, <span class="dv">400</span>, <span class="dv">500</span>, <span class="dv">750</span>, <span class="dv">1000</span>), <span class="at">step =</span> <span class="dv">5</span>),</span>
+<span id="cb11-131"><a href="#cb11-131" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">key =</span> <span class="st">"counties"</span>, <span class="at">name =</span> <span class="st">"Population of Midwest US counties"</span>, <span class="at">short =</span> <span class="st">"County population"</span>,</span>
+<span id="cb11-132"><a href="#cb11-132" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">as.numeric</span>(ggplot2<span class="sc">::</span>midwest<span class="sc">$</span>poptotal), <span class="at">twin =</span> <span class="st">"Closest real-world cousin of the Cauchy"</span>,</span>
+<span id="cb11-133"><a href="#cb11-133" aria-hidden="true" tabindex="-1"></a>       <span class="at">coarse =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">30</span>, <span class="dv">100</span>, <span class="dv">300</span>, <span class="dv">1000</span>, <span class="dv">1500</span>, <span class="dv">2000</span>, <span class="dv">2500</span>, <span class="dv">3000</span>, <span class="dv">4000</span>, <span class="dv">5000</span>, <span class="dv">7500</span>), <span class="at">step =</span> <span class="dv">50</span>)</span>
+<span id="cb11-134"><a href="#cb11-134" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-135"><a href="#cb11-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-136"><a href="#cb11-136" aria-hidden="true" tabindex="-1"></a>info <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(datasets, <span class="cf">function</span>(d) <span class="fu">data.frame</span>(</span>
+<span id="cb11-137"><a href="#cb11-137" aria-hidden="true" tabindex="-1"></a>  <span class="at">Dataset =</span> d<span class="sc">$</span>name, <span class="at">Records =</span> <span class="fu">num</span>(<span class="fu">length</span>(d<span class="sc">$</span>x)), <span class="at">Mean =</span> <span class="fu">num</span>(<span class="fu">signif</span>(<span class="fu">mean</span>(d<span class="sc">$</span>x), <span class="dv">4</span>)),</span>
+<span id="cb11-138"><a href="#cb11-138" aria-hidden="true" tabindex="-1"></a>  <span class="at">Median =</span> <span class="fu">num</span>(<span class="fu">signif</span>(<span class="fu">median</span>(d<span class="sc">$</span>x), <span class="dv">4</span>)), <span class="at">Skewness =</span> <span class="fu">f2</span>(<span class="fu">skew</span>(d<span class="sc">$</span>x)),</span>
+<span id="cb11-139"><a href="#cb11-139" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Ex. kurtosis</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">num</span>(<span class="fu">round</span>(<span class="fu">kurt</span>(d<span class="sc">$</span>x), <span class="dv">1</span>)), <span class="st">`</span><span class="at">Behaves like</span><span class="st">`</span> <span class="ot">=</span> d<span class="sc">$</span>twin, <span class="at">check.names =</span> <span class="cn">FALSE</span>)))</span>
+<span id="cb11-140"><a href="#cb11-140" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(info, <span class="at">align =</span> <span class="st">"lrrrrrl"</span>)</span>
+<span id="cb11-141"><a href="#cb11-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-142"><a href="#cb11-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-145"><a href="#cb11-145" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-146"><a href="#cb11-146" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-real-populations</span></span>
+<span id="cb11-147"><a href="#cb11-147" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "The five populations. The geyser is bimodal; the other four have long right tails, and the county populations most extremely so (Cook County, Illinois, has 5.1 million people; the median county has 35,000). Values above the 99th percentile are not shown."</span></span>
+<span id="cb11-148"><a href="#cb11-148" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.4</span></span>
+<span id="cb11-149"><a href="#cb11-149" aria-hidden="true" tabindex="-1"></a>old <span class="ot">&lt;-</span> <span class="fu">style_par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">3.6</span>, <span class="fl">2.6</span>, <span class="fl">2.6</span>, <span class="fl">0.6</span>))</span>
+<span id="cb11-150"><a href="#cb11-150" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (d <span class="cf">in</span> datasets) {</span>
+<span id="cb11-151"><a href="#cb11-151" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> d<span class="sc">$</span>x[d<span class="sc">$</span>x <span class="sc">&lt;=</span> <span class="fu">quantile</span>(d<span class="sc">$</span>x, <span class="fl">0.99</span>)]</span>
+<span id="cb11-152"><a href="#cb11-152" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (d<span class="sc">$</span>key <span class="sc">==</span> <span class="st">"discoveries"</span>) {</span>
+<span id="cb11-153"><a href="#cb11-153" aria-hidden="true" tabindex="-1"></a>    <span class="fu">barplot</span>(<span class="fu">table</span>(<span class="fu">factor</span>(d<span class="sc">$</span>x, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">12</span>)) <span class="sc">/</span> <span class="fu">length</span>(d<span class="sc">$</span>x), <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.75</span>), <span class="at">border =</span> <span class="cn">NA</span>,</span>
+<span id="cb11-154"><a href="#cb11-154" aria-hidden="true" tabindex="-1"></a>            <span class="at">main =</span> d<span class="sc">$</span>short, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>, <span class="at">cex.names =</span> <span class="fl">0.7</span>)</span>
+<span id="cb11-155"><a href="#cb11-155" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb11-156"><a href="#cb11-156" aria-hidden="true" tabindex="-1"></a>    <span class="fu">hist</span>(x, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.75</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb11-157"><a href="#cb11-157" aria-hidden="true" tabindex="-1"></a>         <span class="at">main =</span> d<span class="sc">$</span>short, <span class="at">xlab =</span> <span class="st">""</span>, <span class="at">ylab =</span> <span class="st">""</span>, <span class="at">yaxt =</span> <span class="st">"n"</span>)</span>
+<span id="cb11-158"><a href="#cb11-158" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-159"><a href="#cb11-159" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-160"><a href="#cb11-160" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(old)</span>
+<span id="cb11-161"><a href="#cb11-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-162"><a href="#cb11-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-163"><a href="#cb11-163" aria-hidden="true" tabindex="-1"></a><span class="fu">### Prediction first, then simulation</span></span>
+<span id="cb11-164"><a href="#cb11-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-165"><a href="#cb11-165" aria-hidden="true" tabindex="-1"></a>For each dataset I first **predicted** the threshold from its skewness, n ≈ (skewness / 0.25)², the same</span>
+<span id="cb11-166"><a href="#cb11-166" aria-hidden="true" tabindex="-1"></a>formula that predicted 64 for the exponential, and then ran the full two-stage search.</span>
+<span id="cb11-167"><a href="#cb11-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-170"><a href="#cb11-170" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-171"><a href="#cb11-171" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: real-simulate</span></span>
+<span id="cb11-172"><a href="#cb11-172" aria-hidden="true" tabindex="-1"></a>real <span class="ot">&lt;-</span> <span class="fu">lapply</span>(datasets, <span class="cf">function</span>(d) {</span>
+<span id="cb11-173"><a href="#cb11-173" aria-hidden="true" tabindex="-1"></a>  mu_d <span class="ot">&lt;-</span> <span class="fu">mean</span>(d<span class="sc">$</span>x); sd_d <span class="ot">&lt;-</span> <span class="fu">pop_sd</span>(d<span class="sc">$</span>x)</span>
+<span id="cb11-174"><a href="#cb11-174" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">run_with_refinement</span>(<span class="fu">from_data</span>(d<span class="sc">$</span>x), d<span class="sc">$</span>coarse, mu_d, sd_d, <span class="at">step =</span> d<span class="sc">$</span>step)</span>
+<span id="cb11-175"><a href="#cb11-175" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> e<span class="sc">$</span>results</span>
+<span id="cb11-176"><a href="#cb11-176" aria-hidden="true" tabindex="-1"></a>  <span class="fu">save_results</span>(r, <span class="fu">paste0</span>(<span class="st">"real_"</span>, d<span class="sc">$</span>key))</span>
+<span id="cb11-177"><a href="#cb11-177" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">d =</span> d, <span class="at">res =</span> r, <span class="at">n_main =</span> <span class="fu">smallest_normal_n</span>(r),</span>
+<span id="cb11-178"><a href="#cb11-178" aria-hidden="true" tabindex="-1"></a>       <span class="at">n_pred =</span> <span class="fu">ceiling</span>((<span class="fu">skew</span>(d<span class="sc">$</span>x) <span class="sc">/</span> <span class="fl">0.25</span>)<span class="sc">^</span><span class="dv">2</span>), <span class="at">r30 =</span> r[r<span class="sc">$</span>n <span class="sc">==</span> <span class="dv">30</span>, ])</span>
+<span id="cb11-179"><a href="#cb11-179" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb11-180"><a href="#cb11-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-181"><a href="#cb11-181" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(real, <span class="cf">function</span>(z) <span class="fu">data.frame</span>(</span>
+<span id="cb11-182"><a href="#cb11-182" aria-hidden="true" tabindex="-1"></a>  <span class="at">Dataset =</span> z<span class="sc">$</span>d<span class="sc">$</span>short,</span>
+<span id="cb11-183"><a href="#cb11-183" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Skewness</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">f2</span>(<span class="fu">skew</span>(z<span class="sc">$</span>d<span class="sc">$</span>x)),</span>
+<span id="cb11-184"><a href="#cb11-184" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Predicted n</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">num</span>(z<span class="sc">$</span>n_pred),</span>
+<span id="cb11-185"><a href="#cb11-185" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Simulated n</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"**"</span>, <span class="fu">num</span>(z<span class="sc">$</span>n_main), <span class="st">"**"</span>),</span>
+<span id="cb11-186"><a href="#cb11-186" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Skewness at n = 30</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">f2</span>(z<span class="sc">$</span>r30<span class="sc">$</span>skewness),</span>
+<span id="cb11-187"><a href="#cb11-187" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Tails at n = 30</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="fu">pct</span>(z<span class="sc">$</span>r30<span class="sc">$</span>lower_tail), <span class="st">" / "</span>, <span class="fu">pct</span>(z<span class="sc">$</span>r30<span class="sc">$</span>upper_tail)),</span>
+<span id="cb11-188"><a href="#cb11-188" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">n = 30 enough?</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">ifelse</span>(z<span class="sc">$</span>r30<span class="sc">$</span>normal_enough, <span class="st">"yes"</span>, <span class="st">"**no**"</span>),</span>
+<span id="cb11-189"><a href="#cb11-189" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>)))</span>
+<span id="cb11-190"><a href="#cb11-190" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(tab, <span class="at">align =</span> <span class="st">"lrrrrrc"</span>)</span>
+<span id="cb11-191"><a href="#cb11-191" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-192"><a href="#cb11-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-195"><a href="#cb11-195" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-196"><a href="#cb11-196" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-real-skew</span></span>
+<span id="cb11-197"><a href="#cb11-197" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Skewness of the sample means as n grows, one panel per dataset. Dots: simulation. Orange: the prediction skewness/√n. Shaded: my ±0.25 pass zone. Dotted: n = 30."</span></span>
+<span id="cb11-198"><a href="#cb11-198" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.6</span></span>
+<span id="cb11-199"><a href="#cb11-199" aria-hidden="true" tabindex="-1"></a>old <span class="ot">&lt;-</span> <span class="fu">style_par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">3.8</span>, <span class="dv">3</span>, <span class="fl">2.6</span>, <span class="fl">0.6</span>))</span>
+<span id="cb11-200"><a href="#cb11-200" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (z <span class="cf">in</span> real) {</span>
+<span id="cb11-201"><a href="#cb11-201" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span> z<span class="sc">$</span>res</span>
+<span id="cb11-202"><a href="#cb11-202" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(r<span class="sc">$</span>n, r<span class="sc">$</span>skewness, <span class="at">log =</span> <span class="st">"x"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.7</span>,</span>
+<span id="cb11-203"><a href="#cb11-203" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">ifelse</span>(r<span class="sc">$</span>skew_ok, pal<span class="sc">$</span>pass, pal<span class="sc">$</span>fail), <span class="at">ylim =</span> <span class="fu">range</span>(<span class="fu">c</span>(r<span class="sc">$</span>skewness, <span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>)),</span>
+<span id="cb11-204"><a href="#cb11-204" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> z<span class="sc">$</span>d<span class="sc">$</span>short, <span class="at">xlab =</span> <span class="st">"n (log)"</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb11-205"><a href="#cb11-205" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(<span class="fl">1e-3</span>, <span class="sc">-</span><span class="fl">0.25</span>, <span class="fl">1e6</span>, <span class="fl">0.25</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>zone, <span class="fl">0.10</span>), <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb11-206"><a href="#cb11-206" aria-hidden="true" tabindex="-1"></a>  <span class="fu">curve</span>(<span class="fu">skew</span>(z<span class="sc">$</span>d<span class="sc">$</span>x) <span class="sc">/</span> <span class="fu">sqrt</span>(x), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> pal<span class="sc">$</span>accent, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">n =</span> <span class="dv">300</span>)</span>
+<span id="cb11-207"><a href="#cb11-207" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">30</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span>
+<span id="cb11-208"><a href="#cb11-208" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-209"><a href="#cb11-209" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(old)</span>
+<span id="cb11-210"><a href="#cb11-210" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-211"><a href="#cb11-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-212"><a href="#cb11-212" aria-hidden="true" tabindex="-1"></a><span class="fu">### What the real data show</span></span>
+<span id="cb11-213"><a href="#cb11-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-214"><a href="#cb11-214" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The rule of 30 fails for most real-world data.** It works for the geyser, whose distribution is</span>
+<span id="cb11-215"><a href="#cb11-215" aria-hidden="true" tabindex="-1"></a>  bimodal but nearly symmetric. It does not work for prices, delays, or populations, which are the kind of</span>
+<span id="cb11-216"><a href="#cb11-216" aria-hidden="true" tabindex="-1"></a>  data analysts handle every day. These need roughly</span>
+<span id="cb11-217"><a href="#cb11-217" aria-hidden="true" tabindex="-1"></a>  <span class="in">`r num(real[[3]]$n_main)`</span>, <span class="in">`r num(real[[4]]$n_main)`</span> and <span class="in">`r num(real[[5]]$n_main)`</span> observations.</span>
+<span id="cb11-218"><a href="#cb11-218" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The skewness formula predicts the threshold well**, even for messy real data: the simulated n lands</span>
+<span id="cb11-219"><a href="#cb11-219" aria-hidden="true" tabindex="-1"></a>  near (skewness/0.25)² for the continuous datasets. One number about the population, its skewness, tells</span>
+<span id="cb11-220"><a href="#cb11-220" aria-hidden="true" tabindex="-1"></a>  you most of what you need to know.</span>
+<span id="cb11-221"><a href="#cb11-221" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Discrete counts behave like the binomial.** The inventions data pass the skewness check early but need</span>
+<span id="cb11-222"><a href="#cb11-222" aria-hidden="true" tabindex="-1"></a>  extra observations because of the steps between possible values. This is the same pattern as in the</span>
+<span id="cb11-223"><a href="#cb11-223" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">binomial analysis</span><span class="co">](04_binomial.qmd)</span>.</span>
+<span id="cb11-224"><a href="#cb11-224" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Heavy tails make the CLT slow.** County populations have finite variance, so the CLT does eventually</span>
+<span id="cb11-225"><a href="#cb11-225" aria-hidden="true" tabindex="-1"></a>  apply, but only after thousands of observations. In practice that is not far from the</span>
+<span id="cb11-226"><a href="#cb11-226" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Cauchy</span><span class="co">](05_cauchy.qmd)</span> case. With a few giants in the data, the mean of a typical sample is dominated by</span>
+<span id="cb11-227"><a href="#cb11-227" aria-hidden="true" tabindex="-1"></a>  whether a giant was included.</span>
+<span id="cb11-228"><a href="#cb11-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-229"><a href="#cb11-229" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part C. Why it matters: do real "95%" intervals catch the truth?</span></span>
+<span id="cb11-230"><a href="#cb11-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-231"><a href="#cb11-231" aria-hidden="true" tabindex="-1"></a>Everything above judged the *shape* of the sample means using the true population SD. A real analyst does</span>
+<span id="cb11-232"><a href="#cb11-232" aria-hidden="true" tabindex="-1"></a>not know the true SD. They estimate it from the same sample and report the textbook interval</span>
+<span id="cb11-233"><a href="#cb11-233" aria-hidden="true" tabindex="-1"></a>x̄ ± t·s/√n. For lopsided data this goes wrong in a specific way: a small sample usually misses the rare</span>
+<span id="cb11-234"><a href="#cb11-234" aria-hidden="true" tabindex="-1"></a>huge values, so it underestimates both the mean and the spread, and the interval comes out too low and</span>
+<span id="cb11-235"><a href="#cb11-235" aria-hidden="true" tabindex="-1"></a>too narrow.</span>
+<span id="cb11-236"><a href="#cb11-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-237"><a href="#cb11-237" aria-hidden="true" tabindex="-1"></a>So I asked the practical question directly. For each dataset I drew 100,000 samples, built the usual 95%</span>
+<span id="cb11-238"><a href="#cb11-238" aria-hidden="true" tabindex="-1"></a>t-interval from each, and counted how often the interval contained the true mean.</span>
+<span id="cb11-239"><a href="#cb11-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-242"><a href="#cb11-242" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-243"><a href="#cb11-243" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: ci-coverage</span></span>
+<span id="cb11-244"><a href="#cb11-244" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Show code: coverage of the usual 95% t-interval"</span></span>
+<span id="cb11-245"><a href="#cb11-245" aria-hidden="true" tabindex="-1"></a>coverage <span class="ot">&lt;-</span> <span class="cf">function</span>(x, n, <span class="at">reps =</span> B, <span class="at">seed =</span> student_id) {</span>
+<span id="cb11-246"><a href="#cb11-246" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">mean</span>(x)</span>
+<span id="cb11-247"><a href="#cb11-247" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed)</span>
+<span id="cb11-248"><a href="#cb11-248" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">replicate</span>(reps, {</span>
+<span id="cb11-249"><a href="#cb11-249" aria-hidden="true" tabindex="-1"></a>    s <span class="ot">&lt;-</span> <span class="fu">sample</span>(x, n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-250"><a href="#cb11-250" aria-hidden="true" tabindex="-1"></a>    half <span class="ot">&lt;-</span> <span class="fu">qt</span>(<span class="fl">0.975</span>, n <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">sd</span>(s) <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb11-251"><a href="#cb11-251" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="fu">abs</span>(<span class="fu">mean</span>(s) <span class="sc">-</span> mu) <span class="sc">&lt;=</span> half,          <span class="co"># interval contains the true mean</span></span>
+<span id="cb11-252"><a href="#cb11-252" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mean</span>(s) <span class="sc">+</span> half <span class="sc">&lt;</span> mu)                <span class="co"># whole interval below the truth</span></span>
+<span id="cb11-253"><a href="#cb11-253" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb11-254"><a href="#cb11-254" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">covers =</span> <span class="fu">mean</span>(res[<span class="dv">1</span>, ]), <span class="at">too_low =</span> <span class="fu">mean</span>(res[<span class="dv">2</span>, ]), <span class="at">too_high =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">mean</span>(res[<span class="dv">1</span>, ]) <span class="sc">-</span> <span class="fu">mean</span>(res[<span class="dv">2</span>, ]))</span>
+<span id="cb11-255"><a href="#cb11-255" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-256"><a href="#cb11-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-257"><a href="#cb11-257" aria-hidden="true" tabindex="-1"></a>ci_rows <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(real, <span class="cf">function</span>(z) {</span>
+<span id="cb11-258"><a href="#cb11-258" aria-hidden="true" tabindex="-1"></a>  sizes <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">100</span>, z<span class="sc">$</span>n_main))</span>
+<span id="cb11-259"><a href="#cb11-259" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(sizes, <span class="cf">function</span>(n) {</span>
+<span id="cb11-260"><a href="#cb11-260" aria-hidden="true" tabindex="-1"></a>    cv <span class="ot">&lt;-</span> <span class="fu">coverage</span>(z<span class="sc">$</span>d<span class="sc">$</span>x, n)</span>
+<span id="cb11-261"><a href="#cb11-261" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>(<span class="at">key =</span> z<span class="sc">$</span>d<span class="sc">$</span>key, <span class="at">dataset =</span> z<span class="sc">$</span>d<span class="sc">$</span>short, <span class="at">n =</span> n, <span class="at">covers =</span> cv[[<span class="st">"covers"</span>]],</span>
+<span id="cb11-262"><a href="#cb11-262" aria-hidden="true" tabindex="-1"></a>               <span class="at">too_low =</span> cv[[<span class="st">"too_low"</span>]], <span class="at">too_high =</span> cv[[<span class="st">"too_high"</span>]])</span>
+<span id="cb11-263"><a href="#cb11-263" aria-hidden="true" tabindex="-1"></a>  }))</span>
+<span id="cb11-264"><a href="#cb11-264" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb11-265"><a href="#cb11-265" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(ci_rows, <span class="st">"../results/ci_coverage.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb11-266"><a href="#cb11-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-267"><a href="#cb11-267" aria-hidden="true" tabindex="-1"></a><span class="co"># 100 example intervals for flight delays at n = 30 (used by the website)</span></span>
+<span id="cb11-268"><a href="#cb11-268" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(student_id)</span>
+<span id="cb11-269"><a href="#cb11-269" aria-hidden="true" tabindex="-1"></a>fl <span class="ot">&lt;-</span> datasets[[<span class="dv">4</span>]]<span class="sc">$</span>x</span>
+<span id="cb11-270"><a href="#cb11-270" aria-hidden="true" tabindex="-1"></a>ex <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">replicate</span>(<span class="dv">100</span>, { s <span class="ot">&lt;-</span> <span class="fu">sample</span>(fl, <span class="dv">30</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>); h <span class="ot">&lt;-</span> <span class="fu">qt</span>(<span class="fl">0.975</span>, <span class="dv">29</span>) <span class="sc">*</span> <span class="fu">sd</span>(s) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="dv">30</span>); <span class="fu">c</span>(<span class="fu">mean</span>(s) <span class="sc">-</span> h, <span class="fu">mean</span>(s) <span class="sc">+</span> h) }))</span>
+<span id="cb11-271"><a href="#cb11-271" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(<span class="fu">data.frame</span>(<span class="at">lo =</span> ex[, <span class="dv">1</span>], <span class="at">hi =</span> ex[, <span class="dv">2</span>]), <span class="st">"../results/ci_flights_examples.csv"</span>, <span class="at">row.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb11-272"><a href="#cb11-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-273"><a href="#cb11-273" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">data.frame</span>(</span>
+<span id="cb11-274"><a href="#cb11-274" aria-hidden="true" tabindex="-1"></a>  <span class="at">Dataset =</span> ci_rows<span class="sc">$</span>dataset, <span class="at">n =</span> <span class="fu">num</span>(ci_rows<span class="sc">$</span>n),</span>
+<span id="cb11-275"><a href="#cb11-275" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Interval caught the truth</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(ci_rows<span class="sc">$</span>covers),</span>
+<span id="cb11-276"><a href="#cb11-276" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Interval too low</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(ci_rows<span class="sc">$</span>too_low),</span>
+<span id="cb11-277"><a href="#cb11-277" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Interval too high</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(ci_rows<span class="sc">$</span>too_high), <span class="at">check.names =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb11-278"><a href="#cb11-278" aria-hidden="true" tabindex="-1"></a>  <span class="at">align =</span> <span class="st">"lrrrr"</span>, <span class="at">caption =</span> <span class="st">"A correct 95% interval catches the truth 95% of the time and misses 2.5% on each side."</span>)</span>
+<span id="cb11-279"><a href="#cb11-279" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-280"><a href="#cb11-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-283"><a href="#cb11-283" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-284"><a href="#cb11-284" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: ci-numbers</span></span>
+<span id="cb11-285"><a href="#cb11-285" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb11-286"><a href="#cb11-286" aria-hidden="true" tabindex="-1"></a>cv <span class="ot">&lt;-</span> <span class="cf">function</span>(k, n) ci_rows[ci_rows<span class="sc">$</span>key <span class="sc">==</span> k <span class="sc">&amp;</span> ci_rows<span class="sc">$</span>n <span class="sc">==</span> n, ]</span>
+<span id="cb11-287"><a href="#cb11-287" aria-hidden="true" tabindex="-1"></a>f30 <span class="ot">&lt;-</span> <span class="fu">cv</span>(<span class="st">"flights"</span>, <span class="dv">30</span>); c30 <span class="ot">&lt;-</span> <span class="fu">cv</span>(<span class="st">"counties"</span>, <span class="dv">30</span>); fmain <span class="ot">&lt;-</span> <span class="fu">cv</span>(<span class="st">"flights"</span>, real[[<span class="dv">4</span>]]<span class="sc">$</span>n_main)</span>
+<span id="cb11-288"><a href="#cb11-288" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-289"><a href="#cb11-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-292"><a href="#cb11-292" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-293"><a href="#cb11-293" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-ci-flights</span></span>
+<span id="cb11-294"><a href="#cb11-294" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "100 of the simulated studies of 30 flights. Each line is one study's 95% interval for the average delay; the dashed line is the true average. Red intervals missed it."</span></span>
+<span id="cb11-295"><a href="#cb11-295" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb11-296"><a href="#cb11-296" aria-hidden="true" tabindex="-1"></a>mu_f <span class="ot">&lt;-</span> <span class="fu">mean</span>(fl)</span>
+<span id="cb11-297"><a href="#cb11-297" aria-hidden="true" tabindex="-1"></a>miss <span class="ot">&lt;-</span> ex[, <span class="dv">2</span>] <span class="sc">&lt;</span> mu_f <span class="sc">|</span> ex[, <span class="dv">1</span>] <span class="sc">&gt;</span> mu_f</span>
+<span id="cb11-298"><a href="#cb11-298" aria-hidden="true" tabindex="-1"></a><span class="fu">style_par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb11-299"><a href="#cb11-299" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="cn">NA</span>, <span class="at">xlim =</span> <span class="fu">range</span>(ex), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">101</span>), <span class="at">yaxt =</span> <span class="st">"n"</span>, <span class="at">xlab =</span> <span class="st">"Average arrival delay (minutes)"</span>, <span class="at">ylab =</span> <span class="st">""</span>)</span>
+<span id="cb11-300"><a href="#cb11-300" aria-hidden="true" tabindex="-1"></a><span class="fu">segments</span>(ex[, <span class="dv">1</span>], <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, ex[, <span class="dv">2</span>], <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, <span class="at">col =</span> <span class="fu">ifelse</span>(miss, pal<span class="sc">$</span>fail, <span class="fu">adjustcolor</span>(pal<span class="sc">$</span>bars, <span class="fl">0.7</span>)), <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb11-301"><a href="#cb11-301" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> mu_f, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb11-302"><a href="#cb11-302" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-303"><a href="#cb11-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-304"><a href="#cb11-304" aria-hidden="true" tabindex="-1"></a>**What this means in practice.** An analyst who estimates the average flight delay from 30 flights gets a</span>
+<span id="cb11-305"><a href="#cb11-305" aria-hidden="true" tabindex="-1"></a>"95%" interval that misses the true average <span class="in">`r pct(1 - f30$covers)`</span> of the time instead of 5%. Almost all of those</span>
+<span id="cb11-306"><a href="#cb11-306" aria-hidden="true" tabindex="-1"></a>misses are on the same side: in <span class="in">`r pct(f30$too_low)`</span> of studies the whole interval sits *below* the truth,</span>
+<span id="cb11-307"><a href="#cb11-307" aria-hidden="true" tabindex="-1"></a>four times the promised 2.5%, so the analyst reports delays as shorter than they really are. For county</span>
+<span id="cb11-308"><a href="#cb11-308" aria-hidden="true" tabindex="-1"></a>populations it is worse: the interval catches the truth only <span class="in">`r pct(c30$covers)`</span> of the time. With</span>
+<span id="cb11-309"><a href="#cb11-309" aria-hidden="true" tabindex="-1"></a><span class="in">`r real[[4]]$n_main`</span> flights per study, the number my shape tests required, coverage rises to</span>
+<span id="cb11-310"><a href="#cb11-310" aria-hidden="true" tabindex="-1"></a><span class="in">`r pct(fmain$covers)`</span>.</span>
+<span id="cb11-311"><a href="#cb11-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-312"><a href="#cb11-312" aria-hidden="true" tabindex="-1"></a>This is the practical cost of trusting the rule of 30 with lopsided data: confidence intervals and</span>
+<span id="cb11-313"><a href="#cb11-313" aria-hidden="true" tabindex="-1"></a>tests that look standard but quietly overstate how sure we are.</span>
+<span id="cb11-314"><a href="#cb11-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-315"><a href="#cb11-315" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limits of this extension</span></span>
+<span id="cb11-316"><a href="#cb11-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-317"><a href="#cb11-317" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**The dataset is treated as the whole population.** Real conclusions would also depend on how the data</span>
+<span id="cb11-318"><a href="#cb11-318" aria-hidden="true" tabindex="-1"></a>  were collected.</span>
+<span id="cb11-319"><a href="#cb11-319" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Independence is assumed.** Real flight delays on the same day are correlated (one storm delays many</span>
+<span id="cb11-320"><a href="#cb11-320" aria-hidden="true" tabindex="-1"></a>  flights), which would slow convergence further. The extra-credit dependent-process study is the place</span>
+<span id="cb11-321"><a href="#cb11-321" aria-hidden="true" tabindex="-1"></a>  to examine this.</span>
+<span id="cb11-322"><a href="#cb11-322" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Resampling with replacement** keeps the draws independent and identically distributed, matching the</span>
+<span id="cb11-323"><a href="#cb11-323" aria-hidden="true" tabindex="-1"></a>  CLT's assumptions.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

@@ -28,13 +28,12 @@ real <- do.call(rbind, lapply(seq_along(real_keys), function(i) {
 
 ::: {.callout-tip appearance="simple"}
 ## In plain words
-Polls, drug trials and website experiments report results as "average ± margin". That margin is only right once the average
-behaves like a bell curve, and statistics classes say 30 data points are enough for that. I simulated 100,000 studies
-for every sample size, on textbook data and real data, to see how many points an average really needs. **The answer
-depends on the data:** balanced data need fewer than 10, lopsided data like prices or delays need 50 to 2,450, and
-some data never get there. New to the topic? Start with the [visual story](index.html).
+Textbooks say an average of 30 data points behaves like a bell curve, and the usual "95% range" depends on that.
+I tested the rule with 100,000 simulated studies for every sample size, on textbook data and real data. **The answer
+depends on the data:** balanced data need fewer than 10 values, lopsided data like prices or delays need 50 to 2,450,
+and some data never get there. In practice, a 95% range built from 30 real flight delays caught the true average only
+89.8% of the time. New to the topic? Start with the [visual story](index.html).
 :::
-
 ## Executive summary
 
 I used Monte Carlo simulation in R (100,000 simulated samples for every sample size, seed 9426) to find
@@ -166,6 +165,25 @@ limiting factor for finite-variance populations.
 - **Dependent observations** and **non-identically distributed observations** were offered as extra-credit
   extensions and are not part of this submission. The real-data page notes where independence is likely to
   fail in practice (flight delays on the same day are correlated).
+
+## Why it matters: real 95% intervals
+
+The checks above use the true population SD. An analyst has to estimate the SD from the same sample, and for lopsided
+data a small sample usually misses the rare huge values. The table shows how often the usual 95% t-interval actually
+contained the true mean (100,000 samples each; details in [Real data](analysis/06_real_world_data.qmd), Part C).
+
+```{r}
+#| label: tbl-coverage
+#| echo: false
+cvg <- read.csv("results/ci_coverage.csv")
+knitr::kable(data.frame(Dataset = cvg$dataset, n = num(cvg$n), `Caught the truth` = pct(cvg$covers),
+                        `Too low` = pct(cvg$too_low), `Too high` = pct(cvg$too_high), check.names = FALSE),
+             align = "lrrrr", caption = "An honest 95% interval catches the truth 95% of the time and misses 2.5% on each side.")
+```
+
+With 30 flights the interval missed 10.2% of the time, almost all of it on the low side; with the 235 flights my
+shape tests required, it missed 5.9%. County populations at n = 30 were caught only 71.7% of the time. This is the
+practical cost of the rule of 30 on lopsided data.
 
 ## Reproducibility
 

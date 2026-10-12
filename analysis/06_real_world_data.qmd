@@ -210,6 +210,86 @@ par(old)
   [Cauchy](05_cauchy.qmd) case. With a few giants in the data, the mean of a typical sample is dominated by
   whether a giant was included.
 
+## Part C. Why it matters: do real "95%" intervals catch the truth?
+
+Everything above judged the *shape* of the sample means using the true population SD. A real analyst does
+not know the true SD. They estimate it from the same sample and report the textbook interval
+x̄ ± t·s/√n. For lopsided data this goes wrong in a specific way: a small sample usually misses the rare
+huge values, so it underestimates both the mean and the spread, and the interval comes out too low and
+too narrow.
+
+So I asked the practical question directly. For each dataset I drew 100,000 samples, built the usual 95%
+t-interval from each, and counted how often the interval contained the true mean.
+
+```{r}
+#| label: ci-coverage
+#| code-summary: "Show code: coverage of the usual 95% t-interval"
+coverage <- function(x, n, reps = B, seed = student_id) {
+  mu <- mean(x)
+  set.seed(seed)
+  res <- replicate(reps, {
+    s <- sample(x, n, replace = TRUE)
+    half <- qt(0.975, n - 1) * sd(s) / sqrt(n)
+    c(abs(mean(s) - mu) <= half,          # interval contains the true mean
+      mean(s) + half < mu)                # whole interval below the truth
+  })
+  c(covers = mean(res[1, ]), too_low = mean(res[2, ]), too_high = 1 - mean(res[1, ]) - mean(res[2, ]))
+}
+
+ci_rows <- do.call(rbind, lapply(real, function(z) {
+  sizes <- unique(c(30, 100, z$n_main))
+  do.call(rbind, lapply(sizes, function(n) {
+    cv <- coverage(z$d$x, n)
+    data.frame(key = z$d$key, dataset = z$d$short, n = n, covers = cv[["covers"]],
+               too_low = cv[["too_low"]], too_high = cv[["too_high"]])
+  }))
+}))
+write.csv(ci_rows, "../results/ci_coverage.csv", row.names = FALSE)
+
+# 100 example intervals for flight delays at n = 30 (used by the website)
+set.seed(student_id)
+fl <- datasets[[4]]$x
+ex <- t(replicate(100, { s <- sample(fl, 30, replace = TRUE); h <- qt(0.975, 29) * sd(s) / sqrt(30); c(mean(s) - h, mean(s) + h) }))
+write.csv(data.frame(lo = ex[, 1], hi = ex[, 2]), "../results/ci_flights_examples.csv", row.names = FALSE)
+
+knitr::kable(data.frame(
+  Dataset = ci_rows$dataset, n = num(ci_rows$n),
+  `Interval caught the truth` = pct(ci_rows$covers),
+  `Interval too low` = pct(ci_rows$too_low),
+  `Interval too high` = pct(ci_rows$too_high), check.names = FALSE),
+  align = "lrrrr", caption = "A correct 95% interval catches the truth 95% of the time and misses 2.5% on each side.")
+```
+
+```{r}
+#| label: ci-numbers
+#| include: false
+cv <- function(k, n) ci_rows[ci_rows$key == k & ci_rows$n == n, ]
+f30 <- cv("flights", 30); c30 <- cv("counties", 30); fmain <- cv("flights", real[[4]]$n_main)
+```
+
+```{r}
+#| label: fig-ci-flights
+#| fig-cap: "100 of the simulated studies of 30 flights. Each line is one study's 95% interval for the average delay; the dashed line is the true average. Red intervals missed it."
+#| fig-height: 6
+mu_f <- mean(fl)
+miss <- ex[, 2] < mu_f | ex[, 1] > mu_f
+style_par(mar = c(4, 1, 1, 1))
+plot(NA, xlim = range(ex), ylim = c(0, 101), yaxt = "n", xlab = "Average arrival delay (minutes)", ylab = "")
+segments(ex[, 1], 1:100, ex[, 2], 1:100, col = ifelse(miss, pal$fail, adjustcolor(pal$bars, 0.7)), lwd = 2)
+abline(v = mu_f, lty = 2, lwd = 2)
+```
+
+**What this means in practice.** An analyst who estimates the average flight delay from 30 flights gets a
+"95%" interval that misses the true average `r pct(1 - f30$covers)` of the time instead of 5%. Almost all of those
+misses are on the same side: in `r pct(f30$too_low)` of studies the whole interval sits *below* the truth,
+four times the promised 2.5%, so the analyst reports delays as shorter than they really are. For county
+populations it is worse: the interval catches the truth only `r pct(c30$covers)` of the time. With
+`r real[[4]]$n_main` flights per study, the number my shape tests required, coverage rises to
+`r pct(fmain$covers)`.
+
+This is the practical cost of trusting the rule of 30 with lopsided data: confidence intervals and
+tests that look standard but quietly overstate how sure we are.
+
 ### Limits of this extension
 
 - **The dataset is treated as the whole population.** Real conclusions would also depend on how the data

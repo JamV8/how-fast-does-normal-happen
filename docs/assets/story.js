@@ -1,36 +1,36 @@
-// Story mode: a scroll-driven particle visualization of the Central Limit Theorem.
-// Every particle eases toward a target position set by the current scene and scroll progress.
-// Numbers in the HUD and the threshold chart come from the R study (assets/data/site.json).
+// Story mode: a scroll-driven walk through one example (NYC flight delays) and then nine others.
+// Dots ease toward positions set by the current section and the (smoothed) scroll position.
+// All study results come from the R analysis via assets/data/site.json; the flight delays shown
+// are real records from assets/data/real_data.json.
 (function () {
   "use strict";
   const cv = document.getElementById("viz"), ctx = cv.getContext("2d");
-  const hud = document.getElementById("hud");
+  const noteEl = document.getElementById("note"), nav = document.getElementById("nav");
+  const bar = document.getElementById("progress-bar"), scrolly = document.querySelector(".scrolly");
   const steps = [...document.querySelectorAll(".step")];
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const COL = { white: "#3d7bfd", cyan: "#6d4aff", coral: "#ff5d73", gold: "#e5a000", violet: "#00b8a0", star: "#d3c7b6",
-                green: "#16a34a", orange: "#f59e0b", red: "#e11d48" };
-  const INK = "#1f1a33";
-  const TINT = { 0: "#faf7f2", 8: "#fff6df", 1: "#e9f7f4", 2: "#e9f7f4", 3: "#f2eeff", 4: "#f2eeff", 5: "#ebf2ff", 6: "#fff0f2", 7: "#faf7f2" };
+  const C = { ink: "#1d1d1b", ink2: "#57544d", muted: "#8b867b", rule: "#d6cfc1", red: "#c8442d", blue: "#2d5f8a",
+              mustard: "#c4900f", green: "#3c8d5a", orange: "#d9822b", paper: "#f4f1ea" };
+  const SANS = '"IBM Plex Sans", system-ui, sans-serif', MONO = '"IBM Plex Mono", ui-monospace, monospace', SERIF = '"Source Serif 4", Georgia, serif';
   const fmt = (x) => Math.round(x).toLocaleString("en-US");
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
   const lerp = (a, b, t) => a + (b - a) * t;
   const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const easeOut = (t) => 1 - Math.pow(1 - t, 3);
-
-  // ---------- glowing sprites ----------
   const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
+
+  // solid dots with a soft edge, pre-rendered once per color
   const SPR = {};
-  for (const k in COL) {
-    const s = document.createElement("canvas"); s.width = s.height = 64;
-    const g = s.getContext("2d"), grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    grd.addColorStop(0, COL[k]); grd.addColorStop(0.55, COL[k]); grd.addColorStop(0.8, rgba(COL[k], 0.35)); grd.addColorStop(1, rgba(COL[k], 0));
-    g.fillStyle = grd; g.fillRect(0, 0, 64, 64); SPR[k] = s;
+  for (const k of ["ink", "blue", "red", "mustard", "green", "orange", "rule"]) {
+    const s = document.createElement("canvas"); s.width = s.height = 32;
+    const g = s.getContext("2d"), grd = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+    grd.addColorStop(0, C[k]); grd.addColorStop(0.62, C[k]); grd.addColorStop(1, rgba(C[k], 0));
+    g.fillStyle = grd; g.fillRect(0, 0, 32, 32); SPR[k] = s;
   }
 
-  // ---------- random numbers and the simulated data ----------
+  // ---------- seeded random numbers ----------
   let seed = 9426;
   const rand = () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-  const rexp = () => -Math.log(1 - rand());
   function qnorm(p) {
     const a = [-39.69683028665376, 220.9460984245205, -275.9285104469687, 138.357751867269, -30.66479806614716, 2.506628277459239];
     const b = [-54.47609879822406, 161.5858368580409, -155.6989798598866, 66.80131188771972, -13.28068155288572];
@@ -43,361 +43,362 @@
   }
   const dnorm = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));
 
+  // ---------- cards fade in as they arrive ----------
+  const cardIO = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) e.target.classList.add("in"); }), { threshold: 0.2 });
+  document.querySelectorAll(".card").forEach((c) => cardIO.observe(c));
+
+  // ---------- data ----------
   const POP_N = 1100, MEAN_N = 2000, ALL = POP_N + MEAN_N;
-  const popVals = Array.from({ length: POP_N }, rexp);
-  const N_STOPS = [5, 8, 12, 20, 30, 45, 71, 110, 200];
-  // For each sample size: 2,000 averages of exponential samples, sorted, so that particle i can
-  // carry the i-th smallest average from one sample size to the next (a smooth morph).
-  const meanStops = N_STOPS.map((n) => {
-    const a = new Float64Array(MEAN_N);
-    for (let i = 0; i < MEAN_N; i++) { let s = 0; for (let j = 0; j < n; j++) s += rexp(); a[i] = s / n; }
-    a.sort();
-    const out = new Float64Array(MEAN_N), h = 12;
-    for (let i = 0; i < MEAN_N; i++) { let s = 0, c = 0; for (let j = Math.max(0, i - h); j <= Math.min(MEAN_N - 1, i + h); j++) { s += a[j]; c++; } out[i] = s / c; }
-    return out;
-  });
-  const cauchyVals = Float64Array.from({ length: MEAN_N }, () => Math.tan(Math.PI * (rand() - 0.5))).sort();
-  const perm = Array.from({ length: MEAN_N }, (_, i) => i);
-  for (let i = MEAN_N - 1; i > 0; i--) { const j = (rand() * (i + 1)) | 0; [perm[i], perm[j]] = [perm[j], perm[i]]; }
-  const revealRank = new Int32Array(MEAN_N); perm.forEach((p, k) => { revealRank[p] = k; });
-  const bellZ = Array.from({ length: ALL }, (_, i) => qnorm((i + 0.5) / ALL));
+  const N_STOPS = [30, 45, 70, 100, 150, 235, 320, 400];
+  let D = null;   // everything that depends on the data files
+  let SITE = {}, WHY = null, ORDER = [];
+
+  Promise.all([fetch("assets/data/site.json").then((r) => r.json()), fetch("assets/data/real_data.json").then((r) => r.json())])
+    .then(([site, real]) => {
+      SITE = Object.fromEntries(site.populations.map((p) => [p.key, p])); ORDER = site.populations.map((p) => p.key); WHY = site.why;
+      const fl = real.flights.values, MU = real.flights.mu, SIG = real.flights.sigma, draw = () => fl[(rand() * fl.length) | 0];
+      const popVals = Float64Array.from({ length: POP_N }, draw);
+      const meanStops = N_STOPS.map((n) => {
+        const a = new Float64Array(MEAN_N);
+        for (let i = 0; i < MEAN_N; i++) { let s = 0; for (let j = 0; j < n; j++) s += draw(); a[i] = s / n; }
+        a.sort();
+        const out = new Float64Array(MEAN_N), h = 8;   // light smoothing of neighbouring order statistics
+        for (let i = 0; i < MEAN_N; i++) { let s = 0, c = 0; for (let j = Math.max(0, i - h); j <= Math.min(MEAN_N - 1, i + h); j++) { s += a[j]; c++; } out[i] = s / c; }
+        return out;
+      });
+      const cauchy = Float64Array.from({ length: MEAN_N }, () => Math.tan(Math.PI * (rand() - 0.5))).sort();
+      const perm = Array.from({ length: MEAN_N }, (_, i) => i);
+      for (let i = MEAN_N - 1; i > 0; i--) { const j = (rand() * (i + 1)) | 0; [perm[i], perm[j]] = [perm[j], perm[i]]; }
+      const reveal = new Int32Array(MEAN_N); perm.forEach((p, k) => { reveal[p] = k; });
+      const bellZ = Float64Array.from({ length: ALL }, (_, i) => qnorm((i + 0.5) / ALL));
+      D = { fl, MU, SIG, draw, popVals, meanStops, cauchy, reveal, bellZ };
+      resize();
+      requestAnimationFrame(loop);
+    });
 
   // ---------- particles ----------
   const P = Array.from({ length: ALL }, (_, i) => ({
-    x: Math.random() * 1400, y: Math.random() * 900, tx: 0, ty: 0, a: 0, ta: 0, s: 1.6, ts: 1.6, c: "white",
-    star: [Math.random(), Math.random()], jit: Math.random(), pop: i < POP_N, k: i < POP_N ? i : i - POP_N }));
-
-  // ---------- results from the R study ----------
-  let SITE = {
-    normal: { name: "Normal", n_main: 1 }, die: { name: "Six-sided die", n_main: 8 }, faithful: { name: "Geyser waiting times", n_main: 6 },
-    discoveries: { name: "Inventions per year", n_main: 38 }, diamonds: { name: "Diamond prices", n_main: 51 },
-    exponential: { name: "Exponential (waiting time)", n_main: 71 }, binomial: { name: "Binomial (5, 0.1)", n_main: 83 },
-    flights: { name: "Flight delays (NYC)", n_main: 235 }, counties: { name: "County populations", n_main: 2450 },
-    cauchy: { name: "Cauchy (extreme tails)", n_main: null } };
-  let ORDER = Object.keys(SITE);
-  Object.keys(SITE).forEach((k) => { SITE[k].key = k; });
-  const PLAIN = { normal: "Already bell-shaped data", die: "Dice rolls", faithful: "Time between Old Faithful eruptions",
-    discoveries: "Inventions per year", diamonds: "Diamond prices", exponential: "Waiting times (next customer)",
-    binomial: "Count of rare events", flights: "Flight delays", counties: "County populations", cauchy: "Extreme-outlier data" };
-  fetch("assets/data/site.json").then((r) => r.json()).then((d) => {
-    SITE = Object.fromEntries(d.populations.map((p) => [p.key, p])); ORDER = d.populations.map((p) => p.key);
-  }).catch(() => {});
+    x: Math.random() * 1200, y: Math.random() * 800, tx: 0, ty: 0, a: 0, ta: 0, s: 1.6, ts: 1.6, c: "ink",
+    j1: Math.random(), j2: Math.random(), pop: i < POP_N, k: i < POP_N ? i : i - POP_N }));
+  const popIds = P.map((_, i) => i).filter((i) => P[i].pop), meanIds = P.map((_, i) => i).filter((i) => !P[i].pop);
 
   // ---------- layout ----------
-  let W = 0, H = 0, B, narrow, textPts = [];
+  let W = 0, H = 0, B, narrow = false, textPts = [];
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2), r = cv.getBoundingClientRect();
     W = r.width; H = r.height; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     narrow = W < 760;
-    B = narrow ? { x: 18, y: 118, w: W - 36, h: H * 0.56 - 118 } : { x: W * 0.41, y: H * 0.17, w: W * 0.54, h: H * 0.68 };
+    B = narrow ? { x: 18, y: 104, w: W - 36, h: H * 0.54 - 104 } : { x: W * 0.43, y: H * 0.17, w: W * 0.52, h: H * 0.66 };
     buildText();
   }
-  function buildText() {   // sample points inside the glyphs of "30"
+  function buildText() {   // points inside the glyphs of "30"
+    if (!B) return;
     const oc = document.createElement("canvas"), w = Math.round(B.w), h = Math.round(B.h);
     oc.width = w; oc.height = h;
-    const g = oc.getContext("2d"), fs = Math.min(h * 0.95, w * 0.62);
-    g.fillStyle = "#fff"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = `800 ${fs}px "Plus Jakarta Sans", sans-serif`;
-    g.fillText("30", w / 2, h / 2 + fs * 0.04);
-    const img = g.getImageData(0, 0, w, h).data, pts = [], step = Math.max(2, Math.round(Math.sqrt((w * h * 0.25) / ALL)));
-    for (let y = 0; y < h; y += step) for (let x = 0; x < w; x += step) if (img[(y * w + x) * 4 + 3] > 140) pts.push([B.x + x, B.y + y]);
+    const g = oc.getContext("2d"), fs = Math.min(h * 0.95, w * 0.6);
+    g.fillStyle = "#000"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = `700 ${fs}px ${SERIF}`;
+    g.fillText("30", w / 2, h / 2 + fs * 0.03);
+    const img = g.getImageData(0, 0, w, h).data, pts = [], st = Math.max(2, Math.round(Math.sqrt((w * h * 0.22) / ALL)));
+    for (let y = 0; y < h; y += st) for (let x = 0; x < w; x += st) if (img[(y * w + x) * 4 + 3] > 140) pts.push([B.x + x, B.y + y]);
     textPts = pts;
   }
-  resize();
   window.addEventListener("resize", resize);
   if (document.fonts) document.fonts.ready.then(buildText);
 
-  // ---------- stacking: turn values into a dot histogram inside a region ----------
-  function stack(ids, valueOf, region, lo, hi, nb, maxDy) {
-    const counts = new Int32Array(nb), bins = new Int32Array(ids.length);
-    ids.forEach((id, j) => { const v = valueOf(id); const b = Math.floor((v - lo) / (hi - lo) * nb); bins[j] = (b >= 0 && b < nb) ? b : -1; if (bins[j] >= 0) counts[b]++; });
-    let mx = 1; for (let b = 0; b < nb; b++) if (counts[b] > mx) mx = counts[b];
-    const bw = region.w / nb, dy = Math.min(maxDy || 7, region.h / (mx + 1)), fill = new Int32Array(nb);
-    ids.forEach((id, j) => {
-      const p = P[id], b = bins[j];
-      if (b < 0) { p.ta = 0; return; }
-      p.tx = region.x + (b + 0.5) * bw + (p.jit - 0.5) * bw * 0.55;
-      p.ty = region.y + region.h - (fill[b]++ + 0.5) * dy;
-    });
-    return { dy, binW: (hi - lo) / nb };
-  }
-  const popIds = P.map((_, i) => i).filter((i) => P[i].pop);
-  const meanIds = P.map((_, i) => i).filter((i) => !P[i].pop);
+  const R = () => ({
+    hero: narrow ? { x: 18, y: H * 0.76, w: W - 36, h: H * 0.2 } : { x: W * 0.53, y: H * 0.28, w: W * 0.42, h: H * 0.5 },
+    popBig: { x: B.x, y: B.y + B.h * 0.08, w: B.w, h: B.h * 0.76 },
+    popTop: { x: B.x, y: B.y, w: B.w, h: B.h * 0.36 },
+    low: { x: B.x, y: B.y + B.h * 0.58, w: B.w, h: B.h * 0.34 },
+    full: narrow ? { x: B.x, y: B.y + B.h * 0.08, w: B.w, h: B.h * 0.84 } : { x: B.x, y: B.y + B.h * 0.26, w: B.w, h: B.h * 0.66 } });
 
-  // ---------- scroll state ----------
-  let scene = 0, prog = 0, sceneT = 0, lastScene = -1;
+  // dot histogram: values -> stacked positions inside a region
+  function stack(ids, valueOf, reg, lo, hi, nb, maxDy) {
+    const counts = new Int32Array(nb), bins = new Int32Array(ids.length);
+    for (let j = 0; j < ids.length; j++) { const b = Math.floor((valueOf(ids[j]) - lo) / (hi - lo) * nb); bins[j] = b >= 0 && b < nb ? b : -1; if (bins[j] >= 0) counts[b]++; }
+    let mx = 1; for (let b = 0; b < nb; b++) if (counts[b] > mx) mx = counts[b];
+    const bw = reg.w / nb, dy = Math.min(maxDy || 6, reg.h / (mx + 1)), fill = new Int32Array(nb);
+    for (let j = 0; j < ids.length; j++) {
+      const p = P[ids[j]], b = bins[j];
+      if (b < 0) { p.ta = 0; continue; }
+      p.tx = reg.x + (b + 0.5) * bw + (p.j1 - 0.5) * bw * 0.5;
+      p.ty = reg.y + reg.h - (fill[b]++ + 0.5) * dy;
+    }
+    let peak = 0; for (let b = 1; b < nb; b++) if (counts[b] > counts[peak]) peak = b;
+    return { dy, binW: (hi - lo) / nb, peakX: reg.x + (peak + 0.5) * bw, peakY: reg.y + reg.h - counts[peak] * dy };
+  }
+
+  // ---------- scroll ----------
+  let scene = "hero", prog = 0, progS = 0, sceneT = 0, last = "", navSolid = false;
   function readScroll() {
     const mid = window.innerHeight * 0.55;
-    let s = 0, pr = 0;
-    steps.forEach((el, i) => {
+    let s = "hero", pr = 0;
+    for (const el of steps) {
       const r = el.getBoundingClientRect();
-      if (r.top <= mid) { s = +el.dataset.scene; pr = clamp((mid - r.top) / Math.max(1, r.height - window.innerHeight * 0.45), 0, 1); }
-    });
+      if (r.top <= mid) { s = el.dataset.scene; pr = clamp((mid - r.top) / Math.max(1, r.height - window.innerHeight * 0.5), 0, 1); }
+      if (r.top < window.innerHeight * 0.9 && r.bottom > 0) { const c = el.querySelector(".card"); if (c && !c.classList.contains("in")) c.classList.add("in"); }
+    }
     scene = s; prog = pr;
-    document.getElementById("nav").classList.toggle("solid", window.scrollY > 40);
-    const sc = document.querySelector(".scrolly"), total = sc.offsetHeight - window.innerHeight;
-    document.getElementById("progress-bar").style.width = (clamp(window.scrollY / total, 0, 1) * 100) + "%";
+    const solid = window.scrollY > 30; if (solid !== navSolid) { navSolid = solid; nav.classList.toggle("solid", solid); }
+    const total = scrolly.offsetHeight - window.innerHeight;
+    bar.style.transform = `scaleX(${clamp(window.scrollY / total, 0, 1)})`;
   }
-  window.addEventListener("scroll", readScroll, { passive: true });
-  readScroll();
 
-  // ---------- per-scene state ----------
-  let whyReg = null, range = [0, 6], region = null, live = [], cycle = -1, sample = [], kicks = 0, chartAlpha = 0, curveAlpha = 0;
+  // ---------- per-section state ----------
+  let range = [-60, 180], reg = null, live = [], cyc = -1, sample = [], kick = 0, curveA = 0, chartA = 0, whyA = 0, labelA = 0;
+  const whyShown = new Float64Array(100).fill(-1);
+  const nAt = (pr) => { const f = clamp(pr, 0, 0.9999) * (N_STOPS.length - 1), k = Math.floor(f), t = ease(f - k);
+    return { k, t, n: Math.exp(lerp(Math.log(N_STOPS[k]), Math.log(N_STOPS[k + 1]), t)) }; };
+  const seRange = (n) => [D.MU - 4.2 * D.SIG / Math.sqrt(n), D.MU + 4.2 * D.SIG / Math.sqrt(n)];
+  let anno = {};
 
-  function nAt(pr) {   // scroll progress -> sample size (log interpolation between the stops)
-    const f = clamp(pr, 0, 0.9999) * (N_STOPS.length - 1), k = Math.floor(f), t = ease(f - k);
-    return { k, t, n: Math.exp(lerp(Math.log(N_STOPS[k]), Math.log(N_STOPS[k + 1]), t)) };
-  }
-  const regions = () => ({
-    popBig: { x: B.x, y: B.y, w: B.w, h: B.h * 0.82 },
-    popTop: { x: B.x, y: B.y, w: B.w, h: B.h * 0.36 },
-    means: { x: B.x, y: B.y + B.h * 0.56, w: B.w, h: B.h * 0.40 },
-    full: { x: B.x, y: B.y + B.h * 0.06, w: B.w, h: B.h * 0.90 } });
+  function targets(dt) {
+    const Rg = R(), f = 1 - Math.exp(-dt * 4);
+    for (const p of P) { p.ta = 0; p.ts = narrow ? 1.25 : 1.55; p.c = "ink"; }
+    const tRange = scene === "one" || scene === "many" ? seRange(30) : scene === "grow" ? seRange(nAt(progS).n) : null;
+    if (tRange) range = [lerp(range[0], tRange[0], f), lerp(range[1], tRange[1], f)];
+    const tReg = scene === "grow" ? Rg.full : Rg.low;
+    reg = reg ? { x: lerp(reg.x, tReg.x, f), y: lerp(reg.y, tReg.y, f), w: lerp(reg.w, tReg.w, f), h: lerp(reg.h, tReg.h, f) } : { ...tReg };
+    anno = {};
 
-  function setTargets(dt) {
-    const Rg = regions();
-    for (const p of P) { p.ta = 0; p.ts = 1.6; p.c = "white"; }
-    const tRange = scene <= 3 ? [0, 6] : scene === 4 ? (() => { const n = nAt(prog).n; return [Math.max(0, 1 - 4.2 / Math.sqrt(n)), 1 + 4.2 / Math.sqrt(n)]; })() : range;
-    range = [lerp(range[0], tRange[0], 1 - Math.exp(-dt * 5)), lerp(range[1], tRange[1], 1 - Math.exp(-dt * 5))];
-    const tReg = scene === 4 ? Rg.full : Rg.means;
-    region = region ? { x: lerp(region.x, tReg.x, 1 - Math.exp(-dt * 5)), y: lerp(region.y, tReg.y, 1 - Math.exp(-dt * 5)),
-                        w: lerp(region.w, tReg.w, 1 - Math.exp(-dt * 5)), h: lerp(region.h, tReg.h, 1 - Math.exp(-dt * 5)) } : tReg;
-
-    if (scene === 0) {
-      const hr = { x: W * 0.08, y: H * (narrow ? 0.71 : 0.7), w: W * 0.84, h: H * (narrow ? 0.26 : 0.27) };
-      stack(P.map((_, i) => i), (i) => bellZ[i], hr, -3.4, 3.4, narrow ? 60 : 110, 5);
-      for (const p of P) { p.ta = 0.55 + 0.3 * p.jit; p.ts = narrow ? 1.3 : 1.7; p.c = p.star[0] < Math.exp(-(((p.tx - W / 2) / (W * 0.16)) ** 2)) ? "cyan" : "violet"; p.ty += Math.sin(sceneT * 1.3 + p.tx * 0.012) * 3; }
-      return;
+    if (scene === "hero") {
+      const st = stack(P.map((_, i) => i), (i) => D.bellZ[i], Rg.hero, -3.3, 3.3, narrow ? 64 : 92, 5);
+      for (const p of P) { p.ta = 0.78; p.ty += Math.sin(sceneT * 1.1 + p.tx * 0.015) * 1.6; }
+      anno.heroCurve = { reg: Rg.hero, dy: st.dy, binW: 6.6 / (narrow ? 64 : 92) };
     }
-    if (scene === 8) {
-      const reg = { x: B.x, y: B.y + B.h * 0.18, w: B.w, h: B.h * 0.74 };
-      stack(P.map((_, i) => i), (i) => bellZ[i], reg, -3.4, 3.4, narrow ? 60 : 96, 6);
-      P.forEach((p, i) => { p.ta = 0.85; p.ts = narrow ? 1.3 : 1.6; p.c = Math.abs(bellZ[i]) <= 1.96 ? "cyan" : "coral"; });
-      whyReg = reg;
+    if (scene === "data" || scene === "one" || scene === "many") {
+      const pr = scene === "data" ? Rg.popBig : Rg.popTop;
+      const st = stack(popIds, (i) => D.popVals[P[i].k], pr, -60, 180, narrow ? 48 : 80, 6);
+      for (const id of popIds) { const p = P[id]; p.ta = scene === "many" ? 0.28 : 0.85; p.c = "blue"; }
+      anno.pop = { reg: pr, st };
     }
-    if (scene === 1 || scene === 2 || scene === 3) {
-      const pr = scene === 1 ? Rg.popBig : Rg.popTop;
-      stack(popIds, (i) => popVals[P[i].k], pr, 0, 6, narrow ? 48 : 72, 7);
-      for (const id of popIds) { const p = P[id]; p.ta = scene === 3 ? 0.35 : 0.85; p.ts = 1.7; }
-    }
-    if (scene === 2) {
-      const cyc = Math.floor(sceneT / 2.4), ph = sceneT - cyc * 2.4;
-      if (cyc !== cycle) {
-        cycle = cyc;
-        sample = []; while (sample.length < 5) { const i = (Math.random() * POP_N) | 0; if (!sample.includes(i)) sample.push(i); }
-        const m = sample.reduce((s, i) => s + popVals[i], 0) / 5;
+    if (scene === "one") {
+      const c = Math.floor(sceneT / 3), ph = sceneT - c * 3, popR = Rg.popTop;
+      if (c !== cyc) {
+        cyc = c; sample = [];
+        while (sample.length < 30) { const i = (Math.random() * POP_N) | 0; if (!sample.includes(i) && D.popVals[i] >= -60 && D.popVals[i] <= 180) sample.push(i); }
+        const m = sample.reduce((s, i) => s + D.popVals[i], 0) / 30;
         if (live.length < 40) live.push(m);
-        const id = meanIds[live.length - 1], p = P[id];
-        p.born = sceneT; p.mx = Rg.popTop.x + clamp(m / 6, 0, 1) * Rg.popTop.w;
       }
-      const mx = Rg.popTop.x + clamp(sample.reduce((s, i) => s + popVals[i], 0) / 5 / 6, 0, 1) * Rg.popTop.w, my = Rg.popTop.y + Rg.popTop.h + 70;
-      sample.forEach((i) => {
-        const p = P[i]; p.c = "coral"; p.ta = 1; p.ts = 4.4;
-        if (ph > 0.55 && ph < 1.25) { p.tx = mx; p.ty = my; }
-      });
-      const shown = meanIds.slice(0, live.length - (ph < 1.25 ? 1 : 0));
-      stack(shown, (id) => live[P[id].k], region, range[0], range[1], narrow ? 48 : 72, 7);
-      shown.forEach((id) => { const p = P[id]; p.ta = 1; p.ts = 2.6; p.c = "gold"; });
-      if (ph >= 1.25) { const p = P[meanIds[live.length - 1]]; if (ph < 1.4) { p.x = mx; p.y = my; } }
+      const m = live[live.length - 1], mx = popR.x + clamp((m + 60) / 240, 0, 1) * popR.w, my = popR.y + popR.h + 66;
+      sample.forEach((i) => { const p = P[i]; p.c = "red"; p.ta = 1; p.ts = 2.8; if (ph > 0.7 && ph < 1.5) { p.tx = mx; p.ty = my; } });
+      const shown = meanIds.slice(0, live.length - (ph < 1.5 ? 1 : 0));
+      stack(shown, (id) => live[P[id].k], reg, range[0], range[1], narrow ? 46 : 70, 7);
+      shown.forEach((id) => { const p = P[id]; p.ta = 1; p.ts = 2.4; p.c = "mustard"; });
+      if (ph >= 1.5 && ph < 1.6) { const p = P[meanIds[live.length - 1]]; p.x = mx; p.y = my; }
+      anno.sample = { mx, my, m, a: ph < 0.2 ? ph / 0.2 : ph < 1.6 ? 1 : Math.max(0, 1 - (ph - 1.6) / 0.5) };
     }
-    if (scene === 3 || scene === 4) {
+    if (scene === "many" || scene === "grow") {
       let valueOf, count;
-      if (scene === 3) { count = Math.min(MEAN_N, Math.floor(sceneT * 650)); valueOf = (id) => meanStops[0][P[id].k]; }
-      else { const { k, t } = nAt(prog); count = MEAN_N; valueOf = (id) => lerp(meanStops[k][P[id].k], meanStops[k + 1][P[id].k], t); }
-      const ids = meanIds.filter((id) => revealRank[P[id].k] < count);
-      const st = stack(ids, valueOf, region, range[0], range[1], narrow ? 56 : 90, 6);
-      ids.forEach((id) => {
+      if (scene === "many") { count = Math.min(MEAN_N, Math.floor(sceneT * 700)); valueOf = (id) => D.meanStops[0][P[id].k]; }
+      else { const { k, t } = nAt(progS); count = MEAN_N; valueOf = (id) => lerp(D.meanStops[k][P[id].k], D.meanStops[k + 1][P[id].k], t); }
+      const ids = meanIds.filter((id) => D.reveal[P[id].k] < count);
+      const st = stack(ids, valueOf, reg, range[0], range[1], narrow ? 56 : 90, 5);
+      for (const id of ids) {
         const p = P[id];
-        if (p.a < 0.02 && scene === 3) { p.x = Rg.popTop.x + Math.random() * Rg.popTop.w; p.y = Rg.popTop.y + Rg.popTop.h * 0.6; }
-        p.ta = 0.9; p.ts = narrow ? 1.3 : 1.6; p.c = "cyan";
-      });
-      region.dy = st.dy; region.binW = st.binW; region.count = ids.length;
-    }
-    if (scene === 5) {
-      for (const p of P) { p.tx = p.star[0] * W; p.ty = p.star[1] * H; p.ta = 0.35; p.ts = 1; p.c = "star"; }
-    }
-    if (scene === 6) {
-      const reg = Rg.full;
-      stack(meanIds, (id) => cauchyVals[P[id].k], reg, -8, 8, narrow ? 56 : 90, 6);
-      meanIds.forEach((id) => { const p = P[id]; p.ta = Math.abs(cauchyVals[p.k]) > 8 ? 0 : 0.9; p.ts = narrow ? 1.3 : 1.6; p.c = "coral"; });
-      kicks += dt;
-      while (kicks > 0.08) {   // the extremes keep knocking averages around
-        kicks -= 0.08;
-        for (let j = 0; j < 14; j++) { const p = P[meanIds[(Math.random() * MEAN_N) | 0]]; p.x += (Math.random() - 0.5) * W * 0.5; p.y -= Math.random() * H * 0.45; }
+        if (scene === "many" && p.a < 0.02) { p.x = Rg.popTop.x + Math.random() * Rg.popTop.w; p.y = Rg.popTop.y + Rg.popTop.h * 0.7; }
+        p.ta = 0.85; p.c = "ink";
       }
+      reg.dy = st.dy; reg.binW = st.binW;
     }
-    if (scene === 7 && textPts.length) {
-      const drift = clamp((prog - 0.55) / 0.45, 0, 1);
-      P.forEach((p, i) => {
-        const q = textPts[(i * 7919) % textPts.length];
-        p.tx = q[0] + (p.jit - 0.5) * 3; p.ty = q[1] + (p.star[1] - 0.5) * 3 + drift * (p.star[0] * 120);
-        p.ta = 0.85 * (1 - drift * 0.6); p.ts = narrow ? 1.3 : 1.7; p.c = i % 3 ? "white" : "cyan";
-      });
+    if (scene === "never") {
+      stack(meanIds, (id) => D.cauchy[P[id].k], Rg.full, -8, 8, narrow ? 56 : 90, 5);
+      for (const id of meanIds) { const p = P[id]; p.ta = Math.abs(D.cauchy[p.k]) > 8 ? 0 : 0.85; p.c = "red"; }
+      kick += dt;
+      while (kick > 0.09) { kick -= 0.09; for (let j = 0; j < 12; j++) { const p = P[meanIds[(Math.random() * MEAN_N) | 0]]; p.x += (Math.random() - 0.5) * W * 0.4; p.y -= Math.random() * H * 0.35; } }
+    }
+    if (scene === "answer" && textPts.length) {
+      const drift = clamp((progS - 0.6) / 0.4, 0, 1);
+      P.forEach((p, i) => { const q = textPts[(i * 7919) % textPts.length];
+        p.tx = q[0] + (p.j1 - 0.5) * 2; p.ty = q[1] + (p.j2 - 0.5) * 2 + drift * p.j1 * 90; p.ta = 0.8 * (1 - drift * 0.6); p.c = "ink"; });
     }
   }
 
-  // ---------- drawing ----------
-  function axis(reg, lo, hi, label, ticks) {
-    const y = reg.y + reg.h + 6;
-    ctx.strokeStyle = "rgba(31,26,51,.22)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(reg.x, y); ctx.lineTo(reg.x + reg.w, y); ctx.stroke();
-    ctx.fillStyle = "rgba(31,26,51,.55)"; ctx.font = '500 11px "JetBrains Mono", monospace'; ctx.textAlign = "center";
-    ticks.forEach((v) => { if (v < lo || v > hi) return; const x = reg.x + (v - lo) / (hi - lo) * reg.w; ctx.fillRect(x, y, 1, 4); ctx.fillText(nice(v), x, y + 17); });
-    if (label) { ctx.textAlign = "left"; ctx.fillStyle = "rgba(31,26,51,.5)"; ctx.fillText(label, reg.x, y + 34); }
+  // ---------- drawing helpers ----------
+  function axis(r, lo, hi, label, ticks, fmtT) {
+    const y = r.y + r.h + 6;
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(r.x, y); ctx.lineTo(r.x + r.w, y); ctx.stroke();
+    ctx.fillStyle = C.ink2; ctx.font = `400 11px ${MONO}`; ctx.textAlign = "center";
+    ticks.forEach((v) => { if (v < lo || v > hi) return; const x = r.x + (v - lo) / (hi - lo) * r.w; ctx.fillRect(x, y, 1, 4); ctx.fillText(fmtT ? fmtT(v) : String(v), x, y + 17); });
+    if (label) { ctx.textAlign = "left"; ctx.font = `400 12px ${SANS}`; ctx.fillStyle = C.ink2; ctx.fillText(label, r.x, y + 34); }
   }
-  const nice = (v) => Math.abs(v) >= 100 ? fmt(v) : Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(Math.abs(v) < 1 ? 2 : 1);
   function niceTicks(lo, hi, k = 5) {
-    const span = hi - lo, step0 = span / k, mag = Math.pow(10, Math.floor(Math.log10(step0))), r = step0 / mag;
-    const step = (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * mag, out = [];
-    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(10));
+    const step0 = (hi - lo) / k, mag = Math.pow(10, Math.floor(Math.log10(step0))), q = step0 / mag;
+    const step = (q < 1.5 ? 1 : q < 3.5 ? 2 : q < 7.5 ? 5 : 10) * mag, out = [];
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
     return out;
   }
-
-  function drawCurve(n) {
-    if (!region || !region.dy) return;
-    const se = 1 / Math.sqrt(n), [lo, hi] = range;
-    ctx.save(); ctx.globalAlpha = curveAlpha;
-    ctx.shadowColor = "rgba(255,93,115,.35)"; ctx.shadowBlur = 6; ctx.strokeStyle = COL.coral; ctx.lineWidth = 3;
-    ctx.beginPath();
-    for (let i = 0; i <= 260; i++) {
-      const x = lo + (hi - lo) * i / 260, cnt = MEAN_N * region.binW * dnorm(x, 1, se);
-      const px = region.x + (x - lo) / (hi - lo) * region.w, py = region.y + region.h - cnt * region.dy;
-      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-    }
+  function label(text, x, y, opt = {}) {
+    ctx.save(); ctx.globalAlpha = opt.a == null ? 1 : opt.a;
+    ctx.font = `${opt.weight || 400} ${opt.size || 12.5}px ${opt.font || SANS}`; ctx.fillStyle = opt.color || C.ink; ctx.textAlign = opt.align || "left";
+    (Array.isArray(text) ? text : [text]).forEach((t, i) => ctx.fillText(t, x, y + i * 16));
+    ctx.restore();
+  }
+  function leader(x1, y1, x2, y2, a) {
+    ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = C.ink; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo(x1, y2, x2, y2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x2, y2, 2, 0, 7); ctx.fillStyle = C.ink; ctx.fill(); ctx.restore();
+  }
+  function curve(r, mu, se, lo, hi, count, binW, dy, a, color) {
+    ctx.save(); ctx.globalAlpha = a; ctx.strokeStyle = color || C.red; ctx.lineWidth = 2.2; ctx.beginPath();
+    for (let i = 0; i <= 240; i++) { const x = lo + (hi - lo) * i / 240, px = r.x + (x - lo) / (hi - lo) * r.w, py = r.y + r.h - count * binW * dnorm(x, mu, se) * dy; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
     ctx.stroke(); ctx.restore();
   }
 
+  function drawWhy(t) {
+    if (!WHY) return;
+    const iv = WHY.intervals, lo = Math.min(...iv.map((v) => v[0])) - 2, hi = Math.max(...iv.map((v) => v[1])) + 2;
+    const top = narrow ? 6 : 128, r = { x: B.x, y: B.y + top, w: B.w, h: B.h - 24 - top + (narrow ? 0 : 40) }, xs = (v) => r.x + (v - lo) / (hi - lo) * r.w, rh = r.h / 100;
+    const shown = Math.round(clamp(progS * 1.35, 0, 1) * 100);
+    ctx.save(); ctx.globalAlpha = whyA;
+    let hit = 0, low = 0, high = 0;
+    for (let i = 0; i < 100; i++) {
+      if (i >= shown) { whyShown[i] = -1; continue; }
+      if (whyShown[i] < 0) whyShown[i] = t;
+      const age = clamp((t - whyShown[i]) / 0.35, 0, 1), [a, b] = iv[i], miss = b < WHY.mu || a > WHY.mu, y = r.y + (i + 0.5) * rh;
+      if (b < WHY.mu) low++; else if (a > WHY.mu) high++; else hit++;
+      ctx.globalAlpha = whyA * easeOut(age); ctx.strokeStyle = miss ? C.red : C.ink2; ctx.lineWidth = miss ? 2 : 1.2;
+      const off = (1 - easeOut(age)) * 30;
+      ctx.beginPath(); ctx.moveTo(xs(a) + off, y); ctx.lineTo(xs(b) + off, y); ctx.stroke();
+      ctx.fillStyle = miss ? C.red : C.ink; ctx.fillRect(xs((a + b) / 2) + off - 1, y - 1, 2, 2);
+    }
+    ctx.globalAlpha = whyA; ctx.strokeStyle = C.ink; ctx.lineWidth = 1.2; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(xs(WHY.mu), r.y - 18); ctx.lineTo(xs(WHY.mu), r.y + r.h); ctx.stroke(); ctx.setLineDash([]);
+    label(`true average delay: ${WHY.mu.toFixed(1)} min`, xs(WHY.mu) + 6, r.y - 8, { a: whyA, size: 12, weight: 500 });
+    axis(r, lo, hi, narrow ? "95% range from one study of 30 flights (min)" : "95% range for the average delay, from one study of 30 flights (minutes)", niceTicks(lo, hi, narrow ? 4 : 6));
+    ctx.restore();
+    return { shown, hit, low, high };
+  }
+
   function drawChart(t) {
-    const rows = ORDER.map((k) => SITE[k]).filter(Boolean), lab = narrow ? 118 : 210, x0 = B.x + lab, x1 = B.x + B.w - (narrow ? 40 : 70);
-    const top = B.y + 30, rh = (B.h - 70) / rows.length, xs = (n) => x0 + Math.log10(n) / 4 * (x1 - x0);
-    ctx.save(); ctx.globalAlpha = chartAlpha;
-    ctx.font = '500 11px "JetBrains Mono", monospace'; ctx.textAlign = "center"; ctx.fillStyle = "rgba(31,26,51,.5)";
-    [1, 10, 100, 1000, 10000].forEach((v) => { ctx.fillText(fmt(v), xs(v), top + rh * rows.length + 22); ctx.fillStyle = "rgba(31,26,51,.07)"; ctx.fillRect(xs(v), top - 10, 1, rh * rows.length + 6); ctx.fillStyle = "rgba(31,26,51,.5)"; });
-    ctx.strokeStyle = "rgba(31,26,51,.55)"; ctx.setLineDash([4, 5]); ctx.beginPath(); ctx.moveTo(xs(30), top - 18); ctx.lineTo(xs(30), top + rh * rows.length); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = INK; ctx.font = '600 12px "JetBrains Mono", monospace'; ctx.fillText("n = 30", xs(30), top - 24);
-    ctx.textAlign = "center"; ctx.fillStyle = "rgba(31,26,51,.5)"; ctx.font = '500 11px "JetBrains Mono", monospace';
-    ctx.fillText("values per study needed before the averages form a bell curve", (x0 + x1) / 2, top + rh * rows.length + 42);
+    const rows = ORDER.map((k) => SITE[k]).filter(Boolean);
+    const NAMES = { normal: "Already bell-shaped data", die: "Dice rolls", faithful: "Time between Old Faithful eruptions", discoveries: "Inventions per year",
+      diamonds: "Diamond prices", exponential: "Waiting times (next customer)", binomial: "Count of rare events", flights: "Flight delays",
+      counties: "County populations", cauchy: "Extreme-outlier data" };
+    const lab = narrow ? 112 : 228, x0 = B.x + lab, x1 = B.x + B.w - (narrow ? 34 : 64), top = B.y + 26, rh = (B.h - 74) / rows.length;
+    const xs = (n) => x0 + Math.log10(n) / 4 * (x1 - x0);
+    ctx.save(); ctx.globalAlpha = chartA;
+    ctx.font = `400 11px ${MONO}`; ctx.textAlign = "center"; ctx.fillStyle = C.ink2;
+    [1, 10, 100, 1000, 10000].forEach((v) => { ctx.fillText(fmt(v), xs(v), top + rh * rows.length + 20); });
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0, top + rh * rows.length + 4); ctx.lineTo(x1, top + rh * rows.length + 4); ctx.stroke();
+    ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(xs(30), top - 16); ctx.lineTo(xs(30), top + rh * rows.length + 4); ctx.stroke(); ctx.setLineDash([]);
+    label("the textbook rule: 30", xs(30) + 5, top - 8, { a: chartA, size: 12, weight: 600 });
+    label("values per study needed before the averages pass all four checks", x0, top + rh * rows.length + 40, { a: chartA, size: 12, color: C.ink2 });
     rows.forEach((p, i) => {
-      const y = top + rh * (i + 0.5), tt = clamp((t - 0.25 - i * 0.09) / 1.4, 0, 1), e = easeOut(tt);
-      ctx.fillStyle = "rgba(31,26,51,.07)"; ctx.fillRect(x0, y, x1 - x0, 1);
-      ctx.textAlign = "right"; ctx.fillStyle = "#3b3450"; ctx.font = `600 ${narrow ? 11 : 13}px "Plus Jakarta Sans", sans-serif`;
-      const nm = PLAIN[p.key] || p.name;
-      ctx.fillText(narrow ? nm.replace(/ \(.*\)/, "") : nm, x0 - 14, y + 4);
-      const never = p.n_main == null, col = never ? "red" : p.n_main > 30 ? "orange" : "green", hex = COL[col];
-      const target = never ? 10000 : p.n_main, nNow = Math.pow(10, Math.log10(target) * e), x = xs(nNow);
-      ctx.strokeStyle = rgba(hex, 0.55); ctx.lineWidth = 2; if (never) ctx.setLineDash([3, 5]);
-      ctx.beginPath(); ctx.moveTo(xs(1), y); ctx.lineTo(x, y); ctx.stroke(); ctx.setLineDash([]);
-      ctx.drawImage(SPR[col], x - 9, y - 9, 18, 18);
-      if (tt >= 1) {
-        ctx.textAlign = "left"; ctx.fillStyle = hex; ctx.font = '600 12px "JetBrains Mono", monospace';
-        ctx.fillText(never ? "never" : "n = " + fmt(p.n_main), never ? x - 46 : x + 12, never ? y - 9 : y + 4);
-      }
+      const y = top + rh * (i + 0.5), tt = clamp((t - 0.2 - i * 0.08) / 1.3, 0, 1), e = easeOut(tt);
+      const name = NAMES[p.key] || p.name;
+      label(narrow ? name.replace(/ \(.*\)/, "").replace("Time between Old Faithful eruptions", "Old Faithful") : name, x0 - 12, y + 4,
+        { a: chartA, align: "right", size: narrow ? 11 : 13, color: p.key === "flights" ? C.ink : C.ink2, weight: p.key === "flights" ? 600 : 400 });
+      const never = p.n_main == null, col = never ? "red" : p.n_main > 30 ? "orange" : "green";
+      const target = never ? 10000 : p.n_main, x = xs(Math.pow(10, Math.log10(target) * e));
+      ctx.strokeStyle = C[col]; ctx.globalAlpha = chartA * 0.5; ctx.lineWidth = 1.5; if (never) ctx.setLineDash([2, 4]);
+      ctx.beginPath(); ctx.moveTo(xs(1), y); ctx.lineTo(x, y); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = chartA;
+      ctx.drawImage(SPR[col], x - 6, y - 6, 12, 12);
+      if (tt >= 1) label(never ? "never" : fmt(p.n_main), never ? x - 40 : x + 10, never ? y - 7 : y + 4, { a: chartA, size: 12, font: MONO, color: C[col] });
     });
     ctx.restore();
   }
 
-  function drawWhy() {
-    if (!whyReg) return;
-    const xs = (z) => whyReg.x + (z + 3.4) / 6.8 * whyReg.w, top = whyReg.y - 26, bot = whyReg.y + whyReg.h + 6;
-    ctx.save(); ctx.strokeStyle = "rgba(31,26,51,.45)"; ctx.setLineDash([4, 5]); ctx.lineWidth = 1;
-    [-1.96, 1.96].forEach((z) => { ctx.beginPath(); ctx.moveTo(xs(z), top + 10); ctx.lineTo(xs(z), bot); ctx.stroke(); });
-    ctx.setLineDash([]); ctx.textAlign = "center";
-    ctx.fillStyle = COL.cyan; ctx.font = `600 ${narrow ? 12 : 14}px "JetBrains Mono", monospace`;
-    ctx.fillText("95% of repeated polls land here", xs(0), top);
-    ctx.fillStyle = COL.coral; ctx.font = `600 ${narrow ? 11 : 12}px "JetBrains Mono", monospace`;
-    ctx.fillText("2.5%", xs(-2.75), whyReg.y + whyReg.h - 30); ctx.fillText("2.5%", xs(2.75), whyReg.y + whyReg.h - 30);
-    ctx.fillStyle = "rgba(31,26,51,.75)"; ctx.font = `600 ${narrow ? 12 : 13}px "JetBrains Mono", monospace`;
-    ctx.fillText("← the “± 3%” →", xs(0), bot + 20);
-    ctx.restore();
-  }
-  function drawSample() {
-    if (!sample.length) return;
-    const ph = sceneT - Math.floor(sceneT / 2.4) * 2.4, Rg = regions();
-    const m = sample.reduce((a, i) => a + popVals[i], 0) / 5;
-    const mx = Rg.popTop.x + clamp(m / 6, 0, 1) * Rg.popTop.w, my = Rg.popTop.y + Rg.popTop.h + 70;
-    const a = ph < 0.15 ? ph / 0.15 : ph < 1.25 ? 1 : Math.max(0, 1 - (ph - 1.25) / 0.4);
-    ctx.save(); ctx.globalAlpha = a * 0.55; ctx.strokeStyle = COL.coral; ctx.lineWidth = 1;
-    sample.forEach((i) => { const p = P[i]; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mx, my); ctx.stroke(); });
-    ctx.globalAlpha = a; ctx.fillStyle = INK; ctx.font = '600 12px "JetBrains Mono", monospace'; ctx.textAlign = "left";
-    ctx.fillText("average = " + m.toFixed(2), mx + 12, my + 4);
-    ctx.restore();
-  }
-  function drawStrike(pr) {
-    const t = clamp((pr - 0.3) / 0.25, 0, 1); if (t <= 0) return;
-    const xa = B.x + B.w * 0.14, ya = B.y + B.h * 0.72, xb = B.x + B.w * 0.86, yb = B.y + B.h * 0.28;
-    ctx.save(); ctx.strokeStyle = COL.coral; ctx.lineWidth = narrow ? 5 : 8; ctx.lineCap = "round"; ctx.shadowColor = "rgba(255,93,115,.4)"; ctx.shadowBlur = 8;
-    ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(lerp(xa, xb, easeOut(t)), lerp(ya, yb, easeOut(t))); ctx.stroke(); ctx.restore();
-  }
-
-  // ---------- HUD ----------
+  // ---------- the margin note ----------
+  let noteHtml = "";
+  function setNote(html) { if (html !== noteHtml) { noteHtml = html; noteEl.innerHTML = html; } noteEl.classList.toggle("show", !!html); }
   function curveAt(key, n) {
     const c = SITE[key] && SITE[key].curve; if (!c) return null;
     let best = 0; c.n.forEach((v, i) => { if (Math.abs(Math.log(v / n)) < Math.abs(Math.log(c.n[best] / n))) best = i; });
-    return { skew: c.skew[best], lower: c.lower[best], upper: c.upper[best], qq: c.qq[best], kurt: c.kurt ? c.kurt[best] : null };
+    return { skew: c.skew[best], kurt: c.kurt ? c.kurt[best] : 0, qq: c.qq[best], lower: c.lower[best], upper: c.upper[best] };
   }
-  function updateHud() {
-    if (scene === 4) {
-      const n = nAt(prog).n, r = curveAt("exponential", n), nMain = (SITE.exponential && SITE.exponential.n_main) || 71;
-      const skew = r ? r.skew : 2 / Math.sqrt(n);
-      const checks = r ? [
-        [Math.abs(skew) <= 0.25, "Not lopsided", `${Math.abs(skew).toFixed(3)} <span class="dim">(0 = even, must be at most 0.25)</span>`],
-        [r.kurt == null || Math.abs(r.kurt) <= 0.5, "Not too many far-out averages", ""],
-        [r.qq >= 0.998, "Matches the bell outline", ""],
-        [[r.lower, r.upper].every((t) => t >= 0.0175 && t <= 0.0325), "“95%” range catches 95%",
-          `<span class="dim">misses ${(100 * r.lower).toFixed(1)}% low · ${(100 * r.upper).toFixed(1)}% high (2.5% each is right)</span>`]] : [];
-      const all = checks.length && checks.every((c) => c[0]), ok = n >= nMain - 0.5;
-      const verdict = ok ? "BELL CURVE: YES" : all ? "BELL CURVE: ALMOST" : "BELL CURVE: NOT YET";
-      const marks = checks.map(([pass]) => `<i class="${pass ? "pass" : "fail"}">${pass ? "✓" : "✗"}</i>`).join("");
-      hud.innerHTML = `<div class="row"><span>VALUES PER STUDY</span><span class="big">n = ${fmt(n)}</span></div>` +
-        `<div class="marks">${marks}</div>` +
-        checks.map(([pass, label, extra]) => `<div class="check ${pass ? "pass" : "fail"}"><span class="mark">${pass ? "✓" : "✗"}</span><span>${label}${extra ? "<br>" + extra : ""}</span></div>`).join("") +
-        `<div class="verdict ${ok ? "ok" : ""}"><span class="dot"></span>${verdict}` +
-        (!ok && all ? `<div class="dim" style="letter-spacing:0;margin-top:4px">All ✓ here, but they must stay ✓ for every bigger study too.</div>` : "") + `</div>`;
-      hud.classList.add("show");
-    } else if (scene === 6) {
-      const n = Math.round(Math.pow(10, clamp(prog / 0.8, 0, 1) * Math.log10(5000)));
-      hud.innerHTML = `<div class="row"><span>VALUES PER STUDY</span><span class="big">n = ${fmt(Math.max(1, n))}</span></div>
-        <div class="row"><span>SPREAD OF THE AVERAGES</span><span class="val">unchanged</span></div>
-        <div class="verdict"><span class="dot"></span>BELL CURVE: NEVER</div>`;
-      hud.classList.add("show");
-    } else hud.classList.remove("show");
+  function updateNote(why) {
+    if (scene === "why" && why) {
+      const w = WHY.flights30;
+      setNote(`<div class="head"><span>${why.shown} studies of 30 flights</span></div>
+        <div class="marks">caught the truth <b>${why.hit}</b> · too low <b class="fail">${why.low}</b> · too high <b>${why.high}</b></div>
+        <div class="check"><span>Range caught the true average</span><span class="big" style="margin-left:auto">${why.hit}</span></div>
+        <div class="check"><span>Range was too low</span><span class="big" style="margin-left:auto;color:var(--red)">${why.low}</span></div>
+        <div class="check"><span>Range was too high</span><span class="big" style="margin-left:auto">${why.high}</span></div>
+        <div class="verdict"><span class="sub">all 100,000 tries: ${(100 * w.covers).toFixed(1)}% caught it, ${(100 * w.too_low).toFixed(1)}% too low</span></div>`);
+    } else if (scene === "grow") {
+      const n = nAt(progS).n, r = curveAt("flights", n), nMain = (SITE.flights && SITE.flights.n_main) || 235;
+      const ok = n >= nMain - 0.5;
+      const checks = r ? [[Math.abs(r.skew) <= 0.25, "Not lopsided", `lopsidedness ${Math.abs(r.skew).toFixed(2)}, limit 0.25`],
+        [Math.abs(r.kurt) <= 0.5, "Not too many far-out averages", ""], [r.qq >= 0.998, "Matches the bell outline", ""],
+        [[r.lower, r.upper].every((v) => v >= 0.0175 && v <= 0.0325), "95% range misses 2.5% per side", `now ${(100 * r.lower).toFixed(1)}% low, ${(100 * r.upper).toFixed(1)}% high`]] : [];
+      const all = checks.every((c) => c[0]);
+      setNote(`<div class="head"><span>Flights per study</span><span class="big">${fmt(n)}</span></div>` +
+        `<div class="marks">${checks.map((c) => `<span class="${c[0] ? "pass" : "fail"}">${c[0] ? "✓" : "✗"}</span>`).join(" ")}</div>` +
+        checks.map(([p, l, sub]) => `<div class="check ${p ? "pass" : "fail"}"><span class="mark">${p ? "✓" : "✗"}</span><span>${l}${sub ? `<br><span class="sub">${sub}</span>` : ""}</span></div>`).join("") +
+        `<div class="verdict ${ok ? "ok" : "no"}">${ok ? "Bell-shaped enough" : all ? "Passes here, but not yet for every bigger study" : "Not bell-shaped yet"}</div>`);
+    } else if (scene === "never") {
+      const n = Math.max(1, Math.round(Math.pow(10, clamp(progS / 0.85, 0, 1) * Math.log10(5000))));
+      setNote(`<div class="head"><span>Values per study</span><span class="big">${fmt(n)}</span></div>
+        <div class="check"><span>Middle half of the averages: about −1 to +1, the same as for single values.</span></div>
+        <div class="verdict no">Never bell-shaped</div>`);
+    } else setNote("");
   }
 
   // ---------- main loop ----------
-  let last = performance.now();
-  function frame(dt) {
-    if (scene !== lastScene) {
-      sceneT = 0; lastScene = scene;
-      document.querySelector(".stage").style.backgroundColor = TINT[scene] || TINT[0];
-      if (scene !== 2) { cycle = -1; }
-      if (scene === 2) { live = []; cycle = -1; }
-    } else sceneT += dt;
-    setTargets(dt);
-    const kp = reduce ? 1 : 1 - Math.exp(-dt * 5.5), ka = reduce ? 1 : 1 - Math.exp(-dt * 4);
-    chartAlpha = lerp(chartAlpha, scene === 5 ? 1 : 0, ka);
-    curveAlpha = lerp(curveAlpha, scene === 4 ? 1 : 0, ka);
+  let lastT = performance.now();
+  function frame(dt, now) {
+    readScroll();
+    if (scene !== last) { sceneT = 0; last = scene; progS = prog; cyc = -1; if (scene === "one") live = []; }
+    else sceneT += dt;
+    progS += (prog - progS) * (reduce ? 1 : 1 - Math.exp(-dt * 7));
+    targets(dt);
+    const kp = reduce ? 1 : 1 - Math.exp(-dt * 4.2), ka = reduce ? 1 : 1 - Math.exp(-dt * 3.5), fa = 1 - Math.exp(-dt * 4);
+    curveA = lerp(curveA, scene === "grow" ? 1 : 0, fa); chartA = lerp(chartA, scene === "compare" ? 1 : 0, fa);
+    whyA = lerp(whyA, scene === "why" ? 1 : 0, fa); labelA = clamp((sceneT - 0.6) / 0.6, 0, 1);
 
     ctx.clearRect(0, 0, W, H);
-    const Rg = regions();
-    if (scene >= 1 && scene <= 3) axis(scene === 1 ? Rg.popBig : Rg.popTop, 0, 6, "waiting time (minutes)", [0, 1, 2, 3, 4, 5, 6]);
-    if ((scene === 2 || scene === 3 || scene === 4) && region) axis(region, range[0], range[1], scene === 4 ? `average of n = ${fmt(nAt(prog).n)} waiting times` : "average of 5 waiting times", scene === 4 ? niceTicks(range[0], range[1]) : [0, 1, 2, 3, 4, 5, 6]);
-    if (scene === 6) axis(Rg.full, -8, 8, "average of n extreme-outlier values", [-8, -4, 0, 4, 8]);
+    const Rg = R();
+    if (anno.pop) axis(anno.pop.reg, -60, 180, "arrival delay in minutes (negative = early)", [-60, 0, 60, 120, 180]);
+    if ((scene === "one" || scene === "many" || scene === "grow") && reg) {
+      const n = scene === "grow" ? nAt(progS).n : 30;
+      axis(reg, range[0], range[1], `average delay of ${fmt(n)} flights (minutes)`, niceTicks(range[0], range[1], narrow ? 4 : 6));
+    }
+    if (scene === "never") axis(Rg.full, -8, 8, "average of n extreme-outlier values", [-8, -4, 0, 4, 8]);
 
     for (const p of P) {
       p.x += (p.tx - p.x) * kp; p.y += (p.ty - p.y) * kp; p.a += (p.ta - p.a) * ka; p.s += (p.ts - p.s) * ka;
       if (p.a < 0.01) continue;
-      const r = p.s * 2.0;
-      ctx.globalAlpha = p.a; ctx.drawImage(SPR[p.c], p.x - r, p.y - r, r * 2, r * 2);
+      const r = p.s * 1.55; ctx.globalAlpha = p.a; ctx.drawImage(SPR[p.c], p.x - r, p.y - r, r * 2, r * 2);
     }
-    ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
-    if (curveAlpha > 0.01) drawCurve(scene === 4 ? nAt(prog).n : 200);
-    if (chartAlpha > 0.01) drawChart(scene === 5 ? sceneT : 99);
-    if (scene === 2) drawSample();
-    if (scene === 8) drawWhy();
-    if (scene === 7) drawStrike(prog);
-    updateHud();
+    ctx.globalAlpha = 1;
+
+    // annotations, after the dots have settled
+    if (anno.heroCurve) { const h = anno.heroCurve; curve(h.reg, 0, 1, -3.3, 3.3, ALL, h.binW, h.dy, 0.9 * clamp(sceneT / 1.2, 0, 1)); }
+    if (scene === "data" && anno.pop) {
+      const { reg: pr, st } = anno.pop, a = labelA;
+      leader(st.peakX + 70, pr.y + 10, st.peakX + 6, st.peakY - 4, a);
+      label(["most flights land within", "20 minutes of schedule"], st.peakX + 74, pr.y + 8, { a, size: 12.5 });
+      const tx = pr.x + pr.w - 4;
+      label(["a few are hours late", "(up to 21 hours, off the chart) →"], tx, pr.y + pr.h - 40, { a, size: 12.5, align: "right" });
+    }
+    if (scene === "one" && anno.sample) {
+      const s = anno.sample;
+      ctx.save(); ctx.globalAlpha = s.a * 0.35; ctx.strokeStyle = C.red; ctx.lineWidth = 0.7;
+      sample.forEach((i) => { const p = P[i]; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(s.mx, s.my); ctx.stroke(); }); ctx.restore();
+      label(`average of these 30: ${s.m.toFixed(1)} min`, s.mx + 10, s.my + 4, { a: s.a, size: 12.5, weight: 600 });
+    }
+    if ((scene === "many" || scene === "grow") && reg && reg.dy) {
+      const x = reg.x + (D.MU - range[0]) / (range[1] - range[0]) * reg.w;
+      ctx.save(); ctx.globalAlpha = 0.7; ctx.strokeStyle = C.ink; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(x, reg.y - 6); ctx.lineTo(x, reg.y + reg.h + 6); ctx.stroke(); ctx.restore();
+      label(`true average ${D.MU.toFixed(1)} min`, x + 6, reg.y + 4, { a: 0.85, size: 12 });
+      if (scene === "many") label(["the tail: studies that", "caught a very late flight →"], reg.x + reg.w - 4, reg.y + reg.h - 50, { a: labelA, size: 12.5, align: "right" });
+    }
+    if (curveA > 0.01 && reg && reg.dy) { const n = scene === "grow" ? nAt(progS).n : 400; curve(reg, D.MU, D.SIG / Math.sqrt(n), range[0], range[1], MEAN_N, reg.binW, reg.dy, curveA); }
+    const why = whyA > 0.01 ? drawWhy(now / 1000) : null;
+    if (chartA > 0.01) drawChart(scene === "compare" ? sceneT : 99);
+    if (scene === "answer") {
+      const t = clamp((progS - 0.25) / 0.25, 0, 1);
+      if (t > 0) {
+        const xa = B.x + B.w * 0.12, ya = B.y + B.h * 0.74, xb = B.x + B.w * 0.88, yb = B.y + B.h * 0.26;
+        ctx.save(); ctx.strokeStyle = C.red; ctx.lineWidth = narrow ? 5 : 7; ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(xa, ya); ctx.lineTo(lerp(xa, xb, easeOut(t)), lerp(ya, yb, easeOut(t))); ctx.stroke(); ctx.restore();
+      }
+    }
+    updateNote(why);
   }
-  function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; frame(dt); requestAnimationFrame(loop); }
-  requestAnimationFrame(loop);
+  function loop(now) { const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; frame(dt, now); requestAnimationFrame(loop); }
 
   // testing helper: run the animation for `sec` seconds without waiting for the browser
-  window.__story = { advance(sec) { for (let i = 0; i < sec * 60; i++) { readScroll(); frame(1 / 60); } } };
+  window.__story = { advance(sec) { if (!D) return; const t0 = performance.now(); for (let i = 0; i < sec * 60; i++) frame(1 / 60, t0 + i * 16.67); } };
 })();
